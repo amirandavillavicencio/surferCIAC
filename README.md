@@ -119,3 +119,11 @@ Los tres carteles 3D conservan la correspondencia A/B/C con cada carril. Ahora t
 ## Modo pregunta a pantalla completa
 
 Al acercarse a una pregunta, la carrera entra en modo pregunta: se detiene la simulación y aparece un panel que ocupa toda la pantalla del teléfono con el enunciado y tres alternativas táctiles grandes. Se elige tocando una alternativa o con flechas y confirmación. Las respuestas se validan en servidor, se muestra brevemente el resultado y se reanuda la carrera, manteniendo la penalización de velocidad de 3 segundos por error. Durante la pregunta no avanzan ni se generan obstáculos; se retiran los objetos del tramo que rodea al corredor y se mantiene un corredor seguro de 130 metros al reanudar. No se cambian las preguntas, claves, modelos 3D ni el ranking.
+
+## Preguntas por carriles con franjas de color (noviembre 2026)
+
+Se recupera la carrera continua: las preguntas de primer año aparecen en una tarjeta horizontal en la parte superior del juego, sin detener la simulación. Las tres opciones se muestran de izquierda a derecha con los mismos colores de los tres carriles: **A azul (izquierda), B verde (centro), C morado (derecha)**. El carril en el que se encuentra el jugador se resalta con un borde blanco, sin adelantar si es correcto.
+
+Cuando el corredor se acerca a los últimos **34 metros** de una pregunta, se ven tres superficies coloreadas en el mundo Three.js, una por carril, alineadas con los valores del panel. Una marca final representa la línea de validación: la API recibe el número de carril que atraviesa el corredor, sin toque adicional. Los modelos originales permanecen intactos.
+
+La pregunta aparece al estar a 110 metros de la meta. Desde ese punto hasta 22 metros después del cruce se eliminan los obstáculos del tramo, incluyendo trenes móviles. Si la API tarda en responder, la zona segura sigue avanzando. El resto de la carrera mantiene los obstáculos originales. Una respuesta incorrecta reduce la velocidad durante tres segundos; la respuesta correcta suma 100 puntos. No cambian las preguntas, claves ni el ranking.

@@ -1,9 +1,11 @@
+import { QuizAnswerTrack } from './answer-track';
+import type { Scene } from 'three';
 import './game.css';
 
 type Question = { id: string; curso: string; tema: string; enunciado: string; breve?: string; opciones: string[] };
 type LaneAction = 'left' | 'right' | 'up' | 'down' | 'pause' | 'confirm' | string;
-type Phase = 'idle' | 'ready' | 'question' | 'submitting' | 'feedback' | 'complete' | 'ended';
-interface Hooks { notice(message: string): void }
+type Phase = 'idle' | 'ready' | 'question' | 'submitting' | 'complete' | 'ended';
+interface Hooks { scene: Scene; notice(message: string): void }
 
 async function api(path: string, body?: object): Promise<any> {
   const response = await fetch('/api/' + path, body ? {
@@ -21,10 +23,10 @@ export class CIACQuiz {
   private token = '';
   private question: Question | null = null;
   private selected = 1;
+  private readonly answerTrack: QuizAnswerTrack;
   private nextDistance = 180;
   private currentDistance = 0;
   private safeUntil = 0;
-  private feedbackRemaining = 0;
   private penaltyRemaining = 0;
   private dialog: HTMLDivElement;
   private title: HTMLElement;
@@ -38,6 +40,7 @@ export class CIACQuiz {
 
   constructor(hooks: Hooks) {
     this.hooks = hooks;
+    this.answerTrack = new QuizAnswerTrack(hooks.scene);
     const startPanel = document.querySelector<HTMLElement>('#s-start .panel');
     const overPanel = document.querySelector<HTMLElement>('#s-over .panel');
     if (!startPanel || !overPanel) throw new Error('No se encontró la interfaz del motor SUBWAY-SURFERS');
@@ -80,9 +83,8 @@ export class CIACQuiz {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'ghost ciac-lane';
-      button.tabIndex = 0;
-      button.addEventListener('pointerdown', event => event.stopPropagation());
-      button.addEventListener('click', event => { event.stopPropagation(); void this.answer(i); });
+      button.tabIndex = -1;
+      button.disabled = true;
       this.choices.push(button);
       lanes.append(button);
     }
@@ -114,14 +116,8 @@ export class CIACQuiz {
     overPanel.append(this.resultForm);
   }
 
-  get active() { return this.blocking; }
-  get blocking() { return this.phase === 'question' || this.phase === 'submitting' || this.phase === 'feedback'; }
   get safeCorridorUntil() { return this.safeUntil; }
   get slowed() { return this.penaltyRemaining > 0; }
-  get upcomingGate(): number | null {
-    return (this.phase === 'question' || this.phase === 'ready') && this.question
-      ? this.nextDistance : null;
-  }
 
   reset() {
     this.runSerial++;
@@ -139,10 +135,10 @@ export class CIACQuiz {
     this.nextDistance = 180;
     this.currentDistance = 0;
     this.safeUntil = 0;
-    this.feedbackRemaining = 0;
     this.penaltyRemaining = 0;
+    this.answerTrack.hide();
     this.dialog.classList.remove('ciac-correct', 'ciac-wrong');
-    for (const choice of this.choices) choice.disabled = false;
+    for (const choice of this.choices) choice.disabled = true;
     void this.refreshRanking();
   }
 
@@ -162,50 +158,64 @@ export class CIACQuiz {
     }
   }
 
-  tick(distance: number, dt: number, _lane: number) {
+  // La carrera sigue avanzando. Se responde con el carril al cruzar la franja.
+  tick(distance: number, dt: number, lane: number) {
     this.currentDistance = distance;
-    if (this.phase === 'feedback') {
-      this.feedbackRemaining = Math.max(0, this.feedbackRemaining - dt);
-      if (this.feedbackRemaining === 0) {
-        this.dialog.hidden = true;
-        this.dialog.classList.remove('ciac-correct', 'ciac-wrong');
-        this.phase = this.question ? 'ready' : 'complete';
-      }
-      return;
-    }
-    if (this.phase === 'question' || this.phase === 'submitting') return;
     if (this.penaltyRemaining > 0) {
       this.penaltyRemaining = Math.max(0, this.penaltyRemaining - dt);
     }
-    if (this.phase !== 'ready' || !this.question) {
+    if (this.phase === 'submitting') {
+      // No exponer al jugador a un obstáculo mientras el servidor valida.
+      this.safeUntil = Math.max(this.safeUntil, distance + 22);
       this.dialog.hidden = true;
+      this.answerTrack.hide();
       return;
     }
-    if (this.nextDistance - distance > 110) return;
-    this.phase = 'question';
-    this.safeUntil = Math.max(this.safeUntil, distance + 130);
-    this.dialog.classList.remove('ciac-correct', 'ciac-wrong');
-    this.title.textContent = this.question.curso + ' · ' +
-      (this.question.breve || this.question.enunciado);
-    this.choices.forEach((button, index) => {
-      button.textContent = ['A', 'B', 'C'][index] + ' · ' + this.question!.opciones[index];
-      button.disabled = false;
-      button.classList.remove('ciac-picked');
-    });
-    this.selected = 1;
+    if (!this.question || (this.phase !== 'ready' && this.phase !== 'question')) {
+      this.dialog.hidden = true;
+      this.answerTrack.hide();
+      return;
+    }
+
+    const ahead = this.nextDistance - distance;
+    if (ahead > 110) {
+      this.dialog.hidden = true;
+      this.answerTrack.hide();
+      return;
+    }
+
+    if (this.phase === 'ready') {
+      this.phase = 'question';
+      // Se despeja desde el primer instante de la pregunta hasta después del cruce.
+      this.safeUntil = Math.max(this.safeUntil, this.nextDistance + 22);
+      this.title.textContent = this.question.curso + ' · ' +
+        (this.question.breve || this.question.enunciado);
+      this.choices.forEach((button, index) => {
+        const side = ['izquierdo', 'central', 'derecho'][index];
+        button.textContent = ['A', 'B', 'C'][index] + ' · ' + this.question!.opciones[index];
+        button.setAttribute('aria-label', 'Carril ' + side + ': ' + this.question!.opciones[index]);
+      });
+      if (this.nextDistance === 180) {
+        this.hooks.notice('Elige el carril del color de tu respuesta.');
+      }
+    }
+    this.selected = lane;
     this.highlight();
-    this.message.textContent = 'Elige una alternativa para continuar.';
     this.dialog.hidden = false;
+    this.message.textContent = 'Elige un carril y cruza su franja de color.';
+    this.answerTrack.update(distance, this.nextDistance);
+
+    if (ahead <= 0) {
+      this.phase = 'submitting';
+      this.dialog.hidden = true;
+      this.answerTrack.hide();
+      void this.answer(lane);
+    }
   }
 
-  handleAction(action: LaneAction) {
-    if (!this.blocking) return false;
-    if (this.phase !== 'question') return true;
-    if (action === 'left') this.selected = Math.max(0, this.selected - 1);
-    if (action === 'right') this.selected = Math.min(2, this.selected + 1);
-    this.highlight();
-    if (action === 'up' || action === 'confirm') void this.answer(this.selected);
-    return true;
+  handleAction(_action: LaneAction) {
+    // Los gestos son del corredor; ningún botón del quiz interrumpe la carrera.
+    return false;
   }
 
   private highlight() {
@@ -213,38 +223,30 @@ export class CIACQuiz {
   }
 
   private async answer(lane: number) {
-    if (this.phase !== 'question' || !this.question) return;
+    if (this.phase !== 'submitting' || !this.question) return;
     const serial = this.runSerial;
-    const questionDistance = this.nextDistance;
-    this.selected = lane;
-    this.highlight();
-    this.phase = 'submitting';
-    for (const button of this.choices) button.disabled = true;
-    this.message.textContent = 'Comprobando respuesta…';
+    const gateDistance = this.nextDistance;
     try {
       const response = await api('answer', { token: this.token, lane });
       if (serial !== this.runSerial || (this.phase as Phase) === 'ended') return;
       this.question = response.question;
-      this.nextDistance = Math.max(questionDistance + 150, this.currentDistance + 150);
-      this.phase = 'feedback';
-      this.feedbackRemaining = 1.1;
-      this.choices[lane].classList.add('ciac-picked');
+      this.nextDistance = Math.max(gateDistance + 150, this.currentDistance + 150);
+      this.phase = this.question ? 'ready' : 'complete';
       if (response.correct) {
-        this.dialog.classList.add('ciac-correct');
-        this.message.textContent = '¡Correcto! · ' + response.points + ' puntos acumulados';
+        this.hooks.notice('¡Correcto! · ' + response.points + ' puntos académicos');
       } else {
-        this.dialog.classList.add('ciac-wrong');
         this.penaltyRemaining = Math.max(
           this.penaltyRemaining, Number(response.penaltySeconds) || 3
         );
-        this.message.textContent = 'Respuesta incorrecta · correrás más lento durante 3 segundos';
+        this.hooks.notice('Incorrecto · 3 segundos corriendo más lento.');
       }
+      if (!this.question) this.hooks.notice('Completaste las preguntas. Sigue corriendo.');
     } catch (error) {
       if (serial !== this.runSerial) return;
-      this.phase = 'question';
-      for (const button of this.choices) button.disabled = false;
-      this.message.textContent = 'No se pudo validar. Vuelve a elegir una alternativa: ' +
-        String(error instanceof Error ? error.message : error);
+      // Si no hay respuesta del servidor, no se inventan puntos.
+      this.phase = 'complete';
+      this.hooks.notice('No se pudo validar la respuesta: ' +
+        String(error instanceof Error ? error.message : error));
     }
   }
 
@@ -253,7 +255,7 @@ export class CIACQuiz {
     this.phase = 'ended';
     this.penaltyRemaining = 0;
     this.safeUntil = 0;
-    this.feedbackRemaining = 0;
+    this.answerTrack.hide();
     this.dialog.hidden = true;
     this.resultForm.hidden = !this.token;
     this.formStatus.textContent = '';

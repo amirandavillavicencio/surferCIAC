@@ -17,176 +17,85 @@
 
 .ciac-prize{margin:0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,194,61,.12);color:#fff;font-size:13px;font-weight:800;line-height:1.35}
 
-/* Preguntas compactas: no cubren la vía ni capturan gestos. */
-.ciac-dialog{
-  top:calc(15vh + env(safe-area-inset-top));
-  bottom:auto;
-  width:min(560px,calc(100% - 20px));
-  padding:9px 10px;
-  border-radius:14px;
-  pointer-events:none;
-  background:rgba(18,26,44,.80);
-}
-.ciac-question{
-  font-size:clamp(13px,3.5vw,18px);
-  line-height:1.3;
-  margin-bottom:7px;
-}
-.ciac-lanes{gap:5px}
-.ciac-lane{
-  min-height:34px;
-  padding:6px 3px;
-  border-radius:8px;
-  font-size:clamp(11px,2.8vw,15px);
-  background:rgba(255,255,255,.06);
-  pointer-events:none;
-  font-weight:700;
-}
-.ciac-lane.selected{outline:0;border-color:#ffc23d;color:#ffdf8c}
-.ciac-message{display:none}
-@media(orientation:landscape) and (max-height:500px){
-  .ciac-dialog{top:8px;left:50%;width:min(450px,48vw)}
-  .ciac-question{font-size:13px}
-  .ciac-lane{font-size:11px;min-height:30px}
-}
 
-/* El sitio se presenta íntegramente en español; no hay selector de idioma. */
-#btn-lang{display:none!important}
-
-/* Señales visibles al acercarse, sin tapar la carrera ni interceptar gestos. */
-.ciac-dialog{
-  border:2px solid rgba(255,255,255,.7);
-  background:rgba(10,21,40,.94);
-  box-shadow:0 4px 14px rgba(0,0,0,.28);
-  transition:border-color .15s ease,background-color .15s ease;
+/* Panel superior: la carrera y las vías quedan visibles y táctiles. */
+#btn-lang { display: none !important; }
+#ui > .ciac-dialog {
+  position: fixed;
+  z-index: 12;
+  top: calc(70px + env(safe-area-inset-top));
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: min(660px, calc(100vw - 20px));
+  max-height: 38dvh;
+  padding: 13px 12px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.47);
+  border-radius: 19px;
+  background: rgba(23,32,59,.91);
+  box-shadow: 0 7px 18px rgba(0,0,0,.25);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  text-align: center;
 }
-.ciac-dialog.ciac-near{border-color:#ffc23d}
-.ciac-dialog.ciac-close{
-  background:rgba(10,21,40,.98);
-  border-width:3px;
+#ui > .ciac-dialog .ciac-question {
+  display: block;
+  margin: 0 0 12px;
+  font-size: clamp(17px,4.3vw,25px);
+  font-weight: 850;
+  line-height: 1.22;
+  color: #fff;
+  overflow-wrap: anywhere;
 }
-.ciac-lane{
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.55);
-  color:#fff;
+#ui > .ciac-dialog .ciac-lanes {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 7px;
 }
-.ciac-dialog.ciac-near .ciac-lane{
-  font-size:clamp(14px,3.6vw,19px);
-  min-height:44px;
-  padding:8px 4px;
+#ui > .ciac-dialog .ciac-lane {
+  min-height: 71px;
+  padding: 10px 5px;
+  border: 2px solid rgba(255,255,255,.36);
+  border-radius: 12px;
+  font-size: clamp(12px,3vw,18px);
+  line-height: 1.18;
+  font-weight: 800;
+  text-align: center;
+  color: #fff;
+  opacity: 1;
+  pointer-events: none;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
-.ciac-dialog .ciac-lane.selected{
-  border:2px solid #ffc23d;
-  background:rgba(255,194,61,.24);
-  color:#fff2c4;
+#ui > .ciac-dialog .ciac-lane:nth-child(1) { background:#346fdb; }
+#ui > .ciac-dialog .ciac-lane:nth-child(2) { background:#229579; }
+#ui > .ciac-dialog .ciac-lane:nth-child(3) { background:#814fcf; }
+#ui > .ciac-dialog .ciac-lane.selected {
+  border-color: #fff;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.55),0 0 0 2px rgba(255,255,255,.18);
+  color: #fff;
+  outline: 0;
 }
-.ciac-dialog .ciac-message{
+#ui > .ciac-dialog .ciac-message {
   display:block;
-  font-size:clamp(10px,2.7vw,13px);
-  font-weight:750;
-  letter-spacing:.03em;
-  color:#f3f6ff;
-  opacity:.95;
-  margin-top:7px;
-}
-.ciac-dialog.ciac-near .ciac-message{color:#ffc23d}
-@media(orientation:landscape) and (max-height:500px){
-  .ciac-dialog.ciac-near .ciac-lane{font-size:12px;min-height:30px;padding:4px}
-  .ciac-dialog .ciac-message{font-size:10px;margin-top:3px}
-}
-
-/* Pregunta a pantalla completa, respuesta táctil y carrera detenida. */
-#ui > .ciac-dialog{
-  position:fixed;
-  z-index:40;
-  inset:0;
-  left:0;
-  top:0;
-  right:0;
-  bottom:0;
-  transform:none;
-  width:100vw;
-  height:100vh;
-  height:100dvh;
-  max-height:none;
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  justify-content:center;
-  gap:clamp(16px,3vh,32px);
-  overflow-y:auto;
-  padding:max(22px,env(safe-area-inset-top))
-          max(18px,env(safe-area-inset-right))
-          max(22px,env(safe-area-inset-bottom))
-          max(18px,env(safe-area-inset-left));
-  border:0;
-  border-radius:0;
-  background:rgba(9,17,32,.98);
-  -webkit-backdrop-filter:blur(16px);
-  backdrop-filter:blur(16px);
-  box-shadow:none;
-  pointer-events:auto;
-}
-#ui > .ciac-dialog .ciac-question{
-  font-size:clamp(26px,6.8vw,52px);
+  margin: 9px 0 0;
+  font-size: clamp(11px,2.8vw,14px);
   line-height:1.25;
-  font-weight:850;
-  margin:0 auto;
-  max-width:900px;
-  color:#fff;
-  text-wrap:balance;
-}
-#ui > .ciac-dialog .ciac-lanes{
-  width:min(680px,100%);
-  display:grid;
-  grid-template-columns:1fr;
-  gap:clamp(12px,2.4vh,20px);
-  margin:0 auto;
-}
-#ui > .ciac-dialog .ciac-lane,
-#ui > .ciac-dialog.ciac-near .ciac-lane{
-  min-height:clamp(74px,13vh,120px);
-  padding:14px 20px;
-  font-size:clamp(21px,5vw,33px);
-  font-weight:800;
-  line-height:1.25;
-  text-align:center;
-  border:2px solid rgba(255,255,255,.48);
-  border-radius:18px;
-  background:#202d43;
-  color:#fff;
-  pointer-events:auto;
-  overflow-wrap:anywhere;
-  cursor:pointer;
-}
-#ui > .ciac-dialog .ciac-lane.selected{
-  border-color:#ffc23d;
-  background:#35405a;
-  color:#fff;
-}
-#ui > .ciac-dialog .ciac-lane:disabled{opacity:.65;cursor:default}
-#ui > .ciac-dialog .ciac-lane.ciac-picked{opacity:1;border-width:4px}
-#ui > .ciac-dialog.ciac-correct .ciac-lane.ciac-picked{border-color:#5ce2a4}
-#ui > .ciac-dialog.ciac-wrong .ciac-lane.ciac-picked{border-color:#ff8e8e}
-#ui > .ciac-dialog .ciac-message{
-  display:block;
-  font-size:clamp(16px,3.8vw,23px);
-  line-height:1.35;
   font-weight:700;
-  letter-spacing:0;
-  color:#f2f5fb;
-  margin:0 auto;
-  max-width:680px;
+  color: #fff;
+  opacity: .94;
 }
-#ui > .ciac-dialog.ciac-correct .ciac-message{color:#5ce2a4}
-#ui > .ciac-dialog.ciac-wrong .ciac-message{color:#ffb0b0}
-@media(orientation:landscape) and (max-height:520px){
-  #ui > .ciac-dialog{gap:9px;padding:10px 20px}
-  #ui > .ciac-dialog .ciac-question{font-size:clamp(18px,4.8vh,26px)}
-  #ui > .ciac-dialog .ciac-lanes{gap:7px;max-width:500px}
-  #ui > .ciac-dialog .ciac-lane,
-  #ui > .ciac-dialog.ciac-near .ciac-lane{
-    min-height:42px;padding:7px 10px;font-size:clamp(16px,4vh,20px);
+@media (orientation:landscape) and (max-height:520px){
+  #ui > .ciac-dialog{
+    top: 8px;
+    width:min(470px,55vw);
+    padding: 8px;
+    max-height: 45vh;
   }
-  #ui > .ciac-dialog .ciac-message{font-size:13px}
+  #ui > .ciac-dialog .ciac-question{font-size:13px;margin-bottom:6px}
+  #ui > .ciac-dialog .ciac-lane{font-size:11px;min-height:39px;padding:5px 2px}
+  #ui > .ciac-dialog .ciac-message{font-size:10px;margin-top:4px}
 }
