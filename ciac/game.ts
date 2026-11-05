@@ -1,4 +1,4 @@
-import { QuizAnswerTrack, QUESTION_VISIBLE_DISTANCE } from './answer-track';
+import { QuizAnswerTrack, QUESTION_VISIBLE_DISTANCE, STRIP_LENGTH } from './answer-track';
 import type { Scene } from 'three';
 import './game.css';
 
@@ -118,6 +118,11 @@ export class CIACQuiz {
 
   get safeCorridorUntil() { return this.safeUntil; }
   get slowed() { return this.penaltyRemaining > 0; }
+  get questionSlow() {
+    return this.phase === 'question' &&
+      this.nextDistance - this.currentDistance <= STRIP_LENGTH &&
+      this.currentDistance < this.nextDistance;
+  }
 
   reset() {
     this.runSerial++;
@@ -166,7 +171,7 @@ export class CIACQuiz {
     }
     if (this.phase === 'submitting') {
       // No exponer al jugador a un obstáculo mientras el servidor valida.
-      this.safeUntil = Math.max(this.safeUntil, distance + 22);
+      this.safeUntil = Math.max(this.safeUntil, distance + 10);
       this.dialog.hidden = true;
       this.answerTrack.hide();
       return;
@@ -187,7 +192,7 @@ export class CIACQuiz {
     if (this.phase === 'ready') {
       this.phase = 'question';
       // Se despeja desde el primer instante de la pregunta hasta después del cruce.
-      this.safeUntil = Math.max(this.safeUntil, this.nextDistance + 22);
+      this.safeUntil = Math.max(this.safeUntil, this.nextDistance + 10);
       this.title.textContent = this.question.curso + ' · ' +
         (this.question.breve || this.question.enunciado);
       this.choices.forEach((button, index) => {

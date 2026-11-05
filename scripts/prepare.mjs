@@ -7,7 +7,6 @@ await copyFile('ciac/game.ts','upstream/src/ciac/game.ts');
 await copyFile('ciac/game.css','upstream/src/ciac/game.css');
 await copyFile('ciac/answer-track.ts','upstream/src/ciac/answer-track.ts');
 await copyFile('ciac/race-fx.ts','upstream/src/ciac/race-fx.ts');
-await copyFile('ciac/ambient-trains.ts','upstream/src/ciac/ambient-trains.ts');
 await copyFile('ciac/race-fx.css','upstream/src/ciac/race-fx.css');
 await copyFile('ciac/i18n.ts','upstream/src/i18n.ts');
 // El cargador HTML se muestra antes de ejecutar el motor.
@@ -24,15 +23,15 @@ let source = await readFile(file,'utf8');
 if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   const changes = [
     ["import { load, save } from './storage';",
-     "import { load, save } from './storage';\nimport { CIACQuiz } from './ciac/game';\nimport { RaceFX } from './ciac/race-fx';\nimport { AmbientTrains } from './ciac/ambient-trains';"],
+     "import { load, save } from './storage';\nimport { CIACQuiz } from './ciac/game';\nimport { RaceFX } from './ciac/race-fx';"],
     ["    const dt = Math.min(0.05, (now - last) / 1000);",
      "    const elapsed = (now - last) / 1000;\n    const dt = Math.min(0.05, elapsed);"],
     ["    watchPerf(dt);", "    if (elapsed < 0.25) watchPerf(elapsed);"],
     ["        if (gap < 90 && !horned.has(o.id))", "        if (o.d0 > sim.d && gap < 90 && !horned.has(o.id))"],
     ["  let seed = (Date.now() % 100000) + 1;",
-     "  const quiz = new CIACQuiz({\n    scene: world.scene,\n    notice: (message: string) => ui.toast(message),\n  });\n  const raceFX = new RaceFX(document.getElementById('ui')!);\n  const ambientTrains = new AmbientTrains(world.scene, core.scene.getObjectByName('train')!);\n  const clearQuizCorridor = () => {\n    const until = quiz.safeCorridorUntil;\n    if (until <= sim.d) return;\n    sim.clearObstaclesUntil(until);\n    sim.clearCollectiblesUntil(until);\n  };\n  let seed = (Date.now() % 100000) + 1;"],
+     "  const quiz = new CIACQuiz({\n    scene: world.scene,\n    notice: (message: string) => ui.toast(message),\n  });\n  const raceFX = new RaceFX(document.getElementById('ui')!);\n  const clearQuizCorridor = () => {\n    const until = quiz.safeCorridorUntil;\n    if (until <= sim.d) return;\n    sim.clearObstaclesUntil(until);\n    sim.clearCollectiblesUntil(until);\n  };\n  let seed = (Date.now() % 100000) + 1;"],
     ["    overTimer = 0;\n    state = 'start';",
-     "    overTimer = 0;\n    if (!TEST) { quiz.reset(); raceFX.reset(); ambientTrains.reset(); }\n    state = 'start';"],
+     "    overTimer = 0;\n    if (!TEST) { quiz.reset(); raceFX.reset(); }\n    state = 'start';"],
     ["    ui.show('play');\n  }\n  function pause() {",
      "    ui.show('play');\n    if (!TEST) void quiz.start();\n  }\n  function pause() {"],
     ["    audio.unlock();\n    if (a === 'pause') pause();",
@@ -45,9 +44,9 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
     ["    if (state === 'play' && sim.d > 260 && !load('tutorialDone', false)) save('tutorialDone', true);",
      "    if (state === 'play' && sim.d > 260 && !tutorialDone) {\n      tutorialDone = true;\n      save('tutorialDone', true);\n    }"],
     ["    if (state === 'play') sim.update(dt);",
-     "    if (state === 'play' && !TEST) {\n      quiz.tick(sim.d, dt, sim.lane);\n      sim.speedOverride = quiz.slowed ? speedAt(sim.d) * 0.55 : 0;\n      clearQuizCorridor();\n    }\n    if (state === 'play') sim.update(dt);\n    if (state === 'play' && !TEST) clearQuizCorridor();"],
+     "    if (state === 'play' && !TEST) {\n      quiz.tick(sim.d, dt, sim.lane);\n      sim.speedOverride = quiz.slowed ? speedAt(sim.d) * 0.55 : quiz.questionSlow ? speedAt(sim.d) * 0.72 : 0;\n      clearQuizCorridor();\n    }\n    if (state === 'play') sim.update(dt);\n    if (state === 'play' && !TEST) clearQuizCorridor();"],
     ["    world.sync(sim, state === 'pause' ? 0 : dt, state === 'start');",
-     "    world.sync(sim, state === 'pause' ? 0 : dt, state === 'start');\n    if (!TEST) {\n      ambientTrains.update(state === 'pause' ? 0 : dt, state === 'play' || state === 'pause');\n      raceFX.update(sim, world, dt, state === 'play', quiz.safeCorridorUntil > sim.d);\n    }"],
+     "    world.sync(sim, state === 'pause' ? 0 : dt, state === 'start');\n    if (!TEST) {\n      raceFX.update(sim, world, dt, state === 'play', quiz.safeCorridorUntil > sim.d);\n    }"],
   ];
   for (const [before, after] of changes) {
     if (source.split(before).length !== 2) throw new Error('La versión original cambió: no se encontró un único punto de integración: ' + before);
