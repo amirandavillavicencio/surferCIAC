@@ -6,9 +6,16 @@
     "check:questions": "node scripts/check-questions.mjs",
     "prepare:game": "node scripts/prepare.mjs",
     "dev:game": "npm run prepare:game && npm --prefix upstream install && npm --prefix upstream run dev",
-    "build": "npm run prepare:game && npm --prefix upstream install && npm --prefix upstream run build && node scripts/copy-dist.mjs"
+    "build": "cf build",
+    "build:game": "npm run prepare:game && npm --prefix upstream install && npm --prefix upstream run build && node scripts/copy-dist.mjs",
+    "deploy": "cf deploy --prebuilt",
+    "check:worker": "node --check src/worker.js"
   },
   "dependencies": {
     "@2toad/profanity": "^3.3.0"
+  },
+  "devDependencies": {
+    "cf": "1.0.0-beta.28",
+    "wrangler": "4.157.0"
   }
 }

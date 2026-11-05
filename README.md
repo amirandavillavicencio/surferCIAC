@@ -66,3 +66,18 @@ El script inserta el módulo educativo en `upstream/src/main.ts` del árbol de t
 **Importante:** el servidor verifica respuestas y calcula puntos, pero un bot todavía podría automatizar peticiones y conseguir puntos sin jugar. Antes de un torneo público o con premios, hace falta protección antibots, control de frecuencia por usuario y una validación de desplazamiento o desafío adicional desde servidor.
 
 Para revisar el banco: `node scripts/check-questions.mjs`. Los 24 ejercicios necesitan aprobación docente antes de ser tratados como evaluación oficial.
+
+## Implementación del Worker `surferciac` (5 de noviembre de 2026)
+
+La cuenta de Cloudflare ya dispone de una base D1 independiente, `surferciac-db`, con el esquema `migrations/0001_init.sql` aplicado. El archivo `cloudflare.config.ts` configura el Worker actual y conecta el binding `DB` a esa base.
+
+El comando `npm run build` construye **solamente el Worker de API** usando `cf build`. Se conservó el proceso de compilación original del juego en `npm run build:game`; su autorización y sus archivos gráficos siguen pendientes. El Worker no presenta otro diseño ni una página ficticia cuando falta el motor 3D.
+
+Rutas preparadas:
+- `GET /api/status`: confirma la conexión con D1.
+- `GET /api/leaderboard?periodo=semana`: ranking de la semana en horario de Chile.
+- `POST /api/start`, `POST /api/answer`, `POST /api/finish`: estructura de la partida académica, deshabilitada temporalmente.
+
+El valor `COMPETITION_LIVE` permanece en `false` porque **todavía no hay un juego público conectado y el ranking premiado carece de protección suficiente contra partidas automatizadas**. No cambiarlo a `true` sin implementar controles antifraude y verificar el juego. No se han registrado nombres o puntajes ficticios.
+
+La integración de Cloudflare Workers Builds usa `npm run build` y `npx cf deploy --prebuilt`. El Worker y el código del juego se mantienen separados mientras se resuelve el permiso de distribución del motor.
