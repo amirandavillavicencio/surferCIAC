@@ -1,4 +1,4 @@
-import { QuizAnswerTrack } from './answer-track';
+import { QuizAnswerTrack, QUESTION_VISIBLE_DISTANCE } from './answer-track';
 import type { Scene } from 'three';
 import './game.css';
 
@@ -178,7 +178,7 @@ export class CIACQuiz {
     }
 
     const ahead = this.nextDistance - distance;
-    if (ahead > 110) {
+    if (ahead > QUESTION_VISIBLE_DISTANCE) {
       this.dialog.hidden = true;
       this.answerTrack.hide();
       return;

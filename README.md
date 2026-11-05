@@ -124,6 +124,10 @@ Al acercarse a una pregunta, la carrera entra en modo pregunta: se detiene la si
 
 Se recupera la carrera continua: las preguntas de primer año aparecen en una tarjeta horizontal en la parte superior del juego, sin detener la simulación. Las tres opciones se muestran de izquierda a derecha con los mismos colores de los tres carriles: **A azul (izquierda), B verde (centro), C morado (derecha)**. El carril en el que se encuentra el jugador se resalta con un borde blanco, sin adelantar si es correcto.
 
-Cuando el corredor se acerca a los últimos **34 metros** de una pregunta, se ven tres superficies coloreadas en el mundo Three.js, una por carril, alineadas con los valores del panel. Una marca final representa la línea de validación: la API recibe el número de carril que atraviesa el corredor, sin toque adicional. Los modelos originales permanecen intactos.
+Cuando el corredor se acerca a los últimos **75 metros** de una pregunta, se ven tres superficies coloreadas en el mundo Three.js, una por carril, alineadas con los valores del panel. Una marca final representa la línea de validación: la API recibe el número de carril que atraviesa el corredor, sin toque adicional. Los modelos originales permanecen intactos.
 
-La pregunta aparece al estar a 110 metros de la meta. Desde ese punto hasta 22 metros después del cruce se eliminan los obstáculos del tramo, incluyendo trenes móviles. Si la API tarda en responder, la zona segura sigue avanzando. El resto de la carrera mantiene los obstáculos originales. Una respuesta incorrecta reduce la velocidad durante tres segundos; la respuesta correcta suma 100 puntos. No cambian las preguntas, claves ni el ranking.
+La pregunta aparece al estar a 80 metros de la zona de respuesta. Desde ese punto hasta 22 metros después del cruce se eliminan los obstáculos del tramo, incluyendo trenes móviles. Si la API tarda en responder, la zona segura sigue avanzando. El resto de la carrera mantiene los obstáculos originales. Una respuesta incorrecta reduce la velocidad durante tres segundos; la respuesta correcta suma 100 puntos. No cambian las preguntas, claves ni el ranking.
+
+## Ajuste de visibilidad del tramo de respuestas
+
+La pregunta aparece cuando faltan **80 metros** para cruzar la línea de respuesta, y cada carril muestra su color durante los **últimos 75 metros** del tramo. De este modo, al aparecer la pregunta los colores comienzan a solo 5 metros por delante del corredor. Se mantiene la correspondencia A azul, B verde y C morado, la validación por carril y el tramo sin obstáculos.

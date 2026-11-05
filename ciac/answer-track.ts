@@ -4,7 +4,8 @@ import { LANE_W, laneX } from '../config';
 // Cada franja ocupa el carril real y conserva el mismo color que la opción
 // de la pregunta. Son superficies visuales: no alteran colisiones ni puntajes.
 const COLORS = [0x346fdb, 0x229579, 0x814fcf] as const;
-const STRIP_LENGTH = 34;
+export const QUESTION_VISIBLE_DISTANCE = 80;
+const STRIP_LENGTH = 75;
 const STRIP_WIDTH = LANE_W - 0.22;
 
 export class QuizAnswerTrack {
@@ -46,7 +47,7 @@ export class QuizAnswerTrack {
 
   update(distance: number, gate: number) {
     const ahead = gate - distance;
-    const visible = ahead > -2 && ahead <= 110;
+    const visible = ahead > -2 && ahead <= QUESTION_VISIBLE_DISTANCE;
     // El motor dibuja el mundo relativo al corredor, que siempre está en z=0.
     const stripCenter = -(gate - STRIP_LENGTH / 2 - distance);
     const endPosition = -(gate - 0.7 - distance);
