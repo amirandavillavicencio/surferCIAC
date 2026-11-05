@@ -12,7 +12,7 @@ Esta rama contiene la integración CIAC propia, no una versión jugable desplega
 
 - Banco inicial de **24 ejercicios reales** basados en los contenidos del formulario USM adjuntado: MAT070, MAT060, FIS100, MAT071, MAT061 y FIS110.
 - Selección de semestre y preguntas en tres carriles durante la carrera, usando las escenas y controles originales.
-- Respuesta correcta: suma 100 puntos académicos y desbloquea el siguiente tramo de 150 metros. Respuesta incorrecta: termina la carrera.
+- Respuesta correcta: suma 100 puntos académicos y desbloquea el siguiente tramo de 150 metros. Respuesta incorrecta: retrasa la carrera 3 segundos sin cerrar la partida ni sumar puntos; luego continúa con la siguiente pregunta.
 - Ranking de mejores puntajes, asociado al nombre público elegido por el jugador, con almacenamiento D1.
 - Comprobación de respuestas **en servidor** (las claves no se envían al navegador). El puntaje original de distancia/monedas se conserva en el juego, pero el ranking global solo usa los puntos académicos comprobados en servidor.
 - Moderación de nombres con `@2toad/profanity` en español e inglés y, opcionalmente, Llama Guard 3 en Cloudflare Workers AI. Los filtros no son infalibles.
@@ -97,3 +97,7 @@ El comando `npm run build:pages` ahora descarga las dependencias del submódulo 
 El bloqueo artificial que detenía `scripts/prepare.mjs` fue retirado a petición del usuario. **La ausencia de licencia del repositorio original sigue siendo una cuestión de derechos de autor, y poder compilarlo no acredita permiso de redistribución.** El submódulo permanece fijado al commit original. El ranking con premio necesita revisión humana de posibles puntajes automatizados.
 
 El servicio `surferciac` de Cloudflare Workers independiente del proyecto Pages no tiene activa su dirección pública `workers.dev`; el dominio para entrar al juego es `surferciac.pages.dev`.
+
+## Penalización por respuestas incorrectas
+
+Una respuesta incorrecta **no mata al personaje ni cierra la sesión**. La carrera se detiene durante **3 segundos de tiempo de juego**; el tiempo de pausa no reduce la penalización. Se muestra una cuenta regresiva. Después el corredor continúa y la siguiente pregunta aparece tras otros 150 metros. La API `/api/answer` informa `penaltySeconds: 3` al fallar y `0` al acertar. Solo los aciertos agregan 100 puntos; los choques normales con obstáculos siguen funcionando como antes.

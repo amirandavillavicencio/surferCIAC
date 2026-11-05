@@ -13,11 +13,13 @@ export async function onRequestPost({ request, env }) {
   const current = questionFor(run.semestre,run.asked,run.question_offset);
   if (!current || current.id !== run.current_id) return json({error:'Pregunta fuera de secuencia'},409);
   const correct = input.lane === current.correcta;
-  const next = correct ? questionFor(run.semestre,run.asked+1,run.question_offset) : null;
-  const nextStatus = !correct || !next ? 'ended' : 'active';
+  // Una respuesta incorrecta retrasa el juego, pero no cierra la sesión.
+  // La secuencia avanza; solo los aciertos suman puntos.
+  const next = questionFor(run.semestre,run.asked+1,run.question_offset);
+  const nextStatus = next ? 'active' : 'ended';
   const result = await env.DB.prepare(
     'UPDATE runs SET asked=?, correct=?, current_id=?, next_answer_at=?, status=? WHERE token=? AND status=? AND current_id=? AND asked=?'
   ).bind(run.asked+1,run.correct+(correct?1:0),next?.id??null,now+3500,nextStatus,run.token,'active',run.current_id,run.asked).run();
   if (result.meta?.changes !== 1) return json({error:'Respuesta duplicada'},409);
-  return json({correct,points:(run.correct+(correct?1:0))*100,question:publicQuestion(next)});
+  return json({correct,points:(run.correct+(correct?1:0))*100,question:publicQuestion(next),penaltySeconds:correct?0:3});
 }

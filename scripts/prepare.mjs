@@ -21,7 +21,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
     ["        overTimer = 0;\n        break;",
      "        overTimer = 0;\n        if (!TEST) quiz.endRun();\n        break;"],
     ["    if (state === 'play') sim.update(dt);",
-     "    if (state === 'play' && !TEST) quiz.tick(sim.d);\n    if (state === 'play' && (TEST || !quiz.active)) sim.update(dt);"],
+     "    if (state === 'play' && !TEST) quiz.tick(sim.d, dt);\n    if (state === 'play' && (TEST || !quiz.active)) sim.update(dt);"],
   ];
   for (const [before, after] of changes) {
     if (source.split(before).length !== 2) throw new Error('La versión original cambió: no se encontró un único punto de integración: ' + before);
