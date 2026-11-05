@@ -1,9 +1,10 @@
+import { QuizGates } from './gates';
 import './game.css';
 
-type Question = { id: string; curso: string; tema: string; enunciado: string; opciones: string[] };
+type Question = { id: string; curso: string; tema: string; enunciado: string; breve?: string; opciones: string[] };
 type LaneAction = 'left' | 'right' | 'up' | 'down' | 'pause' | 'confirm' | string;
 type Phase = 'idle' | 'ready' | 'question' | 'submitting' | 'penalty' | 'complete' | 'ended';
-interface Hooks { fail(): void; lane(index: number): void; notice(message: string): void }
+interface Hooks { scene: ConstructorParameters<typeof QuizGates>[0]; fail(): void; lane(index: number): void; notice(message: string): void }
 
 async function api(path: string, body?: object): Promise<any> {
   const response = await fetch('/api/' + path, body ? {
@@ -21,7 +22,10 @@ export class CIACQuiz {
   private token = '';
   private question: Question | null = null;
   private selected = 1;
-  private nextDistance = 75;
+  private nextDistance = 180;
+  private currentDistance = 0;
+  private shownQuestionId = '';
+  private readonly gates: QuizGates;
   private penaltyRemaining = 0;
   private dialog: HTMLDivElement;
   private title: HTMLElement;
@@ -35,6 +39,7 @@ export class CIACQuiz {
 
   constructor(hooks: Hooks) {
     this.hooks = hooks;
+    this.gates = new QuizGates(hooks.scene);
     const startPanel = document.querySelector<HTMLElement>('#s-start .panel');
     const overPanel = document.querySelector<HTMLElement>('#s-over .panel');
     if (!startPanel || !overPanel) throw new Error('No se encontró la interfaz del motor SUBWAY-SURFERS');
@@ -76,11 +81,7 @@ export class CIACQuiz {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'ghost ciac-lane';
-      button.addEventListener('click', (event) => {
-        event.stopPropagation();
-        void this.answer(i);
-      });
-      button.addEventListener('pointerdown', (event) => event.stopPropagation());
+      button.tabIndex = -1;
       this.choices.push(button);
       lanes.append(button);
     }
@@ -113,6 +114,11 @@ export class CIACQuiz {
   }
 
   get active() { return this.phase === 'question' || this.phase === 'submitting' || this.phase === 'penalty'; }
+  get slowed() { return this.penaltyRemaining > 0; }
+  get upcomingGate(): number | null {
+    return (this.phase === 'question' || this.phase === 'ready') && this.question
+      ? this.nextDistance : null;
+  }
 
   reset() {
     this.runSerial++;
@@ -127,7 +133,10 @@ export class CIACQuiz {
     const saveButton = this.resultForm.querySelector<HTMLButtonElement>('button[type=submit]')!;
     saveButton.disabled = false;
     saveButton.hidden = false;
-    this.nextDistance = 75;
+    this.nextDistance = 180;
+    this.currentDistance = 0;
+    this.shownQuestionId = '';
+    this.gates.hide();
     this.penaltyRemaining = 0;
     for (const choice of this.choices) choice.disabled = false;
     void this.refreshRanking();
@@ -149,47 +158,48 @@ export class CIACQuiz {
     }
   }
 
-  tick(distance: number, dt: number) {
-    if (this.phase === 'penalty') {
+  tick(distance: number, dt: number, lane: number) {
+    this.currentDistance = distance;
+    if (this.penaltyRemaining > 0) {
       this.penaltyRemaining = Math.max(0, this.penaltyRemaining - dt);
-      if (this.penaltyRemaining > 0) {
-        this.message.textContent = 'Puedes continuar en ' + Math.ceil(this.penaltyRemaining) + ' s.';
-        return;
-      }
+    }
+    if (!this.question || (this.phase !== 'ready' && this.phase !== 'question')) {
       this.dialog.hidden = true;
-      for (const choice of this.choices) choice.disabled = false;
-      if (this.question) {
-        this.nextDistance += 150;
-        this.phase = 'ready';
-      } else {
-        this.phase = 'complete';
-        this.hooks.notice('Terminaste las preguntas. Sigue corriendo.');
-      }
+      this.gates.hide();
       return;
     }
-    if (this.phase !== 'ready' || !this.question || distance < this.nextDistance) return;
-    this.phase = 'question';
-    this.selected = 1;
-    this.hooks.lane(this.selected);
-    this.title.textContent = this.question.curso + ' · ' + this.question.enunciado;
-    this.message.textContent = 'Desliza para elegir carril y pulsa salto para responder. También puedes tocar una respuesta.';
-    for (let i = 0; i < 3; i++) this.choices[i].textContent = String.fromCharCode(65 + i) + ' · ' + this.question.opciones[i];
+    const ahead = this.nextDistance - distance;
+    if (ahead > 110) {
+      this.dialog.hidden = true;
+      this.gates.hide();
+      return;
+    }
+    if (this.phase === 'ready' || this.shownQuestionId !== this.question.id) {
+      this.phase = 'question';
+      this.shownQuestionId = this.question.id;
+      this.title.textContent = this.question.curso + ' · ' +
+        (this.question.breve || this.question.enunciado);
+      this.choices.forEach((button, index) => {
+        button.textContent = ['A', 'B', 'C'][index] + ' · ' + this.question!.opciones[index];
+      });
+      this.gates.setOptions(this.question.opciones);
+      if (this.nextDistance === 180) this.hooks.notice('Elige carril y atraviesa la respuesta.');
+    }
+    this.selected = lane;
     this.highlight();
     this.dialog.hidden = false;
+    this.gates.update(ahead);
+    if (ahead <= 0) {
+      this.phase = 'submitting';
+      this.dialog.hidden = true;
+      this.gates.hide();
+      void this.answer(lane);
+    }
   }
 
-  handleAction(action: LaneAction) {
-    if (!this.active || action === 'pause') return false;
-    if (this.phase === 'submitting' || this.phase === 'penalty') return true;
-    if (action === 'left') this.selected = Math.max(0, this.selected - 1);
-    if (action === 'right') this.selected = Math.min(2, this.selected + 1);
-    if (action === 'left' || action === 'right') {
-      this.hooks.lane(this.selected);
-      this.highlight();
-    } else if (action === 'up' || action === 'confirm') {
-      void this.answer(this.selected);
-    }
-    return true;
+  handleAction(_action: LaneAction) {
+    // Los gestos siguen controlando al corredor, nunca se detienen para responder.
+    return false;
   }
 
   private highlight() {
@@ -197,41 +207,35 @@ export class CIACQuiz {
   }
 
   private async answer(lane: number) {
-    if (this.phase !== 'question' || !this.question) return;
-    this.phase = 'submitting';
-    this.selected = lane;
-    this.hooks.lane(lane);
-    this.highlight();
-    this.message.textContent = 'Comprobando respuesta…';
+    const serial = this.runSerial;
+    const gateDistance = this.nextDistance;
     try {
       const response = await api('answer', { token: this.token, lane });
+      if (serial !== this.runSerial || (this.phase as Phase) === 'ended') return;
       this.question = response.question;
-      if (!response.correct) {
-        this.phase = 'penalty';
-        this.penaltyRemaining = response.penaltySeconds;
-        this.title.textContent = 'Respuesta incorrecta · retraso de ' + response.penaltySeconds + ' s';
-        this.message.textContent = 'Puedes continuar en ' + Math.ceil(this.penaltyRemaining) + ' s.';
-        for (const choice of this.choices) choice.disabled = true;
-        this.hooks.notice('Respuesta incorrecta. Espera ' + response.penaltySeconds + ' segundos.');
-        return;
-      }
-      this.dialog.hidden = true;
-      this.hooks.notice('Correcto · ' + response.points + ' puntos académicos');
-      if (!this.question) {
-        this.phase = 'complete';
-        this.hooks.notice('Respondiste todas las preguntas. Sigue corriendo.');
+      this.shownQuestionId = '';
+      this.nextDistance = Math.max(gateDistance + 150, this.currentDistance + 120);
+      this.phase = this.question ? 'ready' : 'complete';
+      if (response.correct) {
+        this.hooks.notice('Correcto · ' + response.points + ' puntos académicos');
       } else {
-        this.phase = 'ready';
-        this.nextDistance += 150;
+        this.penaltyRemaining = Math.max(this.penaltyRemaining, Number(response.penaltySeconds) || 3);
+        this.hooks.notice('Incorrecto · 3 segundos corriendo más lento.');
       }
+      if (!this.question) this.hooks.notice('Completaste las preguntas. Sigue corriendo.');
     } catch (error) {
-      this.message.textContent = String(error instanceof Error ? error.message : error);
-      this.phase = 'question';
+      if (serial !== this.runSerial) return;
+      this.phase = 'complete';
+      this.hooks.notice('No se pudo validar la respuesta: ' +
+        String(error instanceof Error ? error.message : error));
     }
   }
 
   endRun() {
+    this.runSerial++;
     this.phase = 'ended';
+    this.penaltyRemaining = 0;
+    this.gates.hide();
     this.dialog.hidden = true;
     this.resultForm.hidden = !this.token;
     this.formStatus.textContent = '';

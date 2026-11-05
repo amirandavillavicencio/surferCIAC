@@ -10,7 +10,8 @@
       "1",
       "2"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "sen²(x) + cos²(x) = ?"
   },
   {
     "id": "q02",
@@ -23,7 +24,8 @@
       "4x⁴",
       "x³"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "Deriva x⁴"
   },
   {
     "id": "q03",
@@ -36,7 +38,8 @@
       "cos(x)",
       "−sen(x)"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "Deriva cos(x)"
   },
   {
     "id": "q04",
@@ -49,7 +52,8 @@
       "1",
       "3"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "lim(x→0) sen(3x)/(3x)"
   },
   {
     "id": "q05",
@@ -62,7 +66,8 @@
       "¬p ∧ ¬q",
       "p ∨ q"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "Niega (p ∧ q)"
   },
   {
     "id": "q06",
@@ -75,7 +80,8 @@
       "20",
       "15"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "1 + 2 + 3 + 4 + 5 = ?"
   },
   {
     "id": "q07",
@@ -88,7 +94,8 @@
       "2 − 3i",
       "2 + 3i"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "Conjugado de 2 + 3i"
   },
   {
     "id": "q08",
@@ -101,7 +108,8 @@
       "7",
       "12"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "Distancia: (0,0) a (3,4)"
   },
   {
     "id": "q09",
@@ -114,7 +122,8 @@
       "8,66",
       "5"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "Vector 10 a 60°: componente x"
   },
   {
     "id": "q10",
@@ -127,7 +136,8 @@
       "12 m/s",
       "6 m/s"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "v₀=2 m/s, a=3 m/s², t=4 s: v"
   },
   {
     "id": "q11",
@@ -140,7 +150,8 @@
       "9 m",
       "18 m"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "Desde reposo: a=2, t=3 s: d"
   },
   {
     "id": "q12",
@@ -153,7 +164,8 @@
       "0",
       "−1"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "Producto punto: vectores ⟂"
   },
   {
     "id": "q13",
@@ -166,7 +178,8 @@
       "1/3",
       "1"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "∫₀¹ x² dx = ?"
   },
   {
     "id": "q14",
@@ -179,7 +192,8 @@
       "2 + C",
       "x² + C"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "Primitiva de 2x"
   },
   {
     "id": "q15",
@@ -192,7 +206,8 @@
       "2",
       "8"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "f(x)=x², [1,3]: tasa media"
   },
   {
     "id": "q16",
@@ -205,7 +220,8 @@
       "x³/3",
       "x²"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "Deriva ∫₀ˣ t² dt"
   },
   {
     "id": "q17",
@@ -218,7 +234,8 @@
       "5",
       "1"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "det diagonal (2, 3)"
   },
   {
     "id": "q18",
@@ -231,7 +248,8 @@
       "det(A)·det(B)",
       "det(A)/det(B)"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "det(AB) = ?"
   },
   {
     "id": "q19",
@@ -244,7 +262,8 @@
       "6",
       "5"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "dim Ker=2, dim Im=3: dim V"
   },
   {
     "id": "q20",
@@ -257,7 +276,8 @@
       "Av=λv",
       "A=λ+v"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "Autovector v: ecuación con λ"
   },
   {
     "id": "q21",
@@ -270,7 +290,8 @@
       "6 J",
       "18 J"
     ],
-    "correcta": 0
+    "correcta": 0,
+    "breve": "E cinética: m=2 kg, v=3 m/s"
   },
   {
     "id": "q22",
@@ -283,7 +304,8 @@
       "12 N",
       "1,33 N"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "Fuerza: m=4 kg, a=3 m/s²"
   },
   {
     "id": "q23",
@@ -296,7 +318,8 @@
       "14 N·s",
       "5 N·s"
     ],
-    "correcta": 2
+    "correcta": 2,
+    "breve": "Impulso: p cambia de 2 a 7"
   },
   {
     "id": "q24",
@@ -309,6 +332,7 @@
       "10 N",
       "1 N"
     ],
-    "correcta": 1
+    "correcta": 1,
+    "breve": "F elástica: k=100, Δx=0,1 m"
   }
 ]

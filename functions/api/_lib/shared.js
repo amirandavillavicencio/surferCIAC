@@ -11,7 +11,7 @@ export function questionFor(semestre, asked, offset) {
 }
 export function publicQuestion(q) {
   if (!q) return null;
-  return { id: q.id, curso: q.curso, tema: q.tema, enunciado: q.enunciado, opciones: q.opciones };
+  return { id: q.id, curso: q.curso, tema: q.tema, enunciado: q.enunciado, breve: q.breve, opciones: q.opciones };
 }
 export function json(body, status=200) {
   return Response.json(body,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});

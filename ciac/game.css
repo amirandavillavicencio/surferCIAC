@@ -16,3 +16,36 @@
 @media (max-width:560px){.ciac-dialog{bottom:calc(4vh + env(safe-area-inset-bottom));padding:12px}.ciac-lane{padding:8px 5px}.ciac-ranking{max-height:80px}}
 
 .ciac-prize{margin:0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,194,61,.12);color:#fff;font-size:13px;font-weight:800;line-height:1.35}
+
+/* Preguntas compactas: no cubren la vía ni capturan gestos. */
+.ciac-dialog{
+  top:calc(15vh + env(safe-area-inset-top));
+  bottom:auto;
+  width:min(560px,calc(100% - 20px));
+  padding:9px 10px;
+  border-radius:14px;
+  pointer-events:none;
+  background:rgba(18,26,44,.80);
+}
+.ciac-question{
+  font-size:clamp(13px,3.5vw,18px);
+  line-height:1.3;
+  margin-bottom:7px;
+}
+.ciac-lanes{gap:5px}
+.ciac-lane{
+  min-height:34px;
+  padding:6px 3px;
+  border-radius:8px;
+  font-size:clamp(11px,2.8vw,15px);
+  background:rgba(255,255,255,.06);
+  pointer-events:none;
+  font-weight:700;
+}
+.ciac-lane.selected{outline:0;border-color:#ffc23d;color:#ffdf8c}
+.ciac-message{display:none}
+@media(orientation:landscape) and (max-height:500px){
+  .ciac-dialog{top:8px;left:50%;width:min(450px,48vw)}
+  .ciac-question{font-size:13px}
+  .ciac-lane{font-size:11px;min-height:30px}
+}

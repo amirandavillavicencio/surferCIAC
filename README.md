@@ -101,3 +101,9 @@ El servicio `surferciac` de Cloudflare Workers independiente del proyecto Pages 
 ## Penalización por respuestas incorrectas
 
 Una respuesta incorrecta **no mata al personaje ni cierra la sesión**. La carrera se detiene durante **3 segundos de tiempo de juego**; el tiempo de pausa no reduce la penalización. Se muestra una cuenta regresiva. Después el corredor continúa y la siguiente pregunta aparece tras otros 150 metros. La API `/api/answer` informa `penaltySeconds: 3` al fallar y `0` al acertar. Solo los aciertos agregan 100 puntos; los choques normales con obstáculos siguen funcionando como antes.
+
+## Preguntas compactas integradas en los carriles
+
+La carrera continúa mientras aparece una pregunta breve sobre la vía. Las alternativas se ven en un panel compacto y en tres marcadores 3D asociados a los carriles. El jugador responde automáticamente cuando atraviesa el marcador con su carril; ya no se exige tocar un botón ni saltar para confirmar. La primera puerta aparece a 180 m y las siguientes cada 150 m; en torno al cruce se limpia una franja de obstáculos del generador, para que el marcador no quede bloqueado. El resto de las colisiones normales sigue activo.
+
+Los enunciados académicos originales, las alternativas, las claves y la validación en servidor permanecen intactos. Para la interfaz se agregó la propiedad `breve`, una versión acotada de cada uno de los 24 enunciados. Las respuestas correctas siguen sumando 100 puntos. Las equivocadas reducen la velocidad al 55 % de la normal durante 3 segundos, sin congelar la carrera.
