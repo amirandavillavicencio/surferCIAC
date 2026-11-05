@@ -1,0 +1,314 @@
+[
+  {
+    "id": "q01",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Trigonometría",
+    "enunciado": "¿Cuánto vale sen²(x) + cos²(x)?",
+    "opciones": [
+      "0",
+      "1",
+      "2"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q02",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Cuál es la derivada de f(x) = x⁴?",
+    "opciones": [
+      "4x³",
+      "4x⁴",
+      "x³"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q03",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Cuál es la derivada de cos(x)?",
+    "opciones": [
+      "sen(x)",
+      "cos(x)",
+      "−sen(x)"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q04",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Límites",
+    "enunciado": "¿Cuánto vale lim(x→0) sen(3x)/(3x)?",
+    "opciones": [
+      "0",
+      "1",
+      "3"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q05",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuál es la negación de (p ∧ q) según De Morgan?",
+    "opciones": [
+      "¬p ∨ ¬q",
+      "¬p ∧ ¬q",
+      "p ∨ q"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q06",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sumatorias",
+    "enunciado": "¿Cuánto suma 1 + 2 + 3 + 4 + 5?",
+    "opciones": [
+      "10",
+      "20",
+      "15"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q07",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Cuál es el conjugado de z = 2 + 3i?",
+    "opciones": [
+      "−2 + 3i",
+      "2 − 3i",
+      "2 + 3i"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q08",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Geometría analítica",
+    "enunciado": "¿Cuál es la distancia entre (0,0) y (3,4)?",
+    "opciones": [
+      "5",
+      "7",
+      "12"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q09",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "Si un vector mide 10 y forma 60° con el eje X, ¿cuál es su componente x?",
+    "opciones": [
+      "10",
+      "8,66",
+      "5"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q10",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Cinemática",
+    "enunciado": "Si v₀ = 2 m/s, a = 3 m/s² y t = 4 s, ¿cuánto vale v(t)?",
+    "opciones": [
+      "14 m/s",
+      "12 m/s",
+      "6 m/s"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q11",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Cinemática",
+    "enunciado": "Desde el reposo y con a = 2 m/s², ¿qué distancia se recorre en 3 s?",
+    "opciones": [
+      "6 m",
+      "9 m",
+      "18 m"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q12",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Producto punto",
+    "enunciado": "¿Cuánto vale el producto punto de dos vectores perpendiculares?",
+    "opciones": [
+      "1",
+      "0",
+      "−1"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q13",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integrales",
+    "enunciado": "¿Cuánto vale la integral de x² desde 0 hasta 1?",
+    "opciones": [
+      "1/2",
+      "1/3",
+      "1"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q14",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integrales",
+    "enunciado": "¿Cuál es una primitiva de 2x?",
+    "opciones": [
+      "2x² + C",
+      "2 + C",
+      "x² + C"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q15",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Teorema del valor medio",
+    "enunciado": "Si f(x) = x² entre a=1 y b=3, ¿cuánto vale (f(b)−f(a))/(b−a)?",
+    "opciones": [
+      "4",
+      "2",
+      "8"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q16",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Teorema fundamental",
+    "enunciado": "¿Cuál es la derivada respecto de x de la integral de t² entre 0 y x?",
+    "opciones": [
+      "2x",
+      "x³/3",
+      "x²"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q17",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matrices",
+    "enunciado": "¿Cuál es el determinante de una matriz diagonal con diagonal 2 y 3?",
+    "opciones": [
+      "6",
+      "5",
+      "1"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q18",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "¿Qué identidad cumple el determinante de un producto AB?",
+    "opciones": [
+      "det(A)+det(B)",
+      "det(A)·det(B)",
+      "det(A)/det(B)"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q19",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Transformaciones lineales",
+    "enunciado": "Si dim(Ker T)=2 y dim(Im T)=3, ¿cuánto es dim(V)?",
+    "opciones": [
+      "1",
+      "6",
+      "5"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q20",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Valores propios",
+    "enunciado": "¿Qué ecuación define un vector propio v con valor propio λ?",
+    "opciones": [
+      "A+v=λ",
+      "Av=λv",
+      "A=λ+v"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q21",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Energía",
+    "enunciado": "¿Cuál es la energía cinética de m=2 kg con v=3 m/s?",
+    "opciones": [
+      "9 J",
+      "6 J",
+      "18 J"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": "q22",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Dinámica",
+    "enunciado": "¿Cuál es la fuerza neta para m=4 kg y a=3 m/s²?",
+    "opciones": [
+      "7 N",
+      "12 N",
+      "1,33 N"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": "q23",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Impulso",
+    "enunciado": "Si el momentum cambia de 2 a 7 kg·m/s, ¿cuál es el impulso?",
+    "opciones": [
+      "9 N·s",
+      "14 N·s",
+      "5 N·s"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": "q24",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Ley de Hooke",
+    "enunciado": "¿Cuál es la magnitud de la fuerza elástica si k=100 N/m y Δx=0,1 m?",
+    "opciones": [
+      "100 N",
+      "10 N",
+      "1 N"
+    ],
+    "correcta": 1
+  }
+]

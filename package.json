@@ -1,0 +1,14 @@
+{
+  "name": "surfer-ciac",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:questions": "node scripts/check-questions.mjs",
+    "prepare:game": "node scripts/prepare.mjs",
+    "dev:game": "npm run prepare:game && npm --prefix upstream install && npm --prefix upstream run dev",
+    "build": "npm run prepare:game && npm --prefix upstream install && npm --prefix upstream run build && node scripts/copy-dist.mjs"
+  },
+  "dependencies": {
+    "@2toad/profanity": "^3.3.0"
+  }
+}
