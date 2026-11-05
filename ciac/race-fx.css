@@ -1,0 +1,16 @@
+/* Líneas laterales ligeras de velocidad: no capturan gestos. */
+.ciac-rush{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;overflow:hidden;transition:opacity .22s ease}
+.ciac-rush i{position:absolute;top:-20vh;width:2px;height:12vh;border-radius:2px;background:rgba(255,255,255,.8);animation:ciac-rush-line var(--ciac-streak-time,.7s) linear infinite;will-change:transform,opacity}
+.ciac-rush i:nth-child(1){left:4%;animation-delay:-.13s}
+.ciac-rush i:nth-child(2){left:12%;animation-delay:-.48s;height:9vh}
+.ciac-rush i:nth-child(3){left:22%;animation-delay:-.73s}
+.ciac-rush i:nth-child(4){left:32%;animation-delay:-.25s;height:8vh}
+.ciac-rush i:nth-child(5){right:4%;animation-delay:-.36s}
+.ciac-rush i:nth-child(6){right:12%;animation-delay:-.62s;height:9vh}
+.ciac-rush i:nth-child(7){right:22%;animation-delay:-.17s}
+.ciac-rush i:nth-child(8){right:32%;animation-delay:-.82s;height:8vh}
+@keyframes ciac-rush-line{0%{transform:translate3d(0,-20vh,0);opacity:0}16%{opacity:.8}85%{opacity:.8}100%{transform:translate3d(0,145vh,0);opacity:0}}
+.ciac-train-alert{position:absolute;z-index:8;top:calc(27% + env(safe-area-inset-top));left:50%;transform:translateX(-50%);border:1px solid rgba(255,255,255,.6);background:rgba(13,29,45,.88);color:#fff;border-radius:16px;padding:8px 17px;font-size:clamp(13px,3.6vw,19px);font-weight:900;white-space:nowrap;text-align:center;pointer-events:none}
+.ciac-train-alert.danger{border-color:#ffc23d;color:#ffe3a0}
+.ciac-train-alert[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){.ciac-rush{display:none}}
