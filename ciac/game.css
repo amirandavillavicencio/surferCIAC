@@ -14,3 +14,5 @@
 .ciac-result[hidden],.ciac-dialog[hidden]{display:none!important}
 .ciac-result span{font-size:12px}
 @media (max-width:560px){.ciac-dialog{bottom:calc(4vh + env(safe-area-inset-bottom));padding:12px}.ciac-lane{padding:8px 5px}.ciac-ranking{max-height:80px}}
+
+.ciac-prize{margin:0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,194,61,.12);color:#fff;font-size:13px;font-weight:800;line-height:1.35}

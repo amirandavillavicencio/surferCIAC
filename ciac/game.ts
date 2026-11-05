@@ -52,6 +52,11 @@ export class CIACQuiz {
     label.append(this.select);
     startPanel.insertBefore(label, document.getElementById('btn-play'));
 
+    const prize = document.createElement('p');
+    prize.className = 'ciac-prize';
+    prize.textContent = 'El ganador de la semana se lleva un kit de premio.';
+    startPanel.insertBefore(prize, document.getElementById('btn-play'));
+
     this.ranking = document.createElement('div');
     this.ranking.className = 'ciac-ranking';
     startPanel.append(this.ranking);
@@ -228,26 +233,35 @@ export class CIACQuiz {
 
   private async refreshRanking() {
     try {
-      const result = await api('leaderboard');
+      const result = await api('leaderboard?periodo=semana');
       this.ranking.replaceChildren();
       const heading = document.createElement('strong');
-      heading.textContent = 'Mejores puntajes académicos';
+      heading.textContent = 'Ranking semanal';
       this.ranking.append(heading);
+      if (result.semana) {
+        const period = document.createElement('small');
+        const shortDate = (date: string) => date.split('-').reverse().join('/');
+        period.textContent = shortDate(result.semana.desde) + ' al ' + shortDate(result.semana.hasta) + ' · Chile';
+        this.ranking.append(period);
+      }
       const rows = (result.ranking as Array<{name:string;score:number}>).slice(0,5);
       if (rows.length === 0) {
         const empty = document.createElement('small');
         empty.textContent = 'Todavía no hay puntajes publicados';
         this.ranking.append(empty);
       }
-      for (const row of rows) {
+      for (const [index, row] of rows.entries()) {
         const line = document.createElement('div');
         const name = document.createElement('span');
-        name.textContent = row.name;
+        name.textContent = String(index + 1) + '. ' + row.name;
         const score = document.createElement('b');
         score.textContent = String(row.score);
         line.append(name, score);
         this.ranking.append(line);
       }
+      const notice = document.createElement('small');
+      notice.textContent = 'El primer lugar es provisional hasta revisar los puntajes.';
+      this.ranking.append(notice);
     } catch {
       this.ranking.textContent = 'Ranking no disponible';
     }

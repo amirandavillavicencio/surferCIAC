@@ -18,6 +18,18 @@ Esta rama contiene la integración CIAC propia, no una versión jugable desplega
 - Moderación de nombres con `@2toad/profanity` en español e inglés y, opcionalmente, Llama Guard 3 en Cloudflare Workers AI. Los filtros no son infalibles.
 - No se solicitan ni guardan RUT, correo o matrícula.
 
+## Competencia semanal: kit de premio
+
+La pantalla de inicio anuncia: **«El ganador de la semana se lleva un kit de premio.»**
+
+El ranking semanal se calcula con los puntajes académicos guardados en Cloudflare D1 desde el **lunes a las 00:00 hasta el domingo a las 23:59 (hora de Santiago de Chile)**. El cálculo del límite semanal contempla los cambios de hora de Chile. La ruta `GET /api/leaderboard?periodo=semana` devuelve los 10 mejores puntajes de la semana; la pantalla muestra los primeros cinco. El ranking histórico sigue disponible en `GET /api/leaderboard`.
+
+Orden: mayor puntaje y, en caso de empate, el puntaje registrado primero. La cabecera del ranking muestra las fechas exactas de la semana. El líder **no es automáticamente declarado ganador**: los puntajes y la identidad de quien recibirá el premio deben revisarse manualmente al terminar la semana. No se ha conectado un sistema de entrega ni de notificación de ganadores. No se almacena identidad real ni datos de contacto.
+
+**Antes de anunciar oficialmente ganadores o entregar kits**, se deben resolver la autenticación de participantes, la prevención de puntajes automatizados y las reglas de igualdad entre modalidades: «Todos» ofrece más preguntas que una partida limitada a un solo semestre y, por ello, se pueden alcanzar puntajes máximos diferentes. También falta acordar cómo se entrega el premio. La publicidad del kit queda visible para anunciar la dinámica, pero por ahora los resultados son provisionales.
+
+Para comprobar el cálculo semanal: `node --test tests/week.test.mjs`.
+
 ## Estructura
 
 ```
