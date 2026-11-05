@@ -46,7 +46,8 @@ export class RaceFX {
     }
 
     const pace = Math.max(0, Math.min(1, (sim.speed - 12) / 15));
-    this.rush.classList.toggle('active', !this.reducedMotion.matches);\n    this.rush.classList.toggle('question', inQuestion);
+    this.rush.classList.toggle('active', !this.reducedMotion.matches);
+    this.rush.classList.toggle('question', inQuestion);
     const band = Math.round(pace * 4);
     if (band !== this.paceBand) {
       this.paceBand = band;
@@ -54,7 +55,15 @@ export class RaceFX {
       this.rush.style.setProperty('--ciac-rush-opacity', (0.12 + band * 0.045).toFixed(2));
     }
 
-    if (inQuestion) {\n      this.notice.hidden = true;\n      this.noticeLeft = 0;\n      this.tilt = 0;\n      this.previousLane = sim.lane;\n      return;\n    }\n\n    if (sim.lane !== this.previousLane) {
+    if (inQuestion) {
+      this.notice.hidden = true;
+      this.noticeLeft = 0;
+      this.tilt = 0;
+      this.previousLane = sim.lane;
+      return;
+    }
+
+    if (sim.lane !== this.previousLane) {
       this.tilt = (sim.lane - this.previousLane) * -0.012;
       this.previousLane = sim.lane;
     }
