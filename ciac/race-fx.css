@@ -12,3 +12,6 @@
 .ciac-train-alert.danger{border-color:#ffc23d;color:#ffe3a0}
 .ciac-train-alert[hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.ciac-rush{display:none}}
+
+/* La sensación de desplazamiento continúa durante la pregunta sin mostrar avisos de peligro. */
+.ciac-rush.active.question{opacity:.10}

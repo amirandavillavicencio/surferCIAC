@@ -135,3 +135,9 @@ La pregunta aparece cuando faltan **80 metros** para cruzar la línea de respues
 ## Trenes móviles y sensación de velocidad
 
 Se hace más frecuente la aparición de trenes móviles del motor original desde los tramos posteriores al tutorial, ajustando su ponderación a `0.17 + 0.10 × nivel`. Se conserva el generador que comprueba rutas esquivables. Los trenes empiezan a acercarse desde 85 metros, con un factor de movimiento 0,70; mantienen las bocinas y el ruido originales. La cámara amplía levemente el campo visual a mayor velocidad. Aparecen líneas de desplazamiento tenues en los bordes, inclinación breve al cambiar de carril y partículas con aviso al esquivar un tren. Estos efectos son decorativos: no cambian las preguntas, el puntaje ni el ranking. Se ocultan durante las preguntas y pausas, y las líneas respetan la preferencia de movimiento reducido. Las zonas de respuesta siguen libres de obstáculos.
+
+## Trenes visibles y ritmo durante las preguntas
+
+Los carriles A/B/C continúan sin obstáculos en el tramo de preguntas, pero ahora hay trenes del modelo original circulando continuamente por dos vías laterales de fondo. Son elementos escénicos sin colisión, independientes del generador y del ranking. El corredor sigue moviéndose con fluidez; las líneas suaves de velocidad permanecen durante la pregunta (sin avisos de choque). Se aumenta ligeramente el campo de visión dinámico y se añade una oscilación mínima de cámara vinculada al desplazamiento, respetando el perfil táctil de iPhone.
+
+Durante las preguntas y en el margen seguro se retiran, además de los obstáculos, las monedas y los potenciadores presentes en los carriles, con reciclaje de objetos del simulador. Fuera de esos tramos, las monedas y las mecánicas originales siguen funcionando. No se modifican preguntas, opciones, puntajes académicos, ranking ni base D1.
