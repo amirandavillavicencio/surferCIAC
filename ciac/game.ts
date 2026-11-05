@@ -16,6 +16,7 @@ async function api(path: string, body?: object): Promise<any> {
 
 export class CIACQuiz {
   private phase: Phase = 'idle';
+  private runSerial = 0;
   private hooks: Hooks;
   private token = '';
   private question: Question | null = null;
@@ -108,24 +109,34 @@ export class CIACQuiz {
   get active() { return this.phase === 'question' || this.phase === 'submitting'; }
 
   reset() {
+    this.runSerial++;
     this.phase = 'idle';
     this.question = null;
     this.token = '';
     this.dialog.hidden = true;
     this.resultForm.hidden = true;
     this.formStatus.textContent = '';
+    this.playerName.disabled = false;
+    this.playerName.value = '';
+    const saveButton = this.resultForm.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    saveButton.disabled = false;
+    saveButton.hidden = false;
     this.nextDistance = 75;
     void this.refreshRanking();
   }
 
   async start() {
+    const serial = this.runSerial;
     this.phase = 'idle';
     try {
       const response = await api('start', { semestre: this.select.value });
+      if (serial !== this.runSerial) return;
       this.token = response.token;
+      if (this.phase === 'ended') { this.resultForm.hidden = false; return; }
       this.question = response.question;
       this.phase = this.question ? 'ready' : 'complete';
     } catch (error) {
+      if (serial !== this.runSerial) return;
       this.hooks.notice('Preguntas no disponibles: ' + String(error instanceof Error ? error.message : error));
     }
   }
