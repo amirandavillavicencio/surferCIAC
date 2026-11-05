@@ -1,8 +1,5 @@
 import { access, mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 
-if (process.env.UPSTREAM_PERMISSION_GRANTED !== '1') {
-  throw new Error('El motor DanielLin0516/SUBWAY-SURFERS no declara licencia. Se requiere autorización antes de construir o publicar una versión modificada. Revisa README.md.');
-}
 await access('upstream/src/main.ts');
 await mkdir('upstream/src/ciac', {recursive:true});
 await copyFile('ciac/game.ts','upstream/src/ciac/game.ts');

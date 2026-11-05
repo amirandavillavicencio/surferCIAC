@@ -89,3 +89,11 @@ El proyecto Cloudflare Pages `surferciac` está conectado al repositorio `surfer
 El motor 3D todavía no forma parte de la compilación para Pages. La respuesta en la raíz es una página 404 descriptiva hasta completar el juego original. Las rutas `/api/status` y `/api/leaderboard?periodo=semana` sí permiten comprobar los servicios. Las rutas que crean y cierran partidas se mantienen desactivadas con `COMPETITION_LIVE=false`.
 
 El antiguo acceso público del Worker `surferciac` bajo `gestionmonumentoscde.workers.dev` quedó deshabilitado. La configuración de Workers mantiene `workersDev: false` para impedir que nuevos despliegues reactiven esa dirección. Los demás Workers y el subdominio general de la cuenta no se modificaron.
+
+## Publicación del motor 3D (solicitada por el titular del despliegue)
+
+El comando `npm run build:pages` ahora descarga las dependencias del submódulo original, integra el módulo académico en `upstream/src/main.ts`, compila el juego real con Vite/TypeScript y copia `index.html`, JavaScript, CSS, `core.glb` y `scenery.glb` a `dist/`. Cloudflare Pages publica `dist/` en `https://surferciac.pages.dev/`. No se ha creado otro motor ni se han sustituido los modelos.
+
+El bloqueo artificial que detenía `scripts/prepare.mjs` fue retirado a petición del usuario. **La ausencia de licencia del repositorio original sigue siendo una cuestión de derechos de autor, y poder compilarlo no acredita permiso de redistribución.** El submódulo permanece fijado al commit original. El ranking con premio necesita revisión humana de posibles puntajes automatizados.
+
+El servicio `surferciac` de Cloudflare Workers independiente del proyecto Pages no tiene activa su dirección pública `workers.dev`; el dominio para entrar al juego es `surferciac.pages.dev`.
