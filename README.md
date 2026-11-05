@@ -111,3 +111,7 @@ Los enunciados académicos originales, las alternativas, las claves y la validac
 ## Textos del juego en español
 
 Los textos originales del motor se traducen mediante `ciac/i18n.ts`, que el paso de preparación incorpora al compilado. El título visible es `Surfer CIAC`, el botón principal dice `Jugar` y el resto de los controles, marcadores y avisos se presenta en español. Se mantiene el motor, los modelos 3D, los controles y el registro de mejores puntajes originales.
+
+## Indicadores legibles en la aproximación
+
+Los tres carteles 3D conservan la correspondencia A/B/C con cada carril. Ahora tienen fondo oscuro casi opaco, contorno blanco, letra y alternativa ampliadas. El carril que ocupa el jugador aparece con borde dorado y una franja dorada sobre la vía, sin adelantar la respuesta correcta. Cuando faltan menos de 45 metros, el panel superior aumenta el tamaño de las opciones y muestra la distancia hasta el cruce. En los últimos 8 metros, los carteles se mantienen a una distancia mínima de cámara para que no desaparezcan detrás del personaje. La respuesta sigue siendo automática al cruzar y el juego no se pausa.

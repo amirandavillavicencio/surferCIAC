@@ -52,3 +52,45 @@
 
 /* El sitio se presenta íntegramente en español; no hay selector de idioma. */
 #btn-lang{display:none!important}
+
+/* Señales visibles al acercarse, sin tapar la carrera ni interceptar gestos. */
+.ciac-dialog{
+  border:2px solid rgba(255,255,255,.7);
+  background:rgba(10,21,40,.94);
+  box-shadow:0 4px 14px rgba(0,0,0,.28);
+  transition:border-color .15s ease,background-color .15s ease;
+}
+.ciac-dialog.ciac-near{border-color:#ffc23d}
+.ciac-dialog.ciac-close{
+  background:rgba(10,21,40,.98);
+  border-width:3px;
+}
+.ciac-lane{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.55);
+  color:#fff;
+}
+.ciac-dialog.ciac-near .ciac-lane{
+  font-size:clamp(14px,3.6vw,19px);
+  min-height:44px;
+  padding:8px 4px;
+}
+.ciac-dialog .ciac-lane.selected{
+  border:2px solid #ffc23d;
+  background:rgba(255,194,61,.24);
+  color:#fff2c4;
+}
+.ciac-dialog .ciac-message{
+  display:block;
+  font-size:clamp(10px,2.7vw,13px);
+  font-weight:750;
+  letter-spacing:.03em;
+  color:#f3f6ff;
+  opacity:.95;
+  margin-top:7px;
+}
+.ciac-dialog.ciac-near .ciac-message{color:#ffc23d}
+@media(orientation:landscape) and (max-height:500px){
+  .ciac-dialog.ciac-near .ciac-lane{font-size:12px;min-height:30px;padding:4px}
+  .ciac-dialog .ciac-message{font-size:10px;margin-top:3px}
+}

@@ -75,6 +75,7 @@ export class CIACQuiz {
     this.title.className = 'ciac-question';
     this.message = document.createElement('div');
     this.message.className = 'ciac-message';
+    this.message.setAttribute('aria-live', 'off');
     const lanes = document.createElement('div');
     lanes.className = 'ciac-lanes';
     for (let i = 0; i < 3; i++) {
@@ -188,7 +189,12 @@ export class CIACQuiz {
     this.selected = lane;
     this.highlight();
     this.dialog.hidden = false;
-    this.gates.update(ahead);
+    this.dialog.classList.toggle('ciac-near', ahead <= 45);
+    this.dialog.classList.toggle('ciac-close', ahead <= 15);
+    this.message.textContent = ahead <= 45
+      ? 'CRUZA TU RESPUESTA · ' + Math.ceil(Math.max(0, ahead)) + ' m'
+      : 'ELIGE EL CARRIL DE LA RESPUESTA';
+    this.gates.update(ahead, lane);
     if (ahead <= 0) {
       this.phase = 'submitting';
       this.dialog.hidden = true;
