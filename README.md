@@ -131,3 +131,7 @@ La pregunta aparece al estar a 80 metros de la zona de respuesta. Desde ese punt
 ## Ajuste de visibilidad del tramo de respuestas
 
 La pregunta aparece cuando faltan **80 metros** para cruzar la línea de respuesta, y cada carril muestra su color durante los **últimos 75 metros** del tramo. De este modo, al aparecer la pregunta los colores comienzan a solo 5 metros por delante del corredor. Se mantiene la correspondencia A azul, B verde y C morado, la validación por carril y el tramo sin obstáculos.
+
+## Trenes móviles y sensación de velocidad
+
+Se hace más frecuente la aparición de trenes móviles del motor original desde los tramos posteriores al tutorial, ajustando su ponderación a `0.17 + 0.10 × nivel`. Se conserva el generador que comprueba rutas esquivables. Los trenes empiezan a acercarse desde 85 metros, con un factor de movimiento 0,70; mantienen las bocinas y el ruido originales. La cámara amplía levemente el campo visual a mayor velocidad. Aparecen líneas de desplazamiento tenues en los bordes, inclinación breve al cambiar de carril y partículas con aviso al esquivar un tren. Estos efectos son decorativos: no cambian las preguntas, el puntaje ni el ranking. Se ocultan durante las preguntas y pausas, y las líneas respetan la preferencia de movimiento reducido. Las zonas de respuesta siguen libres de obstáculos.
