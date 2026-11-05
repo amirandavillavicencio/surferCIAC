@@ -81,3 +81,11 @@ Rutas preparadas:
 El valor `COMPETITION_LIVE` permanece en `false` porque **todavía no hay un juego público conectado y el ranking premiado carece de protección suficiente contra partidas automatizadas**. No cambiarlo a `true` sin implementar controles antifraude y verificar el juego. No se han registrado nombres o puntajes ficticios.
 
 La integración de Cloudflare Workers Builds usa `npm run build` y `npx cf deploy --prebuilt`. El Worker y el código del juego se mantienen separados mientras se resuelve el permiso de distribución del motor.
+
+## Dirección independiente de Pages
+
+El proyecto Cloudflare Pages `surferciac` está conectado al repositorio `surferCIAC` (rama `main`), con subdominio `https://surferciac.pages.dev`. La publicación de Pages usa `npm run build:pages`, y mantiene el mismo binding D1 `DB` a `surferciac-db`.
+
+El motor 3D todavía no forma parte de la compilación para Pages. La respuesta en la raíz es una página 404 descriptiva hasta completar el juego original. Las rutas `/api/status` y `/api/leaderboard?periodo=semana` sí permiten comprobar los servicios. Las rutas que crean y cierran partidas se mantienen desactivadas con `COMPETITION_LIVE=false`.
+
+Se preserva el Worker antiguo únicamente hasta verificar el nuevo dominio; no se ha modificado el subdominio general de la cuenta Cloudflare.
