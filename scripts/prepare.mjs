@@ -31,7 +31,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
     ["        overTimer = 0;\n        break;",
      "        overTimer = 0;\n        if (!TEST) quiz.endRun();\n        break;"],
     ["    if (state === 'play') sim.update(dt);",
-     "    if (state === 'play' && !TEST) quiz.tick(sim.d, dt, sim.lane);\n    if (state === 'play' && !TEST) {\n      sim.speedOverride = quiz.slowed ? speedAt(sim.d) * 0.55 : 0;\n      const gate = quiz.upcomingGate;\n      if (gate !== null && gate - sim.d < 115) {\n        for (let i = sim.obs.length - 1; i >= 0; i--) {\n          const ob = sim.obs[i];\n          if (ob.d0 < gate + 9 && ob.d1 > gate - 9) sim.obs.splice(i, 1);\n        }\n      }\n    }\n    if (state === 'play') sim.update(dt);"],
+     "    if (state === 'play' && !TEST) quiz.tick(sim.d, dt, sim.lane);\n    if (state === 'play' && !TEST) {\n      sim.speedOverride = quiz.slowed ? speedAt(sim.d) * 0.55 : 0;\n      const safeUntil = quiz.safeCorridorUntil;\n      if (safeUntil > sim.d) {\n        for (let i = sim.obs.length - 1; i >= 0; i--) {\n          const ob = sim.obs[i];\n          if (ob.d0 < safeUntil && ob.d1 > sim.d - 12) sim.obs.splice(i, 1);\n        }\n      }\n    }\n    if (state === 'play' && (TEST || !quiz.blocking)) sim.update(dt);"],
   ];
   for (const [before, after] of changes) {
     if (source.split(before).length !== 2) throw new Error('La versión original cambió: no se encontró un único punto de integración: ' + before);

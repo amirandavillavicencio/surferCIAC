@@ -115,3 +115,7 @@ Los textos originales del motor se traducen mediante `ciac/i18n.ts`, que el paso
 ## Indicadores legibles en la aproximación
 
 Los tres carteles 3D conservan la correspondencia A/B/C con cada carril. Ahora tienen fondo oscuro casi opaco, contorno blanco, letra y alternativa ampliadas. El carril que ocupa el jugador aparece con borde dorado y una franja dorada sobre la vía, sin adelantar la respuesta correcta. Cuando faltan menos de 45 metros, el panel superior aumenta el tamaño de las opciones y muestra la distancia hasta el cruce. En los últimos 8 metros, los carteles se mantienen a una distancia mínima de cámara para que no desaparezcan detrás del personaje. La respuesta sigue siendo automática al cruzar y el juego no se pausa.
+
+## Modo pregunta a pantalla completa
+
+Al acercarse a una pregunta, la carrera entra en modo pregunta: se detiene la simulación y aparece un panel que ocupa toda la pantalla del teléfono con el enunciado y tres alternativas táctiles grandes. Se elige tocando una alternativa o con flechas y confirmación. Las respuestas se validan en servidor, se muestra brevemente el resultado y se reanuda la carrera, manteniendo la penalización de velocidad de 3 segundos por error. Durante la pregunta no avanzan ni se generan obstáculos; se retiran los objetos del tramo que rodea al corredor y se mantiene un corredor seguro de 130 metros al reanudar. No se cambian las preguntas, claves, modelos 3D ni el ranking.
