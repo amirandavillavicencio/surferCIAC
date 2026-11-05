@@ -21,7 +21,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
     ["import { load, save } from './storage';",
      "import { load, save } from './storage';\nimport { CIACQuiz } from './ciac/game';"],
     ["  let seed = (Date.now() % 100000) + 1;",
-     "  const quiz = new CIACQuiz({\n    scene: world.scene,\n    fail: () => { sim.alive = false; sim.events.push({ type: 'crash', kind: 'caught', x: sim.x, y: sim.y }); },\n    lane: (lane: number) => { sim.lane = lane; sim.x = laneX(lane); sim.fromX = sim.x; sim.laneT = 1; },\n    notice: (message: string) => ui.toast(message),\n  });\n  let seed = (Date.now() % 100000) + 1;"],
+     "  const quiz = new CIACQuiz({\n    notice: (message: string) => ui.toast(message),\n  });\n  let seed = (Date.now() % 100000) + 1;"],
     ["    overTimer = 0;\n    state = 'start';",
      "    overTimer = 0;\n    if (!TEST) quiz.reset();\n    state = 'start';"],
     ["    ui.show('play');\n  }\n  function pause() {",
