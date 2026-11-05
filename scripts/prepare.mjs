@@ -24,6 +24,10 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   const changes = [
     ["import { load, save } from './storage';",
      "import { load, save } from './storage';\nimport { CIACQuiz } from './ciac/game';\nimport { RaceFX } from './ciac/race-fx';"],
+    ["    const dt = Math.min(0.05, (now - last) / 1000);",
+     "    const elapsed = (now - last) / 1000;\n    const dt = Math.min(0.05, elapsed);"],
+    ["    watchPerf(dt);", "    if (elapsed < 0.25) watchPerf(elapsed);"],
+    ["        if (gap < 90 && !horned.has(o.id))", "        if (o.d0 > sim.d && gap < 90 && !horned.has(o.id))"],
     ["  let seed = (Date.now() % 100000) + 1;",
      "  const quiz = new CIACQuiz({\n    scene: world.scene,\n    notice: (message: string) => ui.toast(message),\n  });\n  const raceFX = new RaceFX(document.getElementById('ui')!);\n  const clearQuizCorridor = () => {\n    const until = quiz.safeCorridorUntil;\n    if (until <= sim.d) return;\n    sim.clearObstaclesUntil(until);\n  };\n  let seed = (Date.now() % 100000) + 1;"],
     ["    overTimer = 0;\n    state = 'start';",
@@ -86,6 +90,14 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   if (swipe < 0) throw new Error('Controles originales cambiaron');
   await writeFile(inputPath, "import { bindSwipe } from './ciac/swipe';\n" + input.slice(0, swipe) + '  bindSwipe(target, on, canSwipe);\n}\n');
 
+  const uiPath = 'upstream/src/ui.ts';
+  const ui = await readFile(uiPath, 'utf8');
+  const focusPause = "    if (s === 'pause') this.el['btn-resume'].focus({ preventScroll: true });";
+  if (ui.split(focusPause).length !== 2) throw new Error('Foco original de pausa cambió');
+  await writeFile(uiPath, ui.replace(focusPause, focusPause + `
+    if (s === 'play' && document.activeElement instanceof HTMLElement &&
+        document.activeElement.closest('.screen')) document.activeElement.blur();`));
+
   const worldPath = 'upstream/src/view/world.ts';
   let world = await readFile(worldPath, 'utf8');
   const replaceWorld = (before, after) => {
@@ -110,6 +122,8 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   replaceWorld('    const movers: Ob[] = [];', '    const movers = this.movers;\n    movers.length = 0;');
   replaceWorld('    const gold = new THREE.Color(1.0, 0.75, 0.25).multiplyScalar(0.55);', '    const gold = COIN_GLOW;');
   replaceWorld('const LIGHT =', 'const COIN_GLOW = new THREE.Color(1.0, 0.75, 0.25).multiplyScalar(0.55);\nconst LIGHT =');
+  replaceWorld('const LIGHT_RED =', 'const lightTint = new THREE.Color();\nconst LIGHT_RED =');
+  world = world.replaceAll('LIGHT.clone()', 'lightTint.copy(LIGHT)').replaceAll('LIGHT_RED.clone()', 'lightTint.copy(LIGHT_RED)');
   replaceWorld("{ cast: true, name: 'pole' }", "{ name: 'pole' }");
   replaceWorld('    this.buildGround();', `    this.buildGround();
     // Low foothills at the far end of the corridor, behind all playable geometry.
