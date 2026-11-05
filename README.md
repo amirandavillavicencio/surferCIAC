@@ -88,4 +88,4 @@ El proyecto Cloudflare Pages `surferciac` está conectado al repositorio `surfer
 
 El motor 3D todavía no forma parte de la compilación para Pages. La respuesta en la raíz es una página 404 descriptiva hasta completar el juego original. Las rutas `/api/status` y `/api/leaderboard?periodo=semana` sí permiten comprobar los servicios. Las rutas que crean y cierran partidas se mantienen desactivadas con `COMPETITION_LIVE=false`.
 
-Se preserva el Worker antiguo únicamente hasta verificar el nuevo dominio; no se ha modificado el subdominio general de la cuenta Cloudflare.
+El antiguo acceso público del Worker `surferciac` bajo `gestionmonumentoscde.workers.dev` quedó deshabilitado. La configuración de Workers mantiene `workersDev: false` para impedir que nuevos despliegues reactiven esa dirección. Los demás Workers y el subdominio general de la cuenta no se modificaron.
