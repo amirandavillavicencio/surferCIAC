@@ -107,3 +107,7 @@ Una respuesta incorrecta **no mata al personaje ni cierra la sesión**. La carre
 La carrera continúa mientras aparece una pregunta breve sobre la vía. Las alternativas se ven en un panel compacto y en tres marcadores 3D asociados a los carriles. El jugador responde automáticamente cuando atraviesa el marcador con su carril; ya no se exige tocar un botón ni saltar para confirmar. La primera puerta aparece a 180 m y las siguientes cada 150 m; en torno al cruce se limpia una franja de obstáculos del generador, para que el marcador no quede bloqueado. El resto de las colisiones normales sigue activo.
 
 Los enunciados académicos originales, las alternativas, las claves y la validación en servidor permanecen intactos. Para la interfaz se agregó la propiedad `breve`, una versión acotada de cada uno de los 24 enunciados. Las respuestas correctas siguen sumando 100 puntos. Las equivocadas reducen la velocidad al 55 % de la normal durante 3 segundos, sin congelar la carrera.
+
+## Textos del juego en español
+
+Los textos originales del motor se traducen mediante `ciac/i18n.ts`, que el paso de preparación incorpora al compilado. El título visible es `Surfer CIAC`, el botón principal dice `Jugar` y el resto de los controles, marcadores y avisos se presenta en español. Se mantiene el motor, los modelos 3D, los controles y el registro de mejores puntajes originales.

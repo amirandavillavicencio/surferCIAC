@@ -49,3 +49,6 @@
   .ciac-question{font-size:13px}
   .ciac-lane{font-size:11px;min-height:30px}
 }
+
+/* El sitio se presenta íntegramente en español; no hay selector de idioma. */
+#btn-lang{display:none!important}

@@ -5,6 +5,15 @@ await mkdir('upstream/src/ciac', {recursive:true});
 await copyFile('ciac/game.ts','upstream/src/ciac/game.ts');
 await copyFile('ciac/game.css','upstream/src/ciac/game.css');
 await copyFile('ciac/gates.ts','upstream/src/ciac/gates.ts');
+await copyFile('ciac/i18n.ts','upstream/src/i18n.ts');
+// El cargador HTML se muestra antes de ejecutar el motor.
+const indexFile = 'upstream/index.html';
+let html = await readFile(indexFile, 'utf8');
+html = html.replace('<html lang="en">', '<html lang="es">');
+html = html.replace('<title>Subway Run</title>', '<title>Surfer CIAC</title>');
+html = html.replace('<h1 id="ld-title">Subway Run</h1>', '<h1 id="ld-title">Surfer CIAC</h1>');
+html = html.replace(/var T = \{ 'zh-TW': [^\n]+\}\[lang\];/, "var T = ['Surfer CIAC', 'Descargando', 'Preparando…'];");
+await writeFile(indexFile, html);
 const file = 'upstream/src/main.ts';
 let source = await readFile(file,'utf8');
 if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
