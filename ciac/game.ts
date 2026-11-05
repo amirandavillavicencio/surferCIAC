@@ -23,7 +23,6 @@ export class CIACQuiz {
   private selected = 1;
   private nextDistance = 180;
   private currentDistance = 0;
-  private shownQuestionId = '';
   private safeUntil = 0;
   private feedbackRemaining = 0;
   private penaltyRemaining = 0;
@@ -139,7 +138,6 @@ export class CIACQuiz {
     saveButton.hidden = false;
     this.nextDistance = 180;
     this.currentDistance = 0;
-    this.shownQuestionId = '';
     this.safeUntil = 0;
     this.feedbackRemaining = 0;
     this.penaltyRemaining = 0;
