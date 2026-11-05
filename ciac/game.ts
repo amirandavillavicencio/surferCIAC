@@ -96,7 +96,7 @@ export class CIACQuiz {
     this.playerName.required = true;
     this.playerName.minLength = 2;
     this.playerName.maxLength = 24;
-    this.playerName.autocomplete = 'nickname';
+    this.playerName.setAttribute('autocomplete', 'nickname');
     this.playerName.placeholder = 'Tu nombre en el ranking';
     this.playerName.setAttribute('aria-label', 'Nombre público');
     const button = document.createElement('button');
@@ -137,7 +137,7 @@ export class CIACQuiz {
       const response = await api('start', { semestre: this.select.value });
       if (serial !== this.runSerial) return;
       this.token = response.token;
-      if (this.phase === 'ended') { this.resultForm.hidden = false; return; }
+      if ((this.phase as Phase) === 'ended') { this.resultForm.hidden = false; return; }
       this.question = response.question;
       this.phase = this.question ? 'ready' : 'complete';
     } catch (error) {
