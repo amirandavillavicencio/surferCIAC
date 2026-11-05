@@ -10,12 +10,14 @@ export class RaceFX {
   private previousLane = 1;
   private tilt = 0;
   private noticeLeft = 0;
+  private paceBand = -1;
+  private readonly reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(root: HTMLElement) {
     this.rush = document.createElement('div');
     this.rush.className = 'ciac-rush';
     this.rush.setAttribute('aria-hidden', 'true');
-    for (let i = 0; i < 8; i++) this.rush.append(document.createElement('i'));
+    for (let i = 0; i < 4; i++) this.rush.append(document.createElement('i'));
 
     this.notice = document.createElement('div');
     this.notice.className = 'ciac-train-alert';
@@ -29,13 +31,13 @@ export class RaceFX {
     this.previousLane = 1;
     this.tilt = 0;
     this.noticeLeft = 0;
-    this.rush.style.opacity = '0';
+    this.rush.classList.remove('active');
     this.notice.hidden = true;
   }
 
   update(sim: Sim, world: World, dt: number, playing: boolean, inQuestion: boolean) {
     if (!playing || !sim.alive || inQuestion) {
-      this.rush.style.opacity = '0';
+      this.rush.classList.remove('active');
       this.notice.hidden = true;
       this.noticeLeft = 0;
       this.tilt = 0;
@@ -44,15 +46,20 @@ export class RaceFX {
     }
 
     const pace = Math.max(0, Math.min(1, (sim.speed - 12) / 15));
-    this.rush.style.opacity = (0.13 + pace * 0.26).toFixed(2);
-    this.rush.style.setProperty('--ciac-streak-time', (0.84 - pace * 0.38).toFixed(2) + 's');
+    this.rush.classList.toggle('active', !this.reducedMotion.matches);
+    const band = Math.round(pace * 4);
+    if (band !== this.paceBand) {
+      this.paceBand = band;
+      this.rush.style.setProperty('--ciac-streak-time', (0.9 - band * 0.09).toFixed(2) + 's');
+      this.rush.style.setProperty('--ciac-rush-opacity', (0.12 + band * 0.045).toFixed(2));
+    }
 
     if (sim.lane !== this.previousLane) {
-      this.tilt = (sim.lane - this.previousLane) * -0.024;
+      this.tilt = (sim.lane - this.previousLane) * -0.012;
       this.previousLane = sim.lane;
     }
     this.tilt *= Math.exp(-dt * 5);
-    world.camera.rotateZ(this.tilt);
+    if (!this.reducedMotion.matches) world.camera.rotateZ(this.tilt);
 
     this.noticeLeft = Math.max(0, this.noticeLeft - dt);
     if (this.noticeLeft === 0) this.notice.hidden = true;
@@ -60,9 +67,9 @@ export class RaceFX {
     let incoming = false;
     for (const train of sim.obs) {
       if (train.kind !== 'mtrain') continue;
-      const gap = train.meet - sim.d;
-      if (gap > 0 && gap < 55 && train.lane === sim.lane) incoming = true;
-      if (gap < -2 && gap > -16 && train.lane !== sim.lane && !this.passed.has(train.id)) {
+      const gap = train.d0 - sim.d;
+      if (gap > 0 && gap < 72 && train.lane === sim.lane) incoming = true;
+      if (train.d1 - sim.d < 0 && train.d1 - sim.d > -12 && train.lane !== sim.lane && !this.passed.has(train.id)) {
         this.passed.add(train.id);
         if (this.passed.size > 100) this.passed.clear();
         this.show('¡Tren esquivado!', 1.1, false);
@@ -77,7 +84,7 @@ export class RaceFX {
   }
 
   private show(message: string, seconds: number, danger: boolean) {
-    this.notice.textContent = message;
+    if (this.notice.textContent !== message) this.notice.textContent = message;
     this.notice.classList.toggle('danger', danger);
     this.notice.hidden = false;
     this.noticeLeft = seconds;
