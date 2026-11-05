@@ -164,9 +164,6 @@ export class CIACQuiz {
 
   tick(distance: number, dt: number, _lane: number) {
     this.currentDistance = distance;
-    if (this.penaltyRemaining > 0) {
-      this.penaltyRemaining = Math.max(0, this.penaltyRemaining - dt);
-    }
     if (this.phase === 'feedback') {
       this.feedbackRemaining = Math.max(0, this.feedbackRemaining - dt);
       if (this.feedbackRemaining === 0) {
@@ -177,6 +174,9 @@ export class CIACQuiz {
       return;
     }
     if (this.phase === 'question' || this.phase === 'submitting') return;
+    if (this.penaltyRemaining > 0) {
+      this.penaltyRemaining = Math.max(0, this.penaltyRemaining - dt);
+    }
     if (this.phase !== 'ready' || !this.question) {
       this.dialog.hidden = true;
       return;
