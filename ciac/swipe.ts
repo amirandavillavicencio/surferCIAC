@@ -1,49 +1,77 @@
 import type { Action } from '../input';
 
+const interactive = 'button, input, select, textarea, a, [contenteditable]';
+
 export function bindSwipe(target: HTMLElement, on: (action: Action) => void, canSwipe: () => boolean) {
-  let active: number | null = null;
-  let x = 0;
-  let y = 0;
-  let consumed = false;
+  let gesture: { id: number; x: number; y: number; consumed: boolean; touch: boolean } | null = null;
 
-  target.addEventListener('pointerdown', (event) => {
-    if (!canSwipe() || !event.isPrimary || event.button !== 0 || active !== null) return;
-    if ((event.target as Element).closest('button, input, select, textarea, a, [contenteditable]')) return;
-    active = event.pointerId;
-    x = event.clientX;
-    y = event.clientY;
-    consumed = false;
-    target.setPointerCapture(event.pointerId);
-  });
+  const start = (id: number, x: number, y: number, touch: boolean, event: Event) => {
+    if (!canSwipe() || gesture || (event.target as Element).closest(interactive)) return false;
+    gesture = { id, x, y, touch, consumed: false };
+    return true;
+  };
 
-  const read = (event: PointerEvent) => {
-    if (active !== event.pointerId || consumed || !canSwipe()) return;
-    const dx = event.clientX - x;
-    const dy = event.clientY - y;
+  const move = (x: number, y: number) => {
+    if (!gesture || gesture.consumed || !canSwipe()) return;
+    const dx = x - gesture.x;
+    const dy = y - gesture.y;
     const horizontal = Math.abs(dx) > Math.abs(dy);
     const major = Math.max(Math.abs(dx), Math.abs(dy));
     const minor = Math.min(Math.abs(dx), Math.abs(dy));
-    // Short, deliberate swipes respond immediately. Diagonals need more travel.
-    if (major < 13 || (major < 27 && major < minor * 1.3)) return;
-    consumed = true;
+    if (major < 12 || major < minor * 1.25) return;
+    gesture.consumed = true;
     on(horizontal ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
   };
 
-  const end = (event: PointerEvent) => {
-    if (active === event.pointerId) active = null;
-  };
-  target.addEventListener('pointermove', read);
-  target.addEventListener('pointerup', (event) => { read(event); end(event); });
-  target.addEventListener('pointercancel', end);
-  target.addEventListener('lostpointercapture', end);
-  window.addEventListener('blur', () => { active = null; });
-
-  // Safari may handle a swipe from the viewport edge before pointer events arrive.
-  // Cancel the native touch gesture as early as WebKit allows on the play surface.
-  const suppress = (event: TouchEvent) => {
-    if (!canSwipe() || (event.target as Element).closest('button, input, select, textarea, a, [contenteditable]')) return;
+  const cancelNative = (event: TouchEvent) => {
     if (event.cancelable) event.preventDefault();
   };
-  target.addEventListener('touchstart', suppress, { passive: false });
-  target.addEventListener('touchmove', suppress, { passive: false });
+
+  target.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) {
+      if (gesture?.touch) {
+        gesture.consumed = true;
+        cancelNative(event);
+      }
+      return;
+    }
+    const touch = event.changedTouches[0];
+    if (touch && start(touch.identifier, touch.clientX, touch.clientY, true, event)) cancelNative(event);
+  }, { passive: false });
+
+  const readTouch = (event: TouchEvent, ending: boolean) => {
+    if (!gesture?.touch) return;
+    for (let i = 0; i < event.changedTouches.length; i++) {
+      const touch = event.changedTouches[i];
+      if (touch.identifier !== gesture.id) continue;
+      cancelNative(event);
+      move(touch.clientX, touch.clientY);
+      if (ending) gesture = null;
+      return;
+    }
+  };
+  target.addEventListener('touchmove', (event) => readTouch(event, false), { passive: false });
+  target.addEventListener('touchend', (event) => readTouch(event, true), { passive: false });
+  target.addEventListener('touchcancel', () => { if (gesture?.touch) gesture = null; });
+
+  // Touch Events own touch gestures. Pointer Events are for mouse and pen only.
+  target.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'touch' || !event.isPrimary || event.button !== 0) return;
+    if (start(event.pointerId, event.clientX, event.clientY, false, event)) target.setPointerCapture(event.pointerId);
+  });
+  const isPointer = (event: PointerEvent) =>
+    gesture && !gesture.touch && event.pointerType !== 'touch' && gesture.id === event.pointerId;
+  target.addEventListener('pointermove', (event) => {
+    if (isPointer(event)) move(event.clientX, event.clientY);
+  });
+  target.addEventListener('pointerup', (event) => {
+    if (!isPointer(event)) return;
+    move(event.clientX, event.clientY);
+    gesture = null;
+  });
+  const endPointer = (event: PointerEvent) => { if (isPointer(event)) gesture = null; };
+  target.addEventListener('pointercancel', endPointer);
+  target.addEventListener('lostpointercapture', endPointer);
+  window.addEventListener('blur', () => { gesture = null; });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) gesture = null; });
 }
