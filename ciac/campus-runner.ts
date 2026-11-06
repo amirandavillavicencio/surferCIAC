@@ -26,10 +26,10 @@ export function applyCampusRunner(model: THREE.Object3D): void {
   const jerseyLight = material(0x3a92a6);
   const trousers = material(0x293d54);
   const cuffs = material(0x1d3446);
-  const skin = material(0xd9a07e);
-  const skinShade = material(0xc78c6c);
-  const hair = material(0x29303a);
-  const shoe = material(0xe9f2ef);
+  const skin = material(0xd9a07e, .67);
+  const skinShade = material(0xc78c6c, .72);
+  const hair = material(0x29303a, .82);
+  const shoe = material(0xe9f2ef, .64);
   const sole = material(0x8cc4bd);
   const eyes = material(0x1c2836);
   const up = new THREE.Vector3(0, 1, 0);

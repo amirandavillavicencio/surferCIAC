@@ -1,3 +1,4 @@
+import {RailBed,trainDetailPrototype} from '../upstream/src/ciac/rail-art';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -346,9 +347,9 @@ test('original GLB: complete train instances and finite animation clips hold ins
   const couplers=new Instanced(new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.64, CAR_GAP + 0.18)), 60, scene);
   const world=Object.create(World.prototype) as World;
   Object.assign(world, {scene,camera:new THREE.PerspectiveCamera(76,390/844,.3,260),
-    pools:{train:pool},trainLinks:couplers,coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
+    pools:{train:pool},trainLinks:couplers,trainDetails:new Instanced(trainDetailPrototype(),72,scene),railBed:new RailBed(scene),coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
     poles:emptyPool(),powerCards:{magnet:emptyPool(),shoes:emptyPool(),double:emptyPool()},
-    scrollTex:[],movers:[],camX:0,camY:0,shake:0,flash:0,aspect:390/844,time:0,
+    scrollTex:[],movers:[],camX:0,camY:0,camSupport:0,shake:0,flash:0,aspect:390/844,time:0,
     fx:{update(){},burst(){}},player:{menu(){}}
   });
   const matrix=new THREE.Matrix4(), expected=new THREE.Matrix4();
@@ -362,6 +363,8 @@ test('original GLB: complete train instances and finite animation clips hold ins
       }
     }
     assert.equal(pool.count,drawn.length);
+    assert.equal((world as any).trainDetails.count,drawn.length);
+    assert.ok(world.camera.position.toArray().every(Number.isFinite));
     assert.ok(couplers.count<=Math.max(0,drawn.length));
     for(const part of pool.parts) {
       assert.equal(part.mesh.count,drawn.length);

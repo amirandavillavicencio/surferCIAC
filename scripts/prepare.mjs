@@ -206,3 +206,5 @@ console.log('Integración CIAC preparada sobre el motor original.');
 await import("./train-dynamics.mjs");
 
 await import("./presentation.mjs");
+
+await import("./resource-integration.mjs");

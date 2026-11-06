@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/Saurabh2005695/Saurabh-s-Sprint-",
+  "commit": "835b8404fd3bd96afea08e91d0f4fd03e627dd1e",
+  "source": "js/chaser.js",
+  "sha256": "ca58a14345935eba798d440b01a24168f8af451dc63294a3a150b5e74dae08f7",
+  "license": "MIT",
+  "license_sha256": "f2af61c738044eb5a7d53c63dc7c8468ce878fc2f930d5190d63ed9864c3b803",
+  "adaptation": "buildOfficer geometry only; no badges, dog, global engine/audio or volumetric flashlight beam. State machine adapted separately."
+}

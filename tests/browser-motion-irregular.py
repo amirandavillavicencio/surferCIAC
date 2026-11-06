@@ -8,8 +8,8 @@ with sync_playwright() as p:
  const intervals=[.002,.004,.018,.011,.035,.006,.027,.01,.045,.001,.12];let maxError=0,zeroSteps=0,lastTime=0;const clips=new Set();
  for(let frame=0;frame<220;frame++){
   if(frame===0||frame===50)r.input('up');if(frame===7||frame===25)r.input('right');if(frame===14||frame===80)r.input('down');if(frame===16)r.input('left');if(frame===35)r.input('left');
-  const before=s.time;r.presentFrame(intervals[frame%intervals.length]);if(s.time===before)zeroSteps++;
-  const v=r.presentation.view;if(v.time<lastTime-1e-8)throw Error('time reversed');lastTime=v.time;
+  const before=s.time;const alpha=r.presentFrame(intervals[frame%intervals.length]);if(s.time===before)zeroSteps++;
+  const v=r.presentation.view;const guard=r.presentation.chase.sample(alpha);if(r.world.guard.root.visible&&(Math.abs(r.world.guard.root.position.x-(guard.x-.55))>1e-7||Math.abs(r.world.guard.root.position.z-(v.d-guard.d))>1e-7))throw Error('guard timestamp mismatch');if(v.time<lastTime-1e-8)throw Error('time reversed');lastTime=v.time;
   if(Math.abs(r.world.player.root.position.x-v.x)>1e-8||Math.abs(r.world.player.root.position.y-v.y)>1e-8)throw Error('root timestamp mismatch');
   if(!r.world.camera.position.toArray().every(Number.isFinite))throw Error('camera');
   if(Math.abs(r.world.player.root.rotation.z)>.2)throw Error('lean oscillation');
