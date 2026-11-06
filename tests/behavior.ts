@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Sim } from '../upstream/src/sim/sim';
 import { solve } from '../upstream/src/sim/track';
-import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX } from '../upstream/src/config';
+import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_AHEAD } from '../upstream/src/config';
 import { QuizCourse } from '../upstream/src/ciac/course';
 import { RacePace } from '../upstream/src/ciac/pace';
 import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
@@ -57,6 +57,27 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
   assert.ok(movers > 300, 'moving trains should remain common even with quiz reservations');
   assert.equal(trains, 0, 'no stationary railcars in normal runs or tutorial');
   console.log(JSON.stringify({generatedMovingTrains:movers,generatedParkedTrains:trains}));
+});
+
+test('oncoming train moves before it becomes visible and keeps moving as the runner approaches', () => {
+  // With a stationary waiting phase still visible on camera, trains appear frozen.
+  assert.ok((1 + MOVER.ratio) * MOVER.trigger > VIEW_AHEAD,
+    'a moving train must start moving before entering the visible track');
+
+  const sim = new Sim(17);
+  sim.noSpawn = true;
+  sim.reset(17, false);
+  sim.track.ensure(1200);
+  const train = sim.obs.find(o => o.kind === 'mtrain' && o.meet > 200);
+  assert.ok(train, 'there should be a moving train after the first question');
+  sim.d = Math.max(0, train.meet - MOVER.trigger + 6);
+  sim.invincible = true;
+  sim.start();
+  sim.update(1 / 60);
+  const front = train.d0;
+  sim.update(1 / 60);
+  assert.ok(train.d0 < front, 'oncoming train front moves toward runner each step');
+  near(train.d0, moverFront(train.meet, sim.d), 1e-5);
 });
 
 test('continuous runs: nothing retires in front of the camera; moving trains and pickups return after gates', () => {

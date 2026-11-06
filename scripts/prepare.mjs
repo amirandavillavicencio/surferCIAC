@@ -100,7 +100,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   let config = await readFile(configPath,'utf8');
   const oldMover = 'export const MOVER = { ratio: 0.6, trigger: 70 };';
   if (config.split(oldMover).length !== 2) throw new Error('Parámetros originales del tren cambiaron');
-  config = config.replace(oldMover, 'export const MOVER = { ratio: 1.0, trigger: 90 };');
+  config = config.replace(oldMover, 'export const MOVER = { ratio: 1.0, trigger: 115 };');
   await writeFile(configPath,config);
 
   const simPath = 'upstream/src/sim/sim.ts';
