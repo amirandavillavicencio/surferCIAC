@@ -30,8 +30,8 @@ replaceOnce('const rampP = 0.25 + 0.35 * L;',
 // acceder a un tren estacionado por una rampa y recorrer su techo.
 // Nada invade la franja reservada entre los metros 140 y 190.
 replaceOnce("      { kind: 'train', lane: 1, d0: s + 100, d1: s + 100 + trainLength(2), cars: 2, hint: 'lane' },",
-  '',
-  'eliminar tren tutorial en el espacio de la primera pregunta');
+  "      { kind: 'low', lane: 1, d0: s + 79, d1: s + 79 + OB.low.depth, hint: 'lane' },",
+  'mantener tutorial de cambio de carril antes de la primera pregunta');
 replaceOnce("{ kind: 'ramp', lane: 0, d0: s + 150, d1: s + 157, hint: 'ramp' }",
   "{ kind: 'ramp', lane: 0, d0: s + 177, d1: s + 184, hint: 'ramp' }",
   'rampa tras primera pregunta');

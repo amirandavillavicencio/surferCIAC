@@ -73,6 +73,8 @@ test('tutorial teaches jumping onto the train after its first protected question
   s.noSpawn=true;
   s.reset(19,true);
   const ramps=s.obs.filter(o=>o.kind==='ramp');
+  assert.ok(s.obs.some(o=>o.kind==='low' && o.hint==='lane' && o.d0<140),
+    'the lane-change tutorial is preserved before the first quiz');
   assert.ok(ramps.some(r=>r.d0>=190 && s.obs.some(o=>o.kind==='train' &&
     o.lane===r.lane && Math.abs(o.d0-r.d1)<0.01)),
     'tutorial ramp and stationary train must form an accessible roof after first gate');
