@@ -204,3 +204,5 @@ await import('./polish-game.mjs');
 console.log('Integración CIAC preparada sobre el motor original.');
 
 await import("./train-dynamics.mjs");
+
+await import("./presentation.mjs");
