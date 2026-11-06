@@ -296,6 +296,32 @@ test('physical movement: rapid lanes, jump landing, slide, and original collisio
   }
 });
 
+test('runner can take a ramp, jump between roofs and return to ground', () => {
+  const sim = new Sim();
+  sim.noSpawn = true;
+  sim.reset(1, false);
+  sim.clearWorld();
+  sim.addOb({ kind: 'ramp', lane: 1, d0: 8, d1: 15 });
+  sim.addOb({ kind: 'train', lane: 1, d0: 15, d1: 15 + trainLength(2), cars: 2 });
+  sim.addOb({ kind: 'train', lane: 2, d0: 20, d1: 20 + trainLength(2), cars: 2 });
+  sim.start();
+  const runTo = (distance: number) => {
+    while (sim.d < distance && sim.alive) sim.update(h);
+    assert.ok(sim.alive);
+  };
+  runTo(21);
+  near(sim.y, 3.4);
+  sim.jump();
+  sim.right();
+  runTo(31);
+  near(sim.x, laneX(2));
+  near(sim.y, 3.4);
+  assert.ok(sim.grounded);
+  runTo(42);
+  near(sim.y, 0);
+  assert.ok(sim.grounded);
+});
+
 test('original GLB: complete train instances and finite animation clips hold instead of restarting', async () => {
   const file=readFileSync('upstream/public/assets/core.glb');
   const jsonLength=file.readUInt32LE(12), data=JSON.parse(file.subarray(20,20+jsonLength).toString());

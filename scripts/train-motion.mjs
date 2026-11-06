@@ -49,6 +49,35 @@ replaceOnce('    let d = start + gap * 0.6;',
 replaceOnce('    while (d < end - 12) {',
   '    while (d < end - v * 0.8 - 16) {', 'espaço para reagir entre trechos');
 
+// Encounters have an entry, a decision and a way out. Keep the route
+// solver as the final check after each combination is assembled.
+replaceOnce("type Pattern = 'none' | 'b1' | 'b2' | 'b3' | 't1' | 't2' | 't3' | 'tb' | 'mt';",
+  "type Pattern = 'none' | 'b1' | 'b2' | 'b3' | 't1' | 't2' | 't3' | 'tb' | 'mt' | 'roofs' | 'relay';",
+  'patrones de recorrido');
+replaceOnce('tb: 0, mt: 0 }', 'tb: 0, mt: 0, roofs: 0, relay: 0 }', 'patrones de reserva');
+replaceOnce('            tb: Math.max(0, L - 0.2) * 0.45,',
+  `            tb: Math.max(0, L - 0.2) * 0.45,
+            roofs: 0.07 + L * 0.16,
+            relay: 0.04 + L * 0.12,`, 'progresión de recorridos combinados');
+replaceOnce("        case 'mt': {",
+  `        case 'roofs': {
+          const from = shuffled.find(l => free(l, d));
+          if (from === undefined || !train(from, d, true, maxCars)) break;
+          const at = d + OB.ramp.depth + v * 0.3;
+          const to = shuffled.find(l => Math.abs(l - from) === 1 && free(l, at));
+          if (to !== undefined) train(to, at, false, maxCars);
+          break;
+        }
+        case 'relay': {
+          const from = shuffled.find(l => free(l, d - 10));
+          if (from === undefined || !mover(from, d, maxCars)) break;
+          const at = d + v * r.range(0.85, 1.1);
+          const to = shuffled.find(l => l !== from && free(l, at));
+          if (to !== undefined && at < end - v * 0.8 - 4) barrier(to, at);
+          break;
+        }
+        case 'mt': {`, 'trenes escalonados y esquiva seguida de barrera');
+
 // The fallback route must be runnable without assuming a jump or slide.
 replaceOnce("    if (s.kind !== 'train' && s.kind !== 'ramp' && s.kind !== 'mtrain') continue;",
   '', 'incluir barreras en el solucionador');

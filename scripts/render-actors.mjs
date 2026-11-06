@@ -67,6 +67,14 @@ world = patch(world,
   'const all = [...Object.values(this.pools),',
   'const all = [this.trainLinks, ...Object.values(this.pools),',
   'precarga de materiales');
+world = patch(world,
+  'const target = sim.groundY + (sim.y - sim.groundY) * 0.36 - (sim.sliding ? 0.14 : 0);',
+  'const target = sim.y - Math.min(0.9, Math.max(0, sim.y - sim.groundY) * 0.55);',
+  'seguimiento vertical al salir de un techo');
+world = patch(world,
+  'cam.lookAt(this.camX, this.camY + 1.25, -8);',
+  'cam.lookAt(this.camX * 0.45, this.camY + 1.25, -8);',
+  'lectura de los carriles contiguos');
 await writeFile(worldPath, world);
 
 const playerPath = 'upstream/src/view/player.ts';
