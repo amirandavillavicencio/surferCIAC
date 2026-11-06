@@ -99,3 +99,10 @@
   #ui > .ciac-dialog .ciac-lane{font-size:11px;min-height:39px;padding:5px 2px}
   #ui > .ciac-dialog .ciac-message{font-size:10px;margin-top:4px}
 }
+
+/* Contain the game viewport without disabling native semester/name controls. */
+html, body { overscroll-behavior: none; }
+body { overflow: hidden; }
+#game, #ui { touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#ui input, #ui select { touch-action: manipulation; -webkit-user-select: auto; user-select: auto; }
+.ciac-ranking { overscroll-behavior: contain; touch-action: pan-y; }

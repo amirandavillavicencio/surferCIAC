@@ -90,3 +90,27 @@ test('continuous seeded runs connect encounters through questions without telepo
   assert.ok(s.alive&&s.d>=4000,JSON.stringify({seed,snapshot:s.snapshot()}));
  }
 });
+
+test('rapid lateral chains keep travel speed bounded and buffered jumps fire on landing',()=>{
+ const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.start();s.lane=0;s.x=-2.5;
+ s.right();let peakSpeed=0;
+ for(let i=0;i<50;i++){
+  if(i===2)s.right();if(i===6)s.left();if(i===8)s.right();
+  const x=s.x;s.update(1/120);peakSpeed=Math.max(peakSpeed,Math.abs(s.x-x)*120);
+ }
+ assert.ok(peakSpeed<=50,`lateral speed ${peakSpeed}`);assert.equal(s.lane,2);assert.equal(s.x,2.5);
+ s.jump();let buffered=false,secondJump=false;
+ for(let i=0;i<200;i++){
+  if(!buffered&&s.vy<0&&s.y<.25){s.jump();buffered=true;}
+  s.update(1/120);const events=s.drainEvents();
+  if(buffered&&events.some(e=>e.type==='land')&&events.some(e=>e.type==='jump')){secondJump=true;break;}
+ }
+ assert.ok(secondJump);assert.ok(s.vy>0&&!s.grounded);
+});
+
+test('encounters alternate recovery and challenge without losing the elevated route',()=>{
+ const rest=encounter(40,0,'rest'),flow=encounter(190,2,'flow'),hard=encounter(1090,0,'challenge');
+ assert.ok(rest.length<flow.length);assert.ok(!rest.some(s=>s.kind==='mtrain'));
+ assert.ok(flow.some(s=>s.kind==='mtrain'));assert.ok(hard.some(s=>s.kind==='train'&&s.d0===1098));
+ for(const specs of [rest,flow,hard])assert.equal(specs.filter(s=>s.kind==='ramp').length,1);
+});

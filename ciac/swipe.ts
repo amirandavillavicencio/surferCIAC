@@ -65,7 +65,7 @@ export function bindSwipe(target: HTMLElement, on: (action: Action) => void, can
         pointer !== null || finger !== null || !canSwipe() || isControl(event.target)) return;
     pointer = event.pointerId;
     begin(event.clientX, event.clientY, 13);
-    target.setPointerCapture(event.pointerId);
+    try { target.setPointerCapture(event.pointerId); } catch { /* Touch handling remains available on older WebKit. */ }
   });
   target.addEventListener('pointermove', (event) => {
     if (event.pointerId === pointer) read(event.clientX, event.clientY);

@@ -29,6 +29,19 @@ with sync_playwright() as p:
   for key in ['d','time','penalty','clipTime']:assert abs(result[key]-timing[0][key])<1e-8,(key,timing)
   assert result['clip']==timing[0]['clip']
  print('FRAME_AND_ANIMATION '+json.dumps(timing))
+ # Fast command chains exercise real animation selection, camera and touch dispatch.
+ maneuvers=page.evaluate("""()=>{const r=__run,s=r.sim;r.start({noSpawn:true,speed:12});r.clear();
+ r.place('train',1,0,3);s.y=s.groundY=3.4;r.step(.1,1/120);r.input('down');s.d=20.9;r.step(1/120,1/120);const edgeClip=r.world.player.current;if(s.grounded||edgeClip!=='fall')throw Error('roll held in air');
+ for(let i=0;i<100&&!s.grounded;i++)r.step(1/120,1/120);if(!s.sliding||r.world.player.current!=='roll'||r.world.player.actions.roll.time<r.world.player.actions.roll.getClip().duration*.5)throw Error('roll restarted on landing');
+ r.start({noSpawn:true,speed:12});r.clear();r.input('up');let buffered=false,rebounded=false;for(let i=0;i<200;i++){if(!buffered&&s.y<.25&&s.vy<0){r.input('up');buffered=true;}r.step(1/120,1/120);if(buffered&&s.vy>0){rebounded=true;break;}}if(!rebounded||r.world.player.root.scale.y<.999)throw Error('buffered landing squash');
+ r.start({noSpawn:true,speed:12});r.clear();const ui=document.getElementById('ui');let prevented=0;const touch=(type,x,y)=>{const t=new Touch({identifier:9,target:ui,clientX:x,clientY:y});const e=new TouchEvent(type,{bubbles:true,cancelable:true,touches:type==='touchend'?[]:[t],changedTouches:[t]});ui.dispatchEvent(e);if(e.defaultPrevented)prevented++;};
+ for(const dx of [-20,20,-20,20]){touch('touchstart',195,600);touch('touchmove',195+dx,600);touch('touchend',195+dx,600);}const lane=s.lane;
+ touch('touchstart',195,600);touch('touchmove',215,620);touch('touchend',215,620);if(s.lane!==lane||prevented<12)throw Error('touch regression');
+ const style=getComputedStyle(ui);if(style.touchAction!=='none'||getComputedStyle(document.body).overflow!=='hidden')throw Error('scroll containment');
+ // FOV should not zoom in/out as the unchanged quiz speed factor activates.
+ s.d=150;r.step(1,1/120);const fovBefore=r.world.camera.fov;s.pace.penalize(3);r.step(.1,1/120);const fovAfter=r.world.camera.fov;if(Math.abs(fovAfter-fovBefore)>.05)throw Error('quiz zoom');
+ return {edgeClip,rebounded,prevented,diagonalIgnored:true,touchAction:style.touchAction,fovBefore,fovAfter};}""")
+ print('RAPID_MOVEMENT_AND_TOUCH '+json.dumps(maneuvers))
  # Reproduce the formerly occluded central roof.
  page.evaluate("()=>{const r=__run;r.start({noSpawn:true,speed:12});r.clear();r.place('ramp',1,8);r.place('train',1,15,3);r.stepTo(19,1/120,true)}")
  page.screenshot(path='/tmp/surfer-roof-corrected.png')

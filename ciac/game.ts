@@ -196,9 +196,6 @@ export class CIACQuiz {
         button.setAttribute('aria-label', 'Carril ' + side + ': ' + this.question!.opciones[index]);
       });
       this.message.textContent = 'Elige un carril y cruza su franja de color.';
-      if (this.nextDistance === FIRST_GATE) {
-        this.hooks.notice('Elige el carril del color de tu respuesta.');
-      }
     }
     if (this.selected !== lane || this.dialog.hidden) {
       this.selected = lane;
