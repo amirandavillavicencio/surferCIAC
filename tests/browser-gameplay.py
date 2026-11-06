@@ -1,14 +1,15 @@
 from playwright.sync_api import sync_playwright
-import json, os
+import json, os, subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 BASE=os.environ.get('GAME_URL','http://127.0.0.1:8788')
 questions=json.load(open(ROOT/'data/questions.json'))
+controller=subprocess.check_output([str(ROOT/'upstream/node_modules/.bin/esbuild'),str(ROOT/'tests/traffic-controller.ts'),'--bundle','--format=iife','--global-name=Traffic'],text=True)
 with sync_playwright() as p:
  b=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'])
  page=b.new_page(viewport={'width':390,'height':844},device_scale_factor=1)
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.goto(BASE+'/?test');page.wait_for_function('window.__run?.ready',timeout=60000)
+ page.goto(BASE+'/?test');page.wait_for_function('window.__run?.ready',timeout=60000);page.add_script_tag(content=controller)
  results=page.evaluate('''()=>{const r=__run,s=r.sim;const out=[];
  function soleMinimum(){r.world.scene.updateMatrixWorld(true);let min=Infinity;const v=r.world.camera.position.clone();r.world.player.model.traverse(o=>{if(!o.name.endsWith('-zapatilla')&&!o.name.endsWith('-puntera'))return;const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);min=Math.min(min,v.y)}});return min-s.groundY;}
  for(const lane of [0,1,2]){
@@ -45,6 +46,23 @@ with sync_playwright() as p:
  # Reproduce the formerly occluded central roof.
  page.evaluate("()=>{const r=__run;r.start({noSpawn:true,speed:12});r.clear();r.place('ramp',1,8);r.place('train',1,15,3);r.stepTo(19,1/120,true)}")
  page.screenshot(path='/tmp/surfer-roof-corrected.png')
+ # Distinct traffic families: real moving bodies and complete wagon matrices.
+ for kind in ['pass','dodge','double','roof-traffic','transfer','recovery']:
+  page.evaluate("""kind=>{const r=__run;r.start({noSpawn:true,speed:12});r.clear();r.clock.reset();r.trafficPlan=[{start:40,from:0,kind}];for(const spec of Traffic.trafficEncounter(40,0,kind,4))r.sim.addOb(spec);}""",kind)
+  samples=[]
+  for target in [40,65,77,95,123,150]:
+   result=page.evaluate("""target=>{const r=__run,s=r.sim;let guard=0;while(s.d<target&&s.alive&&guard++<10000){Traffic.driveTraffic(s,r.trafficPlan);r.frame(1/60);}r.render();
+    const expected=[];for(const o of s.obs){if(o.kind!=='train'&&o.kind!=='mtrain')continue;if(o.d0>s.d+216.74||o.d1<s.d-26)continue;for(let c=0;c<o.cars;c++){const center=o.d0+c*7.04+3.37;if(center+3.37<s.d-26||center-3.37>s.d+216.74)continue;expected.push({x:(o.lane-1)*2.5,z:s.d-center});}}
+    const pool=r.world.pools.train;if(pool.count!==expected.length)throw Error('missing wagon');
+    for(const part of pool.parts){const m=r.world.camera.matrixWorld.clone(),inverse=part.local.clone().invert();for(let i=0;i<part.mesh.count;i++){part.mesh.getMatrixAt(i,m);m.multiply(inverse);if(!expected.some(e=>Math.abs(e.x-m.elements[12])<1e-4&&Math.abs(e.z-m.elements[14])<1e-4))throw Error('render/physics mismatch');}}
+    return {d:s.d,alive:s.alive,y:s.y,cars:expected.length,moving:s.obs.filter(o=>o.kind==='mtrain').map(o=>({front:o.d0,tail:o.d1,speed:o.trainSpeed,cars:o.cars,time:o.travelTime}))};}""",target)
+   assert result['alive'],(kind,result)
+   samples.append(result)
+   if target in [65,77,95]:page.screenshot(path=f'/tmp/surfer-traffic-{kind}-{target}.png')
+  print('TRAFFIC_VISUAL '+json.dumps({'kind':kind,'samples':samples}))
+ # Same inputs, runner speed, length and distance: legacy profile versus timed.
+ comparison=page.evaluate("""()=>{const out=[];for(const timed of [false,true]){const r=__run;r.start({noSpawn:true,speed:12});r.clear();r.clock.reset();r.sim.addOb(timed?{kind:'mtrain',lane:2,d0:56,d1:125,activation:40,trainSpeed:60,cars:4}:{kind:'mtrain',lane:2,d0:58,d1:72,cars:4});const samples=[];for(const d of [40,65,77]){r.stepTo(d,1/120);const o=r.sim.obs.find(o=>o.kind==='mtrain');samples.push({d:r.sim.d,front:o?.d0??null,tail:o?.d1??null});}out.push({timed,samples});}return out;}""")
+ print('BEFORE_AFTER_TRAINS '+json.dumps(comparison))
  # Continuous actual generator with the real quiz class and a local API fixture.
  calls=[]
  def api(route):
@@ -55,10 +73,10 @@ with sync_playwright() as p:
    calls.append(json.loads(route.request.post_data));result={'correct':True,'points':100,'penaltySeconds':0,'question':questions[min(len(calls),23)]}
   route.fulfill(json=result)
  page.route('**/api/**',api)
- page.goto(BASE+'/?test&quiz');page.wait_for_function('window.__run?.ready')
+ page.goto(BASE+'/?test&quiz');page.wait_for_function('window.__run?.ready');page.add_script_tag(content=controller)
  page.evaluate('__run.start({seed:7,tutorial:false})');page.wait_for_function('__run.quiz.phase === "ready"')
  for target in [65,77,95,145,181,224,238,258,295,331]:
-  state=page.evaluate('''target=>{const r=__run,s=r.sim;let guard=0;while(s.d<target&&s.alive&&guard++<40000){const start=40+Math.max(0,Math.floor((s.d-40)/150))*150;r.plans ||= {}; for(const o of s.obs.filter(o=>o.kind==='ramp'))r.plans[o.d0-24]=o.lane;const ramp=r.plans[start]===undefined?null:{lane:r.plans[start]};if(ramp){const local=s.d-start;if(local<24&&s.lane!==ramp.lane)s.lane<ramp.lane?s.right():s.left();if(local>=36&&r.lastJump!==start){s.jump();ramp.lane===0?s.right():s.left();r.lastJump=start;}if(local>=82-s.speed*.2&&r.lastSlide!==start){s.down();r.lastSlide=start;}}r.frame(1/60);}r.render();return {d:s.d,alive:s.alive,y:s.y,clip:r.world.player.current,phase:r.quiz.phase,questionVisible:!document.querySelector('.ciac-dialog').hidden};}''',target)
+  state=page.evaluate('''target=>{const r=__run,s=r.sim;let guard=0;while(s.d<target&&s.alive&&guard++<40000){const start=40+Math.max(0,Math.floor((s.d-40)/150))*150;r.plans ||= [];for(const plan of Traffic.plansOf(s))if(!r.plans.some(p=>p.start===plan.start))r.plans.push(plan);Traffic.driveTraffic(s,r.plans);r.frame(1/60);}r.render();return {d:s.d,alive:s.alive,y:s.y,clip:r.world.player.current,phase:r.quiz.phase,questionVisible:!document.querySelector('.ciac-dialog').hidden};}''',target)
   print('SEQUENCE '+json.dumps(state))
   assert state['alive']
   page.screenshot(path=f'/tmp/surfer-sequence-{target}.png')

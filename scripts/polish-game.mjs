@@ -70,21 +70,30 @@ world=patch(world,'w.position.set(laneX(l), 6.45, z);','w.position.set(laneX(l),
 await writeFile('upstream/src/view/world.ts',world);
 await copyFile('ciac/encounters.ts','upstream/src/ciac/encounters.ts');
 let track=await readFile('upstream/src/sim/track.ts','utf8');
-track="import { encounter, encounterRoute } from '../ciac/encounters';\n"+track;
+track="import { trafficEncounter, trafficRoute, trafficKind } from '../ciac/encounters';\n"+track;
 const a=track.indexOf('  private genChunk() {');
 const b=track.indexOf('  private buildRows(',a);
 if(a<0||b<0)throw Error('Missing generator');
 track=track.replace(/type Pattern = [^\n]+\n/, '');
+track=track.replace('export class Track {', 'export class Track {\n  private lastTrafficKind = \"\";');
+track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.lastTrafficKind = \"\";');
 const generatorStart=track.indexOf('  private genChunk() {');
 const generatorEnd=track.indexOf('  private buildRows(',generatorStart);
 track=track.slice(0,generatorStart)+`  private genChunk() {
     const start = this.frontier;
     const end = 190 + Math.floor((start - 40) / 150) * 150;
-    const from = this.rng.chance(.5) ? 0 : 2;
-    const mode = this.chunks % 2 === 0 ? 'rest' : start > 1000 && this.chunks % 4 === 3 ? 'challenge' : 'flow';
+    let from = this.rng.chance(.5) ? 0 : 2;
+    if (this.busy[from] > start+8) from=2-from;
+    let kind = trafficKind(this.chunks + this.rng.int(0, 2), start);
+    if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
+    if (this.lastTrafficKind === 'double' || this.lastTrafficKind === 'transfer') kind='recovery';
+    else if (kind===this.lastTrafficKind) kind=trafficKind(this.chunks+3,start);
+    if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
+    this.lastTrafficKind=kind;
+    const variant = this.rng.int(0, 19);
     // Assemble before filtering, so rejected destinations take their ramps.
-    let specs = this.course.prepareSpecs(encounter(start, from, mode)
-      .filter(s => s.d1 < end - 5 && s.d0 >= this.busy[s.lane]));
+    let specs = this.course.prepareSpecs(trafficEncounter(start, from, kind, variant)
+      .filter(s => s.d1 < end - 5 && (s.kind === 'mtrain' || s.d0 >= this.busy[s.lane])));
     let res = solve(specs, start, end, this.reach, speedAt, true, from);
     if (!res.ok) {
       this.failures++;
@@ -93,28 +102,25 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
       res = solve(specs, start, end, this.reach, speedAt, true, from);
       if (!res.ok) throw new Error('Encounter has no escape at '+start);
     }
-    for (const s of specs) this.sink.ob(s);
+    for (const s of specs) this.sink.ob({...s,planKind:kind});
     // Coins describe the intended physical action sequence. Do not draw a roof
     // trajectory when a short/tutorial chunk could not retain both roofs.
-    const complete = specs.some(s=>s.kind==='train' && s.d0 === start+40) && specs.some(s=>s.kind==='ramp');
-    if (complete) {
-      for (let d=start+3; d<end-4; d+=2.1) {
-        if (!this.course.allowsPickup(d)) continue;
-        const pt=encounterRoute(start,from,d,speedAt(start+36));
-        // Slide rewards stay below the bar; above-roof coins track the jump.
-        const y=d>start+78 && d<start+86 ? .45 : pt.y+.85;
-        this.sink.coin(pt.lane,d,y);
-      }
-    } else if (res.path) this.coinsAlong(res.path,specs,start,end,levelAt(start));
+    for (let d=start+3; d<end-4; d+=2.1) {
+      if (!this.course.allowsPickup(d)) continue;
+      const pt=trafficRoute(start,from,kind,d,speedAt(start+36));
+      const sliding=kind!=='double';
+      this.sink.coin(pt.lane,d,sliding && d>start+78 && d<start+86 ? .45 : pt.y+.85);
+    }
     if (res.path && this.nextPower >= start && this.nextPower < end) this.placePower(res.path,specs,start,end);
     else if (this.nextPower < start) this.nextPower=start+200;
-    this.busy=[end,end,end];
+    for (const spec of specs) this.busy[spec.lane]=Math.max(this.busy[spec.lane], spec.kind==='mtrain' ? start+218+trainLength(spec.cars||1)+4 : spec.d1+4);
     this.reach=res.endLanes;
     this.frontier=end;
     this.chunks++;
   }
 
 `+track.slice(track.indexOf('  /** Coins along',generatorEnd));
+track=track.replace('PLAYER, levelAt,','PLAYER,');
 await writeFile('upstream/src/sim/track.ts',track);
 let player=await readFile('upstream/src/view/player.ts','utf8');
 player=patch(player,"import { applyCampusRunner } from '../ciac/campus-runner';","import { applyCampusRunner, correctCampusContact } from '../ciac/campus-runner';");

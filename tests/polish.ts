@@ -1,10 +1,11 @@
+import { plansOf, driveTraffic } from './traffic-controller';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FrameClock} from '../ciac/frame-clock';
 import {crossingLane,occupiedLane} from '../upstream/src/ciac/physical-lane';
 import {Sim} from '../upstream/src/sim/sim';
 import {speedAt,laneX,trainLength} from '../upstream/src/config';
-import {encounter} from '../upstream/src/ciac/encounters';
+import {encounter,trafficEncounter} from '../upstream/src/ciac/encounters';
 
 const schedules=[[1/15],[1/20],[1/30],[1/60],[.01,.08,.025,.12, .015]];
 test('fixed clock: identical physics, pace, jumps and slides at 15/20/30/60 FPS and jitter',()=>{
@@ -65,6 +66,15 @@ test('30 seeded maps: bounded gaps and physical encounter replays including roof
   for(const ramp of specs.filter(o=>o.kind==='ramp')){
    const start=ramp.d0-24;
    for(const speed of [12,speedAt(start),27])replayEncounter(start,ramp.lane,speed);
+  }
+  for(const plan of plansOf(s)) {
+   for(const speed of [12,speedAt(plan.start),27]) {
+    const replay=new Sim();replay.noSpawn=true;replay.reset(seed,false);replay.clearWorld();replay.d=plan.start-20;replay.speedOverride=speed;replay.start();
+    for(const o of s.obs.filter(o=>o.activation===plan.start || (o.kind!=='mtrain'&&o.d0>=plan.start&&o.d0<plan.start+100)))replay.addOb(Sim.specOf(o));
+    const actions=[{...plan}];let guard=0;
+    while(replay.d<plan.start+110&&replay.alive&&guard++<10000){driveTraffic(replay,actions);replay.update(1/120);}
+    assert.ok(replay.alive&&replay.d>=plan.start+110,JSON.stringify({plan,speed,state:replay.snapshot()}));
+   }
    encounters++;
   }
  }
@@ -75,15 +85,11 @@ test('30 seeded maps: bounded gaps and physical encounter replays including roof
 test('continuous seeded runs connect encounters through questions without teleports or invincibility',()=>{
  for(let seed=1;seed<=30;seed++){
   const s=new Sim(seed);s.noSpawn=true;s.reset(seed,false);while(s.track.frontier<4200)s.track.ensure(4200);
-  const ramps=s.obs.filter(o=>o.kind==='ramp').map(o=>({start:o.d0-24,from:o.lane}));
-  let jumpStart=-1,slideStart=-1;const clock=new FrameClock();let frames=0;s.start();
+  const trafficPlans=plansOf(s);
+  for(let i=1;i<trafficPlans.length;i++){assert.notEqual(trafficPlans[i].kind,trafficPlans[i-1].kind);if(['double','transfer'].includes(trafficPlans[i-1].kind))assert.equal(trafficPlans[i].kind,'recovery');}
+  const clock=new FrameClock();let frames=0;s.start();
   while(s.d<4000&&s.alive&&frames++<100000){clock.advance(schedules[seed%schedules.length][frames%schedules[seed%schedules.length].length],dt=>{
-   const block=ramps.find(r=>s.d<r.start+100&&s.d>=r.start-1) || (s.d<40?ramps[0]:null);
-   if(block){const local=s.d-block.start;
-    if(local<24&&s.lane!==block.from){s.lane<block.from?s.right():s.left();}
-    if(local>=36&&jumpStart!==block.start){s.jump();block.from===0?s.right():s.left();jumpStart=block.start;}
-    if(local>=82-s.speed*.2&&slideStart!==block.start){s.down();slideStart=block.start;}
-   }
+   driveTraffic(s,trafficPlans);
    s.questionGate=180+Math.max(0,Math.ceil((s.d-180)/150))*150;
    s.update(dt);
   });}
@@ -113,4 +119,38 @@ test('encounters alternate recovery and challenge without losing the elevated ro
  assert.ok(rest.length<flow.length);assert.ok(!rest.some(s=>s.kind==='mtrain'));
  assert.ok(flow.some(s=>s.kind==='mtrain'));assert.ok(hard.some(s=>s.kind==='train'&&s.d0===1098));
  for(const specs of [rest,flow,hard])assert.equal(specs.filter(s=>s.kind==='ramp').length,1);
+});
+
+test('timed vehicles keep their own speed through penalties, pause and replay schedules',()=>{
+ const results=[];
+ for(const schedule of schedules){
+  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.invincible=true;s.speedOverride=12;s.start();
+  const vehicle=s.addOb({kind:'mtrain',lane:0,d0:16,d1:85,activation:0,trainSpeed:56,cars:4});
+  const clock=new FrameClock();let wall=0,i=0;
+  while(wall<3-1e-9){const elapsed=Math.min(schedule[i++%schedule.length],3-wall);wall+=elapsed;clock.advance(elapsed,dt=>s.update(dt));}
+  assert.ok(Math.abs(vehicle.d0-(218-56*3))<1e-8);
+  const before=vehicle.d0;clock.advance(0,dt=>s.update(dt));assert.equal(vehicle.d0,before);
+  results.push({front:vehicle.d0,time:vehicle.travelTime,d:s.d});
+ }
+ for(const x of results)assert.deepEqual(x,results[0]);
+ const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.start();s.pace.penalize(3);
+ const vehicle=s.addOb({kind:'mtrain',lane:0,d0:16,d1:85,activation:0,trainSpeed:64,cars:3});
+ s.update(.05);const before=vehicle.d0;s.update(.05);
+ assert.ok(Math.abs(vehicle.d0-before+64*.05)<1e-8);assert.ok(s.speed<12);
+});
+
+test('every traffic family has a physical route and a human anticipation window',()=>{
+ const families=['pass','dodge','double','roof-traffic','transfer','recovery'] as const;
+ for(const kind of families)for(const from of [0,2])for(const variant of [0,1,2,3,4])for(const speed of [6,12,20,27]) {
+  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.speedOverride=speed;s.start();s.d=20;
+  for(const spec of trafficEncounter(40,from,kind,variant))s.addOb(spec);
+  const plan=[{start:40,from,kind}];let steps=0;
+  while(s.d<150&&s.alive&&steps++<10000){driveTraffic(s,plan);s.update(1/120);}
+  assert.ok(s.alive&&s.d>=150,JSON.stringify({kind,from,variant,speed,state:s.snapshot()}));
+  for(const vehicle of trafficEncounter(40,from,kind,variant).filter(o=>o.trainSpeed)){
+   assert.ok(218/(27+vehicle.trainSpeed!)>2.2,'more than two seconds from horizon to contact');
+   assert.ok(27*(218+trainLength(vehicle.cars!))/(27+vehicle.trainSpeed!)<vehicle.d1-40,'tail clears its reserved collision envelope');
+  }
+ }
+ console.log(JSON.stringify({trafficFamilies:6,physicalScenarios:240,minimumAnticipationSeconds:218/(27+68)}));
 });

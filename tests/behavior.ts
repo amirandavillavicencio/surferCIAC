@@ -54,9 +54,9 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
       if (o.kind==='mtrain') {
         movers++;
         assert.ok(o.cars >= 1 && o.cars <= 4, 'moving train length');
-        const furthestTail = moverFront(o.meet, 0) + o.len;
+        const furthestTail = o.activation !== undefined ? o.activation+218+o.len : moverFront(o.meet, 0) + o.len;
         assert.ok(s.obs.every(other => other === o || other.lane !== o.lane ||
-          (other.kind === 'mtrain' ? other.meet <= o.meet || other.meet > furthestTail :
+          (other.kind === 'mtrain' ? o.activation !== undefined && other.activation !== undefined ? Math.abs(other.activation-o.activation)>=150 : other.meet <= o.meet || other.meet > furthestTail :
             other.d1 < o.meet || other.d0 > furthestTail)), 'train has an unobstructed lane through its approach');
       }
       if (o.kind==='train') {
@@ -103,14 +103,14 @@ test('oncoming train moves before it becomes visible and keeps moving as the run
   sim.track.ensure(1200);
   const train = sim.obs.find(o => o.kind === 'mtrain' && o.meet > 200);
   assert.ok(train, 'there should be a moving train after the first question');
-  sim.d = Math.max(0, train.meet - MOVER.trigger + 6);
+  sim.d = train.activation !== undefined ? train.activation+6 : Math.max(0, train.meet - MOVER.trigger + 6);
   sim.invincible = true;
   sim.start();
   sim.update(1 / 60);
   const front = train.d0;
   sim.update(1 / 60);
   assert.ok(train.d0 < front, 'oncoming train front moves toward runner each step');
-  near(train.d0, moverFront(train.meet, sim.d), 1e-5);
+  near(train.d0, train.trainSpeed ? train.activation!+218-train.trainSpeed*train.travelTime : moverFront(train.meet, sim.d), 1e-5);
 });
 
 test('continuous runs: nothing retires in front of the camera; moving trains and pickups return after gates', () => {
@@ -120,13 +120,13 @@ test('continuous runs: nothing retires in front of the camera; moving trains and
     let gate=180;
     while(s.d<2000) {
       s.questionGate=gate;
-      const previous = s.obs.map(o=>({id:o.id,d1:o.d1,meet:o.meet,len:o.len,kind:o.kind}));
+      const previous = s.obs.map(o=>({id:o.id,d1:o.d1,meet:o.meet,len:o.len,kind:o.kind,activation:o.activation,trainSpeed:o.trainSpeed,travelTime:o.travelTime}));
       const coins = s.coinList.map(c=>({id:c.id,d:c.d,pulled:c.pulled}));
       const before=s.d;
       s.update(1/60);
       const picked = s.drainEvents().filter(e=>e.type==='coin');
       for(const o of previous) if(!s.obs.some(n=>n.id===o.id)) {
-        const end = o.kind==='mtrain'?moverFront(o.meet,s.d)+o.len:o.d1;
+        const end = o.kind==='mtrain'?(o.trainSpeed ? o.activation!+218-o.trainSpeed*(o.travelTime+1/60) : moverFront(o.meet,s.d))+o.len:o.d1;
         assert.ok(end < s.d-14+1e-6, `premature obstacle removal at ${s.d}`);
       }
       const removedCoins=coins.filter(c=>!s.coinList.some(n=>n.id===c.id));
@@ -135,7 +135,7 @@ test('continuous runs: nothing retires in front of the camera; moving trains and
         assert.ok(c.d < s.d-14 || c.d-before<1.5 || c.pulled || picked.length>0);
       }
       for(const o of s.obs) if(o.kind==='mtrain') {
-        near(o.d0,moverFront(o.meet,s.d)); near(o.d1-o.d0,trainLength(o.cars));
+        near(o.d0,o.trainSpeed ? o.activation!+218-o.trainSpeed*o.travelTime : moverFront(o.meet,s.d)); near(o.d1-o.d0,trainLength(o.cars));
         observedMovers++;
       }
       const zone = gate > 180 && gate - s.d > 140 ? gate - 150 : gate;

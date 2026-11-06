@@ -40,3 +40,61 @@ export function encounterRoute(start: number, from: number, d: number, speed: nu
   const t=(d-start-40-trainLength(3))/speed;
   return {lane:1,y:Math.max(0,3.4-.5*30.3*1.15*t*t)};
 }
+
+export type TrafficKind = 'pass' | 'dodge' | 'double' | 'roof-traffic' | 'transfer' | 'recovery';
+export function trafficKind(index: number, start: number): TrafficKind {
+  // A shuffled family, with recovery after a multi-decision encounter. The
+  // caller supplies a seeded index; difficulty never increases vehicle speed.
+  const kinds: TrafficKind[] = start < 1000
+    ? ['pass','dodge','roof-traffic','recovery','transfer']
+    : ['pass','double','transfer','recovery','dodge','roof-traffic'];
+  return kinds[((index % kinds.length)+kinds.length)%kinds.length];
+}
+export function trafficEncounter(start: number, from: number, kind: TrafficKind, variant = 0): Spec[] {
+  const other=2-from;
+  const mover=(lane:number,offset:number):Spec=>({kind:'mtrain',lane,d0:start+16,d1:start+85,
+    activation:start, trainSpeed:52+((variant+offset)%5)*4,cars:1+((variant+offset)%4)});
+  const anchor:Spec={kind:'overhead',lane:from,d0:start+8,d1:start+8+OB.overhead.depth};
+  const exit:Spec={kind:kind==='double'?'low':'overhead',lane:from,d0:start+82,
+    d1:start+82+(kind==='double'?OB.low.depth:OB.overhead.depth)};
+  const specs:Spec[]=[anchor,exit];
+  if(kind==='pass')return [...specs,mover(other,1)];
+  if(kind==='dodge')return [...specs,{kind:'low',lane:from,d0:start+52,d1:start+52+OB.low.depth},mover(1,0)];
+  if(kind==='double') {
+    const a=mover(1,0), b=mover(other,2);
+    // Short, fast convoys clear before the exit barrier: a ground escape
+    // remains available even when the player elects not to jump.
+    a.trainSpeed=64; a.cars=1; a.d1=start+71;
+    b.trainSpeed=68; b.cars=2; b.d1=start+71;
+    specs.push(a,b);
+  }
+  if(kind==='double'||kind==='recovery') {
+    specs.push({kind:'ramp',lane:from,d0:start+24,d1:start+31},
+      {kind:'train',lane:from,d0:start+31,d1:start+31+trainLength(3),cars:3});
+    return specs;
+  }
+  // Moving vehicles remain in the third lane, beside the rooftop transfer.
+  specs.push({kind:'ramp',lane:from,d0:start+24,d1:start+31},
+    {kind:'train',lane:from,d0:start+31,d1:start+31+trainLength(kind==='transfer'?4:3),cars:kind==='transfer'?4:3},
+    {kind:'train',lane:1,d0:start+40,d1:start+40+trainLength(3),cars:3},mover(other,3));
+  // Exit after the transfer is on the center lane; the third lane is a moving hazard.
+  exit.lane=1;
+  return specs;
+}
+
+export function trafficRoute(start:number,from:number,kind:TrafficKind,d:number,speed:number) {
+  if(d<start+12)return {lane:1,y:0};
+  if(kind==='roof-traffic'||kind==='transfer')return encounterRoute(start,from,d,speed);
+  let y=0;
+  if(kind==='double'||kind==='recovery') {
+    if(d>=start+24&&d<start+31)y=(d-start-24)/7*3.4;
+    else if(d>=start+31&&d<=start+31+trainLength(3))y=3.4;
+    else if(d>start+31+trainLength(3)) {const t=(d-start-31-trainLength(3))/speed;y=Math.max(0,3.4-.5*34.9*t*t);}
+  }
+  const jump=kind==='dodge'?52:82;
+  if((kind==='dodge'||kind==='double')&&Math.abs(d-start-jump)<speed*.3) {
+    const t=(d-(start+jump-speed*.2))/speed;
+    if(t>0)y=Math.max(y,Math.max(0,30.3*.34*t-.5*30.3*t*t));
+  }
+  return {lane:from,y};
+}
