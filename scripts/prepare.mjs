@@ -197,4 +197,5 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   await writeFile(playerPath, player);
   await writeFile(file, source);
 }
+await import('./render-actors.mjs');
 console.log('Integración CIAC preparada sobre el motor original.');

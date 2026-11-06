@@ -257,9 +257,10 @@ test('original GLB: complete train instances and finite animation clips hold ins
   const sim=new Sim();sim.noSpawn=true;sim.reset(1,false);sim.clearWorld();sim.start();
   const mover=sim.addOb({kind:'mtrain',lane:0,d0:80,d1:95,cars:3});
   const emptyPool=()=>new Instanced(train,60,scene);
+  const couplers=new Instanced(new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.64, CAR_GAP + 0.18)), 60, scene);
   const world=Object.create(World.prototype) as World;
   Object.assign(world, {scene,camera:new THREE.PerspectiveCamera(76,390/844,.3,260),
-    pools:{train:pool},coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
+    pools:{train:pool},trainLinks:couplers,coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
     poles:emptyPool(),powerCards:{magnet:emptyPool(),shoes:emptyPool(),double:emptyPool()},
     scrollTex:[],movers:[],camX:0,camY:0,shake:0,flash:0,aspect:390/844,time:0,
     fx:{update(){},burst(){}},player:{menu(){}}
@@ -267,19 +268,35 @@ test('original GLB: complete train instances and finite animation clips hold ins
   const matrix=new THREE.Matrix4(), expected=new THREE.Matrix4();
   for(let frame=0;frame<1400;frame++) {
     sim.invincible=true;sim.update(h);world.sync(sim,h,false);
-    const count=sim.obs.includes(mover) && mover.d1>=sim.d-12 ? 3 : 0;
-    assert.equal(pool.count,count);
-    for(const part of pool.parts) {
-      assert.equal(part.mesh.count,count);
-      for(let car=0;car<count;car++) {
+    const drawn:number[]=[];
+    if(sim.obs.includes(mover) && mover.d1>=sim.d-26) {
+      for(let car=0;car<mover.cars;car++) {
         const center=mover.d0+car*(CAR_LEN+CAR_GAP)+CAR_LEN/2;
+        if(center+CAR_LEN/2>=sim.d-26 && center-CAR_LEN/2<=sim.d+210+CAR_LEN) drawn.push(car);
+      }
+    }
+    assert.equal(pool.count,drawn.length);
+    assert.ok(couplers.count<=Math.max(0,drawn.length));
+    for(const part of pool.parts) {
+      assert.equal(part.mesh.count,drawn.length);
+      for(let index=0;index<drawn.length;index++) {
+        const center=mover.d0+drawn[index]*(CAR_LEN+CAR_GAP)+CAR_LEN/2;
         expected.makeTranslation(laneX(mover.lane),0,sim.d-center).multiply(part.local);
-        part.mesh.getMatrixAt(car,matrix);
+        part.mesh.getMatrixAt(index,matrix);
         for(let k=0;k<16;k++)near(matrix.elements[k],expected.elements[k],1e-5);
       }
     }
   }
-  const player=new PlayerView(gltf,new THREE.Scene());
+  const actorScene=new THREE.Scene();
+  const player=new PlayerView(gltf,actorScene);
+  const shadow=actorScene.children.find(o=>o.type==='Mesh' && (o as THREE.Mesh).geometry.type==='CircleGeometry');
+  assert.ok(shadow,'ground contact shadow remains attached to the player renderer');
+  const nodes=actorScene.children.length;
+  const runner=new Sim();runner.noSpawn=true;runner.reset(2,false);runner.clearWorld();runner.start();
+  for(let frame=0;frame<120;frame++){
+    runner.update(h);player.update(runner,h,[]);
+    assert.equal(actorScene.children.length,nodes,'no new scene nodes per frame');
+  }
   player.play('jump',0,1,true);player.mixer.update(10);
   const time=player.actions.jump.time;player.play('jump',0,1);near(player.actions.jump.time,time);
   player.play('jump',0,1,true);near(player.actions.jump.time,0);
