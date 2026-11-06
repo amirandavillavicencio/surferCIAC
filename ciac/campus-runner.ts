@@ -115,3 +115,28 @@ export function applyCampusRunner(model: THREE.Object3D): void {
   ball('Head', 'nariz', [0, 17, 16.4], [2.6, 4, 3], skinShade);
   ball('Head', 'sonrisa', [0, 9, 15.8], [5, 1.2, 0.8], skinShade);
 }
+
+// Pose-space sole contact: keep the Mixamo rig and collider untouched. Only the
+// shoe geometry below the support plane is compressed, like a flexible sole.
+// Rest coordinates are retained so correction never accumulates between clips.
+const soleRest = new WeakMap<THREE.BufferGeometry, Float32Array>();
+const contactPoint = new THREE.Vector3();
+const contactInverse = new THREE.Matrix4();
+export function correctCampusContact(model: THREE.Object3D, supportY: number) {
+  model.updateWorldMatrix(true, true);
+  model.traverse(node => {
+    if (!node.name.endsWith('-zapatilla') && !node.name.endsWith('-puntera')) return;
+    const mesh = node as THREE.Mesh<THREE.BufferGeometry>;
+    const position = mesh.geometry.getAttribute('position') as THREE.BufferAttribute;
+    let rest = soleRest.get(mesh.geometry);
+    if (!rest) { rest = new Float32Array(position.array); soleRest.set(mesh.geometry, rest); }
+    contactInverse.copy(mesh.matrixWorld).invert();
+    for (let i=0; i<position.count; i++) {
+      contactPoint.fromArray(rest, i*3).applyMatrix4(mesh.matrixWorld);
+      if (contactPoint.y < supportY) contactPoint.y = supportY;
+      contactPoint.applyMatrix4(contactInverse);
+      position.setXYZ(i,contactPoint.x,contactPoint.y,contactPoint.z);
+    }
+    position.needsUpdate = true;
+  });
+}

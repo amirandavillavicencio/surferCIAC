@@ -218,6 +218,11 @@ export class CIACQuiz {
     return false;
   }
 
+  presentLane(lane: number) {
+    if (this.phase !== 'question') return;
+    if (this.selected !== lane) { this.selected = lane; this.highlight(); }
+  }
+
   private highlight() {
     for (let i = 0; i < 3; i++) this.choices[i].classList.toggle('selected', i === this.selected);
   }

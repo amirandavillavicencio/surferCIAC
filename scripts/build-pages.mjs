@@ -23,3 +23,5 @@ await cp('upstream/dist', 'dist', { recursive: true });
 await rm('dist/assets/scenery.glb', { force: true });
 await Promise.all([access('dist/index.html'), access('dist/assets/core.glb')]);
 console.log('surferCIAC: juego Three.js, core.glb preparados para Cloudflare Pages.');
+
+await import("./write-build-info.mjs");

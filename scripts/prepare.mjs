@@ -200,4 +200,5 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
 }
 await import('./train-motion.mjs');
 await import('./render-actors.mjs');
+await import('./polish-game.mjs');
 console.log('Integración CIAC preparada sobre el motor original.');
