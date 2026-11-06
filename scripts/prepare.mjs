@@ -100,7 +100,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   let config = await readFile(configPath,'utf8');
   const oldMover = 'export const MOVER = { ratio: 0.6, trigger: 70 };';
   if (config.split(oldMover).length !== 2) throw new Error('Parámetros originales del tren cambiaron');
-  config = config.replace(oldMover, 'export const MOVER = { ratio: 0.70, trigger: 85 };');
+  config = config.replace(oldMover, 'export const MOVER = { ratio: 1.0, trigger: 90 };');
   await writeFile(configPath,config);
 
   const simPath = 'upstream/src/sim/sim.ts';
@@ -198,5 +198,6 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   await writeFile(playerPath, player);
   await writeFile(file, source);
 }
+await import('./train-motion.mjs');
 await import('./render-actors.mjs');
 console.log('Integración CIAC preparada sobre el motor original.');

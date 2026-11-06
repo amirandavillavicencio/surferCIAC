@@ -1,4 +1,4 @@
-import { MOVER, trainLength, VIEW_AHEAD } from '../config';
+import { VIEW_AHEAD } from '../config';
 import type { Spec } from '../sim/track';
 
 export const FIRST_GATE = 180;
@@ -32,12 +32,12 @@ export class QuizCourse {
   }
 
   allowsObstacle(spec: Spec) {
-    const far = spec.kind === 'mtrain'
-      ? spec.d0 + MOVER.ratio * MOVER.trigger + trainLength(spec.cars || 1)
-      : spec.d1;
-    // Reserve the whole parked-to-moving sweep, not only the meeting span.
-    // The rear clearance also lets preceding stock leave the camera naturally.
-    return !this.intersects(spec.d0, far + RETIRE_BEHIND);
+    // A moving train has two distances: its physical position (far ahead
+    // while approaching) and the runner distance where collision is possible.
+    // Reserve only the meeting interval. Reserving its entire travel path
+    // removed nearly every moving train between consecutive questions.
+    const anticipation = spec.kind === 'mtrain' ? 6 : 0;
+    return !this.intersects(spec.d0 - anticipation, spec.d1 + RETIRE_BEHIND);
   }
 
   allowsPickup(distance: number) { return !this.intersects(distance - 1, distance + 1); }

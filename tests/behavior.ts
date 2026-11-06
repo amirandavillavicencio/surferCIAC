@@ -21,9 +21,11 @@ const near = (a: number, b: number, tolerance = 1e-8) => assert.ok(Math.abs(a-b)
 test('reservations cover the full train sweep; ramps cannot survive without trains', () => {
   const course = new QuizCourse();
   const crossing = {kind:'mtrain' as const,lane:1,d0:100,d1:104,cars:1};
-  assert.equal(course.allowsObstacle(crossing), false);
+  assert.equal(course.allowsObstacle(crossing), true); // already passes before gate 180
+  assert.equal(course.allowsObstacle({...crossing,d0:145,d1:149}), false); // intersects question
+  assert.equal(course.allowsObstacle({...crossing,d0:205,d1:209}), true); // next train is visible beyond answer
+  assert.equal(course.allowsObstacle({...crossing,d0:275,d1:279}), false); // enters next protected gate
   assert.equal(course.allowsObstacle({...crossing,d0:40,d1:44}), true);
-  assert.equal(course.allowsObstacle({...crossing,d0:195,d1:199}), true);
   assert.deepEqual(course.prepareSpecs([
     {kind:'ramp',lane:0,d0:120,d1:127},
     {kind:'train',lane:0,d0:127,d1:147,cars:3}
@@ -41,7 +43,10 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
     for (const o of s.obs) {
       assert.ok(o.lane>=0 && o.lane<=2);
       assert.ok(s.track.course.allowsObstacle(Sim.specOf(o)));
-      if (o.kind==='mtrain') movers++;
+      if (o.kind==='mtrain') {
+        movers++;
+        assert.ok(o.cars >= 3, 'no isolated one-car train');
+      }
       if (o.kind==='train') trains++;
     }
     assert.ok(s.coinList.every(c=>s.track.course.allowsPickup(c.d)));
@@ -49,7 +54,8 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
     const result = solve(s.obs.map(o=>Sim.specOf(o)),0,s.track.frontier,[1],speedAt);
     assert.ok(result.ok, `seed ${seed}, tutorial ${tutorial}, at ${result.failAt}`);
   }
-  assert.ok(movers > 100 && trains > 100);
+  assert.ok(movers > 300, 'moving trains should remain common even with quiz reservations');
+  assert.equal(trains, 0, 'no stationary railcars in normal runs or tutorial');
   console.log(JSON.stringify({generatedMovingTrains:movers,generatedParkedTrains:trains}));
 });
 

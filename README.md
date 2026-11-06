@@ -149,3 +149,9 @@ Se dibujan vagones individuales con margen de salida por detrás de la cámara, 
 ## Corredor universitario: nuevo modelo 3D
 
 Se reemplaza la geometría visible del personaje original por un **nuevo corredor deportivo de estilo universitario** construido con piezas 3D ligeras. Lleva polera azul, pantalón oscuro, zapatillas claras y pelo corto; no usa gorra, mochila ni capucha. Cada parte está anclada a los huesos Mixamo ya presentes en `core.glb`, de modo que mantiene los ocho clips originales (carrera, salto, deslizamiento, caída, etc.). La geometría anterior queda oculta, pero permanece en el modelo para conservar el esqueleto y las animaciones. No se agregan modelos externos, descargas ni dependencias; se conservan trenes, preguntas, controles y ranking.
+
+## Trenes completos y en movimiento
+
+La partida utiliza trenes de **3 a 4 vagones** en las **tres vías existentes**. El generador ya no produce trenes estáticos de un solo vagón. Los trenes avanzan de frente respecto del corredor, con desplazamiento vinculado a la simulación, y conservan el solucionador de rutas para permitir esquivarlos. También en el tutorial se sustituyen los trenes fijos; las señales de salto y deslizamiento se conservan.
+
+La reserva de preguntas considera el intervalo de **encuentro con el jugador** del tren móvil, no toda la distancia recorrida por su morro antes de encontrarse. Esto permite que los trenes circulen visiblemente en la distancia sin invadir los 36 m de franjas de respuesta ni sus márgenes protegidos. El render por vagones y acoples se conserva. No se alteran preguntas, controles, puntuaciones, API ni ranking.
