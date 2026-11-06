@@ -175,7 +175,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   replaceWorld('Math.min(1, dt * 5)', '(1 - Math.exp(-dt * 5))');
   replaceWorld('Math.min(1, dt * 3)', '(1 - Math.exp(-dt * 3))');
   replaceWorld('this.shake * 0.5', 'this.shake * 0.25');
-  replaceWorld('cam.position.set(sx + ox, this.camY + height + oy, dist);', 'const bob = Math.sin(sim.d * 0.72) * 0.035 * Math.max(0, Math.min(1, (sim.speed - 12) / 15));\n    cam.position.set(this.camX + ox, this.camY + height + oy + bob, dist);');
+  replaceWorld('cam.position.set(sx + ox, this.camY + height + oy, dist);', 'cam.position.set(this.camX + ox, this.camY + height + oy, dist);');
   replaceWorld('const fov = 58 + portrait * 17 + speedFactor * 10;', 'const fov = 59 + portrait * 17 + speedFactor * 14;');
   replaceWorld('cam.lookAt(sim.x * 0.85, this.camY + 1.25, -8);', 'cam.lookAt(this.camX, this.camY + 1.25, -8);');
   replaceWorld('    const target = sim.grounded ? sim.y : Math.max(sim.groundY, Math.min(sim.y, this.camY + 1.0));', '    const target = sim.groundY + (sim.y - sim.groundY) * 0.36 - (sim.sliding ? 0.14 : 0);');

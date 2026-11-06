@@ -152,4 +152,12 @@ player = patch(player,
     (this.shadow.material as THREE.MeshBasicMaterial).opacity = 0.22 / (1 + lift * 0.45);
     this.root.position.set(sim.x, sim.y, 0);`,
   'sombra durante saltos');
+player = patch(player,
+  "        if (!sim.grounded && sim.vy < -3 && (this.current !== 'jump' || !this.actions.jump.isRunning())) this.play('fall', 0.15);",
+  "        if (!sim.grounded && sim.vy <= 0) this.play('fall', 0.1);",
+  'caída al abandonar una superficie');
+player = patch(player,
+  "      const busy = (this.current === 'jump' && !sim.grounded && this.actions.jump.isRunning()) ||",
+  "      const busy = (this.current === 'jump' && !sim.grounded && !sim.fastFall && this.actions.jump.isRunning()) ||",
+  'descenso rápido interrumpe la pose de salto');
 await writeFile(playerPath, player);
