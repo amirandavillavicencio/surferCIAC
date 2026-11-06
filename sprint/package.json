@@ -1,0 +1,17 @@
+{
+  "name": "saurabhs-sprint",
+  "version": "1.0.0",
+  "description": "Saurabh's Sprint - 3D Endless Runner Subway Game (PWA)",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx vite",
+    "build": "npx vite build && node copy_dist.js",
+    "preview": "npx vite preview"
+  },
+  "keywords": ["game", "endless-runner", "threejs", "pwa", "subway-surfers"],
+  "author": "Saurabh",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
+}

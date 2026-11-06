@@ -1,0 +1,40 @@
+{
+  "name": "Saurabh's Sprint - 3D Endless Subway Runner",
+  "short_name": "Saurabh's Sprint",
+  "description": "High-octane 3D Subway Runner with 9 unique characters, dynamic tracks, power-ups, and offline capability!",
+  "id": "saurabhs-sprint-pwa",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#eef2f6",
+  "theme_color": "#0284c7",
+  "categories": ["games", "arcade", "action"],
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./assets/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

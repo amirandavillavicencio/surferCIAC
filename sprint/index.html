@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Saurabh's Sprint - 3D Endless Subway Runner</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Saurabh Sprint">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Saurabh's Sprint">
+  
+  <!-- Apple Touch & Standard Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
+  <link rel="shortcut icon" href="favicon.ico">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Outfit:wght@400;600;700;800;900&family=Russo+One&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" rel="stylesheet">
+
+  <!-- Three.js 3D Library (Local with CDN fallback) -->
+  <script src="lib/three.min.js"></script>
+  <script>if (typeof THREE === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>'); }</script>
+
+  <!-- Global Error Handler - catches JS errors and shows helpful message instead of blank screen -->
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('[GAME ERROR]', e.message, 'at', e.filename, 'line', e.lineno);
+      var cont = document.getElementById('game-container');
+      if (cont && !document.getElementById('error-banner')) {
+        var banner = document.createElement('div');
+        banner.id = 'error-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ff3838;color:#fff;padding:16px;font-family:monospace;font-size:14px;z-index:99999;white-space:pre-wrap;';
+        banner.textContent = 'GAME ERROR: ' + e.message + '\nFile: ' + (e.filename||'?') + ' Line: ' + (e.lineno||'?') + '\nPlease hard-refresh (Ctrl+Shift+R) to clear cache.';
+        document.body.insertBefore(banner, document.body.firstChild);
+      }
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('[PROMISE ERROR]', e.reason);
+    });
+  </script>
+
+  <!-- Service Worker Registration for PWA & Offline Play -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js?v=5.3')
+          .then(reg => {
+            console.log('[SW] Registered:', reg.scope);
+            reg.update();
+          })
+          .catch(err => console.warn('[SW] Registration failed:', err));
+      });
+    }
+  </script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=5.3">
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="game-container"></div>
+
+  <!-- In-Game HUD Overlay -->
+  <div id="hud" class="overlay-layer hud-hidden">
+    <!-- Top Bar Stats -->
+    <div class="hud-top">
+      <div class="hud-stat-group left">
+        <div class="hud-card score-card">
+          <span class="hud-label">SCORE</span>
+          <span id="hud-score" class="hud-val">0</span>
+        </div>
+        <div class="hud-card highscore-card">
+          <span class="hud-label">🏆 BEST</span>
+          <span id="hud-highscore" class="hud-val">0</span>
+        </div>
+      </div>
+
+      <div class="hud-stat-group center">
+        <div id="multiplier-badge" class="multiplier-badge">1X</div>
+      </div>
+
+      <div class="hud-stat-group right">
+        <div class="hud-card coin-card">
+          <span class="hud-label">🪙</span>
+          <span id="hud-coins" class="hud-val">0</span>
+        </div>
+        <div class="hud-card key-card">
+          <span class="hud-label">🗝️</span>
+          <span id="hud-keys" class="hud-val">5</span>
+        </div>
+        <button id="btn-pause" class="hud-btn-circle" aria-label="Pause">⏸️</button>
+      </div>
+    </div>
+
+    <!-- Active Power-Up Timers Bar -->
+    <div id="powerup-bars-container" class="powerup-bars-container">
+      <div id="magnet-bar" class="powerup-bar magnet-theme hidden">
+        <span class="pu-text-tag">🧲 MAG</span>
+        <div class="pu-progress-bg"><div class="pu-progress-fill" id="magnet-fill"></div></div>
+      </div>
+      <div id="multiplier-bar" class="powerup-bar multiplier-theme hidden">
+        <span class="pu-text-tag">⚡ 2X</span>
+        <div class="pu-progress-bg"><div class="pu-progress-fill" id="multiplier-fill"></div></div>
+      </div>
+      <div id="hoverboard-bar" class="powerup-bar hoverboard-theme hidden">
+        <span class="pu-text-tag">🛹 BRD</span>
+        <div class="pu-progress-bg"><div class="pu-progress-fill" id="hoverboard-fill"></div></div>
+      </div>
+      <div id="jetpack-bar" class="powerup-bar jetpack-theme hidden">
+        <span class="pu-text-tag">🚀 JET</span>
+        <div class="pu-progress-bg"><div class="pu-progress-fill" id="jetpack-fill"></div></div>
+      </div>
+      <div id="sneakers-bar" class="powerup-bar sneakers-theme hidden">
+        <span class="pu-text-tag">👟 JUMP</span>
+        <div class="pu-progress-bg"><div class="pu-progress-fill" id="sneakers-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Word Hunt Mini In-Game Tracker -->
+    <div id="hud-word-hunt" class="hud-word-hunt">
+      <span class="hud-wh-title">🔤 WORD HUNT:</span>
+      <div id="hud-wh-letters" class="hud-wh-letters"></div>
+    </div>
+
+    <!-- Mobile Quick Double-Tap Hint / Board Status -->
+    <div id="hoverboard-hint" class="hoverboard-hint">
+      🛹 DOUBLE TAP FOR HOVERBOARD SHIELD
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification Banner -->
+  <div id="game-toast" class="game-toast hidden">
+    <span id="toast-message">🗝️ KEY COLLECTED!</span>
+  </div>
+
+  <!-- Main Start Menu Overlay (Subway Surfers Home Page) -->
+  <div id="start-screen" class="overlay-layer menu-active start-screen-layout">
+    <!-- Top Header Bar (Subway Surfers Header) -->
+    <div class="start-top-bar glass-panel">
+      <div class="header-left-group">
+        <button id="btn-open-settings" class="btn-top-circle" aria-label="Settings" title="Settings">
+          <span id="sound-icon">⚙️</span>
+        </button>
+        <div class="stat-pill best-pill">
+          <span class="stat-pill-icon">🏆</span>
+          <span class="stat-label-text">BEST</span>
+          <span id="menu-highscore">0</span>
+        </div>
+      </div>
+
+      <div class="logo-group">
+        <h1 class="game-logo-compact">SAURABH'S <span class="highlight">SPRINT</span></h1>
+      </div>
+
+      <div class="header-right-group">
+        <div class="stat-pill coin-pill">
+          <span class="stat-pill-icon">🪙</span>
+          <span id="menu-coins">0</span>
+        </div>
+        <div class="stat-pill key-pill">
+          <span class="stat-pill-icon">🗝️</span>
+          <span id="menu-keys">5</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Screen Floating Side Docks (Subway Surfers UI) -->
+    <div class="home-middle-zone">
+      <!-- Left Floating Dock: Daily Word Hunt, Daily Rewards, Spin, Trophies, Missions -->
+      <div class="home-dock-left">
+        <!-- Daily Word Hunt Widget -->
+        <div class="home-word-hunt-card glass-panel" id="home-word-hunt">
+          <div class="word-hunt-header">
+            <span class="wh-tag">🔤 WORD HUNT</span>
+            <span class="wh-reward">🪙 1,000</span>
+          </div>
+          <div class="word-hunt-letters" id="word-hunt-letters-container">
+            <!-- Dynamically populated: [S] [P] [R] [I] [N] [T] -->
+          </div>
+        </div>
+
+        <button id="btn-open-daily" class="btn-dock-action position-relative glass-panel highlight-dock">
+          <span class="dock-icon">🎁</span>
+          <span class="dock-label">DAILY GIFTS</span>
+          <span id="daily-badge" class="badge-dot hidden"></span>
+        </button>
+
+        <button id="btn-open-spin" class="btn-dock-action position-relative glass-panel highlight-dock">
+          <span class="dock-icon">🎡</span>
+          <span class="dock-label">LUCKY SPIN</span>
+          <span id="spin-badge" class="badge-dot hidden"></span>
+        </button>
+
+        <button id="btn-open-achievements" class="btn-dock-action position-relative glass-panel">
+          <span class="dock-icon">🏆</span>
+          <span class="dock-label">TROPHIES</span>
+          <span id="ach-badge" class="badge-dot hidden"></span>
+        </button>
+
+        <button id="btn-open-missions" class="btn-dock-action position-relative glass-panel">
+          <span class="dock-icon">📜</span>
+          <span class="dock-label">MISSIONS</span>
+          <span id="missions-badge" class="badge-dot hidden"></span>
+        </button>
+      </div>
+
+      <!-- Right Floating Dock: Heroes, Boards, Shop & Guide -->
+      <div class="home-dock-right">
+        <button id="btn-open-skins" class="btn-dock-action glass-panel highlight-dock">
+          <span class="dock-icon">👥</span>
+          <span class="dock-label">HEROES</span>
+          <span class="dock-badge">26</span>
+        </button>
+
+        <button id="btn-open-boards" class="btn-dock-action glass-panel highlight-dock">
+          <span class="dock-icon">🛹</span>
+          <span class="dock-label">BOARDS</span>
+          <span class="dock-badge">26</span>
+        </button>
+
+        <button id="btn-open-shop" class="btn-dock-action glass-panel">
+          <span class="dock-icon">🛒</span>
+          <span class="dock-label">SHOP</span>
+        </button>
+
+        <button id="btn-open-help" class="btn-dock-action glass-panel">
+          <span class="dock-icon">❓</span>
+          <span class="dock-label">RULES</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Subway Surfers Floating Action Dock -->
+    <div class="start-bottom-bar glass-panel">
+      <!-- Character Quick Switcher Widget -->
+      <div class="home-character-widget">
+        <button id="btn-prev-char" class="btn-char-arrow" aria-label="Previous Character">&lt;</button>
+        <div class="char-info-center">
+          <div class="char-meta-row">
+            <span id="home-char-gender" class="gender-tag gender-boy">BOY</span>
+            <span id="home-char-avatar" class="char-avatar-mini">CD</span>
+          </div>
+          <h3 id="home-char-name" class="home-char-title">Cyber Dash</h3>
+          <button id="home-char-btn" class="btn-home-equip">EQUIPPED</button>
+        </div>
+        <button id="btn-next-char" class="btn-char-arrow" aria-label="Next Character">&gt;</button>
+      </div>
+
+      <!-- Big Subway Surfers Sprint Play Button -->
+      <button id="btn-start" class="btn-primary-action pulse-anim btn-subway-play">
+        <div class="btn-play-text-group">
+          <span class="btn-text">▶️ TAP TO SPRINT</span>
+          <span class="btn-sub">SUBWAY RUNNER 3D</span>
+        </div>
+      </button>
+
+      <!-- PWA Banner Container -->
+      <div id="pwa-install-container" class="pwa-banner hidden">
+        <div class="pwa-info">
+          <img src="assets/icons/icon-192.png" alt="App Icon" class="pwa-mini-icon">
+          <div>
+            <strong>Install Saurabh's Sprint</strong>
+            <span>Tap to install on iPhone, Android or PC</span>
+          </div>
+        </div>
+        <button id="btn-install-pwa" class="btn-install">📲 INSTALL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Me / Revive Modal Overlay -->
+  <div id="revive-modal" class="overlay-layer menu-hidden">
+    <div class="menu-glass-panel revive-panel">
+      <div class="revive-badge">🗝️ SECOND CHANCE</div>
+      <h2 class="revive-title">SAVE ME!</h2>
+      <div class="revive-countdown-circle">
+        <span id="revive-countdown">5</span>
+      </div>
+      <p class="revive-hint">Continue sprint with your current score & distance!</p>
+      <button id="btn-revive-action" class="btn-primary-action btn-revive-glow pulse-anim">
+        <span>🗝️ REVIVE (2 KEYS)</span>
+      </button>
+      <button id="btn-revive-skip" class="btn-secondary btn-skip-revive">
+        <span>❌ NO THANKS, END RUN</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen Overlay -->
+  <div id="gameover-screen" class="overlay-layer menu-hidden">
+    <div class="menu-glass-panel gameover-panel">
+      <div id="gameover-badge" class="gameover-badge">🚨 CAUGHT BY INSPECTOR!</div>
+      <h2 class="gameover-title">🏁 RUN COMPLETED</h2>
+
+      <div id="new-record-alert" class="new-record-alert hidden">
+        🎉 NEW HIGH SCORE RECORD!
+      </div>
+
+      <div class="results-grid">
+        <div class="result-card">
+          <span class="result-label">FINAL SCORE</span>
+          <span id="result-score" class="result-value">0</span>
+        </div>
+        <div class="result-card coin-card-result">
+          <span class="result-label">COINS COLLECTED</span>
+          <span id="result-coins" class="result-value">+0</span>
+        </div>
+        <div class="result-card">
+          <span class="result-label">DISTANCE</span>
+          <span id="result-distance" class="result-value">0m</span>
+        </div>
+        <div class="result-card best-card-result">
+          <span class="result-label">🏆 ALL-TIME BEST</span>
+          <span id="result-best" class="result-value">0</span>
+        </div>
+      </div>
+
+      <div class="gameover-buttons">
+        <button id="btn-gameover-mystery" class="btn-primary-action pulse-anim btn-mystery-glow hidden">
+          <span>📦 OPEN MYSTERY BOX</span>
+        </button>
+        <button id="btn-gameover-revive" class="btn-primary-action btn-revive-glow pulse-anim">
+          <span>🗝️ REVIVE & CONTINUE (2 KEYS)</span>
+        </button>
+        <button id="btn-restart" class="btn-primary-action btn-restart-glow">
+          <span>🔄 RUN AGAIN</span>
+        </button>
+        <div class="dual-buttons">
+          <button id="btn-share-score" class="btn-secondary btn-accent-share">📸 SHARE SCORE</button>
+          <button id="btn-go-shop" class="btn-secondary btn-accent-shop">🛒 SHOP</button>
+          <button id="btn-go-menu" class="btn-secondary btn-accent-menu">🏠 MENU</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Menu Overlay -->
+  <div id="pause-screen" class="overlay-layer menu-hidden">
+    <div class="menu-glass-panel pause-panel">
+      <div class="pause-header-badge">⏸️ GAME PAUSED</div>
+      <h2 class="pause-title">TAKE A BREATHER</h2>
+      <div class="pause-stats-grid">
+        <div class="pause-stat-pill">
+          <span class="pause-stat-label">CURRENT SCORE</span>
+          <strong id="pause-score" class="pause-stat-val">0</strong>
+        </div>
+        <div class="pause-stat-pill coin-pill">
+          <span class="pause-stat-label">COINS COLLECTED</span>
+          <strong id="pause-coins" class="pause-stat-val">0</strong>
+        </div>
+      </div>
+      <div class="pause-buttons-wrap">
+        <button id="btn-resume" class="btn-primary-action btn-resume-glow pulse-anim">
+          <span>▶️ RESUME SPRINT</span>
+        </button>
+        <button id="btn-pause-sound" class="btn-pause-setting">
+          <span id="pause-sound-text">⚙️ SOUND: ON</span>
+        </button>
+        <button id="btn-quit-to-menu" class="btn-secondary btn-pause-quit">
+          <span>🏠 QUIT TO MENU</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop & Upgrades Modal Overlay -->
+  <div id="shop-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title">🛒 POWER-UP UPGRADE SHOP</h2>
+        <button id="btn-close-shop" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="shop-bank-bar">
+        <span>🪙 COIN BANK:</span>
+        <strong id="shop-coins-display">0</strong>
+      </div>
+
+      <div class="shop-items-container">
+        <!-- Coin Magnet Upgrade -->
+        <div class="shop-item-card">
+          <div class="item-icon-box magnet-theme">🧲</div>
+          <div class="item-info">
+            <h3>Coin Magnet</h3>
+            <p>Attracts all coins from all 3 lanes</p>
+            <div class="level-indicator" id="magnet-level-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button id="btn-upgrade-magnet" class="btn-buy" data-type="magnet">
+            <span class="price-val">100 C</span>
+            <span class="buy-label">UPGRADE</span>
+          </button>
+        </div>
+
+        <!-- Super Jump Sneakers Upgrade -->
+        <div class="shop-item-card">
+          <div class="item-icon-box sneakers-theme">👟</div>
+          <div class="item-info">
+            <h3>Super Jump Sneakers</h3>
+            <p>Spring-loaded shoes to leap over trains!</p>
+            <div class="level-indicator" id="sneakers-level-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button id="btn-upgrade-sneakers" class="btn-buy" data-type="sneakers">
+            <span class="price-val">150 C</span>
+            <span class="buy-label">UPGRADE</span>
+          </button>
+        </div>
+
+        <!-- 2X Multiplier Upgrade -->
+        <div class="shop-item-card">
+          <div class="item-icon-box multiplier-theme">⚡</div>
+          <div class="item-info">
+            <h3>2X Score Multiplier</h3>
+            <p>Doubles score gains during active run</p>
+            <div class="level-indicator" id="multiplier-level-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button id="btn-upgrade-multiplier" class="btn-buy" data-type="multiplier">
+            <span class="price-val">150 C</span>
+            <span class="buy-label">UPGRADE</span>
+          </button>
+        </div>
+
+        <!-- Hoverboard Shield Upgrade -->
+        <div class="shop-item-card">
+          <div class="item-icon-box hoverboard-theme">🛹</div>
+          <div class="item-info">
+            <h3>Hoverboard Shield</h3>
+            <p>Crash protection! Double-tap to activate</p>
+            <div class="level-indicator" id="hoverboard-level-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button id="btn-upgrade-hoverboard" class="btn-buy" data-type="hoverboard">
+            <span class="price-val">200 C</span>
+            <span class="buy-label">UPGRADE</span>
+          </button>
+        </div>
+
+        <!-- Jetpack Boost Upgrade -->
+        <div class="shop-item-card">
+          <div class="item-icon-box jetpack-theme">🚀</div>
+          <div class="item-info">
+            <h3>Jetpack Flight</h3>
+            <p>Fly high into the sky collecting coin trails</p>
+            <div class="level-indicator" id="jetpack-level-dots">
+              <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button id="btn-upgrade-jetpack" class="btn-buy" data-type="jetpack">
+            <span class="price-val">300 C</span>
+            <span class="buy-label">UPGRADE</span>
+          </button>
+        </div>
+
+        <!-- Key Bundle Purchase -->
+        <div class="shop-item-card shop-item-keys">
+          <div class="item-icon-box" style="background: linear-gradient(135deg,#ffd700,#f59e0b); font-size:22px; box-shadow: 0 4px 14px rgba(245,158,11,0.35);">🗝️</div>
+          <div class="item-info">
+            <h3>🗝️ Revive Key Bundle</h3>
+            <p>Buy <strong>3 Golden Revive Keys</strong> — continue runs after crash!</p>
+            <div class="level-indicator" style="justify-content:flex-start;gap:4px;">
+              <span style="font-size:11px;color:#d97706;font-weight:700;">🗝️ 🗝️ 🗝️ = 150 coins</span>
+            </div>
+          </div>
+          <button id="btn-buy-keys" class="btn-buy" style="background:linear-gradient(135deg,#ffd700,#f59e0b);color:#1e293b;border:1px solid #fde68a;box-shadow: 0 4px 12px rgba(245,158,11,0.3);">
+            <span class="price-val">150 C</span>
+            <span class="buy-label">BUY KEYS</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outfits & Skins Modal Overlay (26+ Dynamic Characters with Showcase Slider) -->
+  <div id="skins-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel characters-modal-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title" style="font-size: 18px; color: #0284c7;">👥 26 RUNNER HEROES</h2>
+        <button id="btn-close-skins" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="shop-bank-bar">
+        <span>🪙 COIN BANK:</span>
+        <strong id="skins-coins-display">0</strong>
+      </div>
+      
+      <!-- Showcase Carousel Stage (Side-by-side Browsing) -->
+      <div class="showcase-stage-container">
+        <button id="btn-modal-prev-skin" class="btn-showcase-arrow" aria-label="Previous Hero">&lt;</button>
+        <div class="showcase-main-card" id="skin-showcase-card">
+          <div class="showcase-card-header" id="skin-showcase-header"></div>
+          <div class="showcase-3d-stage">
+            <canvas id="hero-3d-preview-canvas" class="showcase-3d-canvas" width="300" height="180"></canvas>
+            <div class="stage-pedestal-ring"></div>
+          </div>
+          <div class="showcase-hero-info" id="skin-showcase-info"></div>
+          <div class="showcase-stats-row" id="skin-showcase-stats"></div>
+          <div class="showcase-action-wrapper" id="skin-showcase-action"></div>
+        </div>
+        <button id="btn-modal-next-skin" class="btn-showcase-arrow" aria-label="Next Hero">&gt;</button>
+      </div>
+
+      <!-- Collection Thumbnails Strip -->
+      <div class="collection-section-header">
+        <span>👥 HERO COLLECTION (<span id="skin-index-display">1 / 26</span>)</span>
+      </div>
+      <div class="showcase-thumb-strip" id="skins-thumb-container">
+        <!-- Dynamically rendered by ui.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Skateboards & Hoverboards Modal Overlay (26+ Unique Boards with Showcase Slider) -->
+  <div id="boards-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel characters-modal-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title" style="font-size: 18px; color: #10b981;">🛹 26 HOVERBOARDS</h2>
+        <button id="btn-close-boards" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="shop-bank-bar">
+        <span>🪙 COIN BANK:</span>
+        <strong id="boards-coins-display">0</strong>
+      </div>
+      
+      <!-- Showcase Carousel Stage (Side-by-side Browsing) -->
+      <div class="showcase-stage-container">
+        <button id="btn-modal-prev-board" class="btn-showcase-arrow" aria-label="Previous Board">&lt;</button>
+        <div class="showcase-main-card" id="board-showcase-card">
+          <div class="showcase-card-header" id="board-showcase-header"></div>
+          <div class="showcase-3d-stage">
+            <canvas id="board-3d-preview-canvas" class="showcase-3d-canvas" width="300" height="180"></canvas>
+            <div class="stage-pedestal-ring board-ring"></div>
+          </div>
+          <div class="showcase-hero-info" id="board-showcase-info"></div>
+          <div class="showcase-stats-row" id="board-showcase-stats"></div>
+          <div class="showcase-action-wrapper" id="board-showcase-action"></div>
+        </div>
+        <button id="btn-modal-next-board" class="btn-showcase-arrow" aria-label="Next Board">&gt;</button>
+      </div>
+
+      <!-- Collection Thumbnails Strip -->
+      <div class="collection-section-header">
+        <span>🛹 BOARD COLLECTION (<span id="board-index-display">1 / 26</span>)</span>
+      </div>
+      <div class="showcase-thumb-strip" id="boards-thumb-container">
+        <!-- Dynamically rendered by ui.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Missions & Achievements Modal Overlay -->
+  <div id="missions-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title">📜 MISSIONS & QUESTS</h2>
+        <button id="btn-close-missions" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="shop-bank-bar">
+        <span>🪙 CLAIM REWARDS:</span>
+        <strong id="missions-coins-display">0</strong>
+      </div>
+      <div id="missions-list-container" class="missions-list-container">
+        <!-- Dynamically rendered by ui.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel settings-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title">⚙️ GAME SETTINGS</h2>
+        <button id="btn-close-settings" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="settings-list">
+        <div class="setting-row">
+          <div class="setting-text-group">
+            <strong>🔊 Master Audio</strong>
+            <span>Toggle all game sound effects & music</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-sound-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-text-group">
+            <strong>🎵 Synthwave Beats (BGM)</strong>
+            <span>Subway Surfers arcade soundtrack</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-bgm-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-text-group">
+            <strong>💥 Sound Effects (SFX)</strong>
+            <span>Jump, slide, hoverboard, coins & crashes</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-sfx-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <button id="btn-close-settings-bottom" class="btn-primary-action btn-settings-done">
+        <span>SAVE & CLOSE</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Help & Rules Modal -->
+  <div id="help-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel help-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title">❓ HOW TO SPRINT</h2>
+        <button id="btn-close-help" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="help-content-scroll">
+        <!-- Controls Grid -->
+        <div class="help-group-title">🎮 SPRINT CONTROLS</div>
+        <div class="rules-cards-grid">
+          <div class="rule-card">
+            <div class="rule-icon-circle bg-blue">⬅️➡️</div>
+            <div class="rule-text">
+              <strong>SWIPE LEFT / RIGHT</strong>
+              <span>Switch between tracks to dodge trains (<kbd>A</kbd>/<kbd>D</kbd> or <kbd>&larr;</kbd><kbd>&rarr;</kbd>)</span>
+            </div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-icon-circle bg-green">⬆️</div>
+            <div class="rule-text">
+              <strong>SWIPE UP / JUMP</strong>
+              <span>Leap over track barriers & hurdles (<kbd>W</kbd> / <kbd>&uarr;</kbd>)</span>
+            </div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-icon-circle bg-orange">⬇️</div>
+            <div class="rule-text">
+              <strong>SWIPE DOWN / SLIDE</strong>
+              <span>Duck under high subway arches (<kbd>S</kbd> / <kbd>&darr;</kbd>)</span>
+            </div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-icon-circle bg-purple">🛹</div>
+            <div class="rule-text">
+              <strong>DOUBLE TAP / SPACE</strong>
+              <span>Activate Hoverboard crash protection (<kbd>SPACE</kbd>/<kbd>E</kbd>)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Power-Ups Breakdown -->
+        <div class="help-group-title" style="margin-top: 14px;">⚡ SUPER POWER-UPS</div>
+        <div class="rules-powerup-list">
+          <div class="rule-pu-item">
+            <span class="rule-pu-icon">🧲</span>
+            <div class="rule-pu-info">
+              <strong>Coin Magnet</strong>
+              <span>Pulls all gold coins across all tracks automatically</span>
+            </div>
+          </div>
+          <div class="rule-pu-item">
+            <span class="rule-pu-icon">👟</span>
+            <div class="rule-pu-info">
+              <strong>Super Sneakers</strong>
+              <span>Massive high spring jumps to leap onto moving trains</span>
+            </div>
+          </div>
+          <div class="rule-pu-item">
+            <span class="rule-pu-icon">🚀</span>
+            <div class="rule-pu-info">
+              <strong>Turbo Jetpack</strong>
+              <span>Soar through the sky collecting endless coin ribbons</span>
+            </div>
+          </div>
+          <div class="rule-pu-item">
+            <span class="rule-pu-icon">⚡</span>
+            <div class="rule-pu-info">
+              <strong>2X Multiplier</strong>
+              <span>Doubles sprint score points during active run</span>
+            </div>
+          </div>
+          <div class="rule-pu-item">
+            <span class="rule-pu-icon">🛹</span>
+            <div class="rule-pu-info">
+              <strong>Hoverboards (26 Designs)</strong>
+              <span>Surfs on rails and saves you from 1 obstacle crash</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="btn-close-help-bottom" class="btn-primary-action btn-got-it">
+        <span>GOT IT, LET'S RUN!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Install App PWA Modal -->
+  <div id="install-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel install-panel">
+      <div class="modal-header">
+        <div class="install-header-brand">
+          <img src="assets/icons/icon-192.png" alt="Saurabh's Sprint" class="install-brand-icon" onerror="this.style.display='none'">
+          <div>
+            <h2 style="font-size: 17px; margin: 0; color: #0284c7;">INSTALL APP</h2>
+            <span class="install-brand-sub">⚡ 100% OFFLINE FULLSCREEN RUNNER</span>
+          </div>
+        </div>
+        <button id="btn-close-install" class="btn-close-modal">&times;</button>
+      </div>
+
+      <div class="install-tabs">
+        <button class="install-tab-btn active" data-tab="android">📱 ANDROID</button>
+        <button class="install-tab-btn" data-tab="ios">🍎 IPHONE / IPAD</button>
+        <button class="install-tab-btn" data-tab="pc">💻 PC / MAC</button>
+      </div>
+
+      <div class="modal-body-scroll install-modal-body">
+        <!-- Android Guide -->
+        <div class="install-tab-content active" id="tab-content-android">
+          <div class="install-platform-badge android-badge">Android Chrome / Edge / Brave</div>
+          <div class="install-steps-list">
+            <div class="install-step-card">
+              <div class="step-num">1</div>
+              <div class="step-details">
+                <h4>Tap Install or 3-Dot Menu</h4>
+                <p>Click <strong class="highlight-step">Install Now</strong> below, or tap Chrome's <strong>3 dots (⋮)</strong> at top right.</p>
+              </div>
+            </div>
+            <div class="install-step-card">
+              <div class="step-num">2</div>
+              <div class="step-details">
+                <h4>Select "Install App"</h4>
+                <p>Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong> from menu options.</p>
+              </div>
+            </div>
+            <div class="install-step-card">
+              <div class="step-num">3</div>
+              <div class="step-details">
+                <h4>Play Anytime Offline</h4>
+                <p>Launch from Home Screen without internet with 60 FPS speed & zero lag!</p>
+              </div>
+            </div>
+          </div>
+          <button id="btn-modal-install-action" class="btn-primary-action pulse-anim" style="margin-top: 6px; width: 100%;">
+            <span>📲 INSTALL NOW (PWA)</span>
+          </button>
+        </div>
+
+        <!-- iOS Guide -->
+        <div class="install-tab-content" id="tab-content-ios">
+          <div class="install-platform-badge ios-badge">Apple Safari (iOS / iPadOS)</div>
+          <div class="install-steps-list">
+            <div class="install-step-card">
+              <div class="step-num">1</div>
+              <div class="step-details">
+                <h4>Tap Share Button</h4>
+                <p>In Safari, tap the <span class="ios-icon-badge">⎋ Share</span> button at the bottom navigation bar.</p>
+              </div>
+            </div>
+            <div class="install-step-card">
+              <div class="step-num">2</div>
+              <div class="step-details">
+                <h4>Add to Home Screen</h4>
+                <p>Scroll down the share sheet and tap <strong class="highlight-step">"Add to Home Screen" <span class="ios-icon-badge">➕</span></strong>.</p>
+              </div>
+            </div>
+            <div class="install-step-card">
+              <div class="step-num">3</div>
+              <div class="step-details">
+                <h4>Tap "Add"</h4>
+                <p>Tap <strong>Add</strong> at top right. Saurabh's Sprint is ready on your Home Screen!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PC Guide -->
+        <div class="install-tab-content" id="tab-content-pc">
+          <div class="install-platform-badge pc-badge">Windows 11/10 / macOS / ChromeOS</div>
+          <div class="install-steps-list">
+            <div class="install-step-card">
+              <div class="step-num">1</div>
+              <div class="step-details">
+                <h4>Click Address Bar Icon</h4>
+                <p>In Chrome or Edge, click the <span class="ios-icon-badge">⊕ Install</span> icon on the right side of address bar.</p>
+              </div>
+            </div>
+            <div class="install-step-card">
+              <div class="step-num">2</div>
+              <div class="step-details">
+                <h4>Confirm Desktop Install</h4>
+                <p>Click <strong>"Install"</strong> to launch as a standalone lightweight desktop game.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Benefits Row -->
+        <div class="install-benefits-row">
+          <div class="benefit-item">⚡ <strong>Fast 60FPS</strong></div>
+          <div class="benefit-item">📴 <strong>100% Offline</strong></div>
+          <div class="benefit-item">🎮 <strong>Fullscreen</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. Daily Rewards Modal (7-Day Streak Calendar) -->
+  <div id="daily-rewards-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel daily-modal-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title" style="font-size: 18px; color: #f59e0b;">🎁 7-DAY LOGIN GIFTS</h2>
+        <button id="btn-close-daily" class="btn-close-modal">&times;</button>
+      </div>
+      <p class="modal-subtitle">Log in every day for bigger coins, keys & surprise crates!</p>
+      
+      <div class="daily-streak-grid" id="daily-streak-container">
+        <!-- Rendered by JavaScript -->
+      </div>
+      
+      <div class="daily-streak-footer">
+        <button id="btn-claim-daily" class="btn-primary-action pulse-anim btn-claim-glow" disabled>
+          <span id="daily-claim-btn-text">🎁 CLAIM TODAY'S REWARD</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Lucky Spin Wheel Modal -->
+  <div id="spin-wheel-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel spin-modal-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title" style="font-size: 18px; color: #ec4899;">🎡 LUCKY SPIN WHEEL</h2>
+        <button id="btn-close-spin" class="btn-close-modal">&times;</button>
+      </div>
+      <p class="modal-subtitle">Spin every day for FREE coins, boards & revive keys!</p>
+
+      <div class="spin-wheel-stage">
+        <div class="wheel-pointer">▼</div>
+        <canvas id="spin-wheel-canvas" width="280" height="280"></canvas>
+      </div>
+      <div id="spin-wheel-status" class="spin-status-banner">🎡 1 FREE DAILY SPIN READY!</div>
+
+      <div class="spin-wheel-footer">
+        <button id="btn-spin-action" class="btn-primary-action pulse-anim btn-spin-glow">
+          <span id="spin-btn-text">🎡 SPIN NOW (FREE)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Achievements / Trophies Modal -->
+  <div id="achievements-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel achievements-modal-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title" style="font-size: 18px; color: #eab308;">🏆 TROPHY ROOM</h2>
+        <button id="btn-close-achievements" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="shop-bank-bar">
+        <span>COMPLETED:</span>
+        <strong id="achievements-counter-display">0 / 10</strong>
+      </div>
+      <div class="modal-body-scroll achievements-list-container" id="achievements-list-container">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Mystery Box Modal -->
+  <div id="mystery-box-modal" class="modal-layer menu-hidden">
+    <div class="modal-content glass-panel mystery-modal-panel">
+      <div class="modal-header">
+        <h2 class="text-3d-title" style="font-size: 18px; color: #a855f7;">📦 MYSTERY BOX</h2>
+        <button id="btn-close-mystery" class="btn-close-modal">&times;</button>
+      </div>
+      <div class="mystery-unboxing-area">
+        <div id="mystery-box-graphic" class="mystery-box-3d-anim">📦</div>
+        <h3 id="mystery-headline" class="mystery-headline">TAP TO UNBOX!</h3>
+        <p id="mystery-subtext" class="mystery-subtext">Mystery crates contain coins, revive keys & surprises!</p>
+        <div id="mystery-reward-reveal" class="mystery-reward-display hidden">
+          <div id="mystery-reward-icon" class="mystery-reward-icon">🪙</div>
+          <div id="mystery-reward-amount" class="mystery-reward-amount">+500 COINS!</div>
+        </div>
+      </div>
+      <div class="mystery-footer">
+        <button id="btn-open-box-action" class="btn-primary-action pulse-anim btn-mystery-action">
+          <span id="mystery-btn-text">📦 OPEN CRATE (<span id="mystery-boxes-count">0</span> LEFT)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/storage.js?v=5.9"></script>
+  <script src="js/audio.js?v=5.9"></script>
+  <script src="js/missions.js?v=5.9"></script>
+  <script src="js/collectibles.js?v=5.9"></script>
+  <script src="js/player.js?v=5.9"></script>
+  <script src="js/chaser.js?v=5.9"></script>
+  <script src="js/world.js?v=5.9"></script>
+  <script src="js/input.js?v=5.9"></script>
+  <script src="js/ui.js?v=5.9"></script>
+  <script src="js/main.js?v=5.9"></script>
+</body>
+</html>
+

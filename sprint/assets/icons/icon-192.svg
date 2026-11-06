@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0e14" />
+      <stop offset="100%" stop-color="#1e272e" />
+    </linearGradient>
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff3838" />
+      <stop offset="100%" stop-color="#ffa502" />
+    </linearGradient>
+    <linearGradient id="trackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00d2d3" />
+      <stop offset="100%" stop-color="#54a0ff" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)" />
+  <rect x="12" y="12" width="488" height="488" rx="98" fill="none" stroke="url(#neonGrad)" stroke-width="8" opacity="0.6" />
+
+  <!-- 3D Track Perspective Lines -->
+  <path d="M120 440 L220 230" stroke="url(#trackGrad)" stroke-width="8" stroke-linecap="round" opacity="0.8" />
+  <path d="M392 440 L292 230" stroke="url(#trackGrad)" stroke-width="8" stroke-linecap="round" opacity="0.8" />
+  <path d="M256 440 L256 230" stroke="url(#trackGrad)" stroke-width="6" stroke-dasharray="16,16" stroke-linecap="round" opacity="0.6" />
+
+  <!-- Cross Ties -->
+  <line x1="145" y1="400" x2="367" y2="400" stroke="#ffd32a" stroke-width="6" stroke-linecap="round" opacity="0.8" />
+  <line x1="175" y1="350" x2="337" y2="350" stroke="#ffd32a" stroke-width="6" stroke-linecap="round" opacity="0.8" />
+  <line x1="205" y1="290" x2="307" y2="290" stroke="#ffd32a" stroke-width="6" stroke-linecap="round" opacity="0.8" />
+
+  <!-- Speed Glow Ring -->
+  <circle cx="256" cy="180" r="100" fill="url(#neonGrad)" opacity="0.25" filter="blur(10px)" />
+
+  <!-- Runner Figure Icon -->
+  <text x="256" y="235" font-size="160" text-anchor="middle" dominant-baseline="central">🏃‍♂️</text>
+
+  <!-- Game Logo Text -->
+  <text x="256" y="470" font-family="'Russo One', sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" letter-spacing="2">SAURABH'S SPRINT</text>
+</svg>

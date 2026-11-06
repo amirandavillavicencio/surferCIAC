@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Debug Test</title>
+  <style>
+    body { margin: 0; background: #111; color: #0f0; font-family: monospace; font-size: 14px; }
+    #log { padding: 20px; white-space: pre; }
+    .ok { color: #0f0; }
+    .err { color: #f00; font-weight: bold; }
+    .warn { color: #ff0; }
+    .info { color: #0ff; }
+  </style>
+</head>
+<body>
+  <div id="log">Starting tests...\n</div>
+
+  <script>
+    const log = document.getElementById('log');
+    const origLog = console.log;
+    const origErr = console.error;
+    const origWarn = console.warn;
+
+    function addLine(text, cls) {
+      const span = document.createElement('span');
+      span.className = cls || '';
+      span.textContent = text + '\n';
+      log.appendChild(span);
+    }
+
+    window.addEventListener('error', function(e) {
+      addLine('❌ UNCAUGHT ERROR: ' + e.message + ' @ line ' + e.lineno, 'err');
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      addLine('❌ UNHANDLED PROMISE: ' + (e.reason && e.reason.message || e.reason), 'err');
+    });
+
+    addLine('✅ Basic JS working', 'ok');
+  </script>
+
+  <!-- Load Three.js -->
+  <script src="lib/three.min.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined') {
+      addLine('✅ THREE.js loaded: ' + THREE.REVISION, 'ok');
+      addLine('  CircleGeometry: ' + (typeof THREE.CircleGeometry), 'info');
+      addLine('  FogExp2: ' + (typeof THREE.FogExp2), 'info');
+      addLine('  WebGLRenderer: ' + (typeof THREE.WebGLRenderer), 'info');
+    } else {
+      addLine('❌ THREE.js FAILED TO LOAD', 'err');
+    }
+  </script>
+
+  <script src="js/storage.js?v=5.1"></script>
+  <script>addLine('✅ storage.js loaded - Storage: ' + (typeof Storage !== 'undefined' ? 'OK' : 'MISSING'), 'ok');</script>
+
+  <script src="js/audio.js?v=5.1"></script>
+  <script>addLine('✅ audio.js loaded - Audio: ' + (typeof Audio !== 'undefined' ? 'defined' : 'missing'), 'ok');</script>
+
+  <script src="js/missions.js?v=5.1"></script>
+  <script>addLine('✅ missions.js loaded - MissionManager: ' + (typeof MissionManager), 'ok');</script>
+
+  <script src="js/collectibles.js?v=5.1"></script>
+  <script>addLine('✅ collectibles.js loaded - CollectibleManager: ' + (typeof CollectibleManager), 'ok');</script>
+
+  <script src="js/player.js?v=5.1"></script>
+  <script>addLine('✅ player.js loaded - Player: ' + (typeof Player), 'ok');</script>
+
+  <script src="js/chaser.js?v=5.1"></script>
+  <script>addLine('✅ chaser.js loaded - ChaserManager: ' + (typeof ChaserManager), 'ok');</script>
+
+  <script src="js/world.js?v=5.1"></script>
+  <script>addLine('✅ world.js loaded - WorldManager: ' + (typeof WorldManager), 'ok');</script>
+
+  <script src="js/input.js?v=5.1"></script>
+  <script>addLine('✅ input.js loaded - InputManager: ' + (typeof InputManager), 'ok');</script>
+
+  <script src="js/ui.js?v=5.1"></script>
+  <script>addLine('✅ ui.js loaded - UIManager: ' + (typeof UIManager), 'ok');</script>
+
+  <script src="js/main.js?v=5.1"></script>
+  <script>
+    addLine('✅ main.js loaded - Game: ' + (typeof Game), 'ok');
+    addLine('  launchGame: ' + (typeof launchGame), 'ok');
+    if (window.game) {
+      addLine('✅ Game RUNNING', 'ok');
+    } else {
+      addLine('⚠️ game not on window yet (normal - loads on DOMContentLoaded)', 'warn');
+    }
+    setTimeout(() => {
+      if (window.game) {
+        addLine('✅ window.game EXISTS - game is running!', 'ok');
+      } else {
+        addLine('❌ window.game is NULL after 500ms - game failed to launch!', 'err');
+        // Try launching manually
+        try {
+          if (typeof launchGame === 'function') {
+            addLine('  Trying manual launchGame()...', 'warn');
+            launchGame();
+            addLine('  launchGame() completed. window.game: ' + (window.game ? 'EXISTS' : 'NULL'), 'info');
+          }
+        } catch(e) {
+          addLine('❌ launchGame() ERROR: ' + e.message, 'err');
+          addLine('  Stack: ' + e.stack.substring(0, 300), 'err');
+        }
+      }
+    }, 500);
+  </script>
+</body>
+</html>
