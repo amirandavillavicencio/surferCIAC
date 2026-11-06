@@ -2,15 +2,15 @@ import {readFile,writeFile,copyFile} from 'node:fs/promises';
 await copyFile('ciac/train-dynamics.ts','upstream/src/ciac/train-dynamics.ts');
 function patch(s,a,b){if(s.split(a).length!==2)throw Error('Train dynamics anchor: '+a);return s.replace(a,b);}
 let types=await readFile('upstream/src/sim/types.ts','utf8');
-types=patch(types,'  meet: number;', '  planKind?: string;\n  activation?: number;\n  trainSpeed?: number;\n  travelTime: number;\n  meetEnd: number;\n  meet: number;');
+types=patch(types,'  meet: number;', '  actionBeat?: string;\n  actionVariant?: number;\n  planKind?: string;\n  activation?: number;\n  trainSpeed?: number;\n  travelTime: number;\n  meetEnd: number;\n  meet: number;');
 await writeFile('upstream/src/sim/types.ts',types);
 let track=await readFile('upstream/src/sim/track.ts','utf8');
-track=patch(track,'export interface Spec {','export interface Spec {\n  planKind?: string;\n  activation?: number;\n  trainSpeed?: number;');
+track=patch(track,'export interface Spec {','export interface Spec {\n  actionBeat?: string;\n  actionVariant?: number;\n  planKind?: string;\n  activation?: number;\n  trainSpeed?: number;');
 track=patch(track,'if (d >= s.d0 && d <= s.d1) walkTrain[i * L + s.lane] = 1;', 'if (d >= s.d0 && d <= s.d1 + PLAYER.halfD) walkTrain[i * L + s.lane] = 1;');
 await writeFile('upstream/src/sim/track.ts',track);
 let sim=await readFile('upstream/src/sim/sim.ts','utf8');
 sim="import { timedFront } from '../ciac/train-dynamics';\n"+sim;
-sim=patch(sim,'      id: this.nextId++, kind: s.kind,', '      planKind:s.planKind, activation:s.activation, trainSpeed:s.trainSpeed, travelTime:0, meetEnd:s.d1,\n      id: this.nextId++, kind: s.kind,');
+sim=patch(sim,'      id: this.nextId++, kind: s.kind,', '      actionBeat:s.actionBeat, actionVariant:s.actionVariant, planKind:s.planKind, activation:s.activation, trainSpeed:s.trainSpeed, travelTime:0, meetEnd:s.d1,\n      id: this.nextId++, kind: s.kind,');
 sim=patch(sim,`  private placeMover(o: Ob) {
     o.d0 = moverFront(o.meet, this.d);
     o.d1 = o.d0 + o.len;

@@ -69,14 +69,15 @@ world=patch(world,"      const w = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.
 world=patch(world,'w.position.set(laneX(l), 6.45, z);','w.position.set(laneX(l), 6.45, z - 30);');
 await writeFile('upstream/src/view/world.ts',world);
 await copyFile('ciac/encounters.ts','upstream/src/ciac/encounters.ts');
+await copyFile('ciac/action-section.ts','upstream/src/ciac/action-section.ts');
 let track=await readFile('upstream/src/sim/track.ts','utf8');
-track="import { trafficEncounter, trafficRoute, trafficKind } from '../ciac/encounters';\n"+track;
+track="import { ACTION_BEATS, actionEncounter, actionRoute } from '../ciac/action-section';\nimport { trafficEncounter, trafficRoute, trafficKind } from '../ciac/encounters';\n"+track;
 const a=track.indexOf('  private genChunk() {');
 const b=track.indexOf('  private buildRows(',a);
 if(a<0||b<0)throw Error('Missing generator');
 track=track.replace(/type Pattern = [^\n]+\n/, '');
-track=track.replace('export class Track {', 'export class Track {\n  private lastTrafficKind = \"\";');
-track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.lastTrafficKind = \"\";');
+track=track.replace('export class Track {', 'export class Track {\n  actionSectionStart = -1;\n  private lastTrafficKind = \"\";');
+track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.lastTrafficKind = \"\";\n    this.actionSectionStart = -1;');
 const generatorStart=track.indexOf('  private genChunk() {');
 const generatorEnd=track.indexOf('  private buildRows(',generatorStart);
 track=track.slice(0,generatorStart)+`  private genChunk() {
@@ -89,10 +90,14 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
     if (this.lastTrafficKind === 'double' || this.lastTrafficKind === 'transfer') kind='recovery';
     else if (kind===this.lastTrafficKind) kind=trafficKind(this.chunks+3,start);
     if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
+    if(this.actionSectionStart<0 && end-start>100)this.actionSectionStart=start;
+    const sectionIndex=(start-this.actionSectionStart)/150;
+    const beat=sectionIndex>=0 && sectionIndex<3 && Number.isInteger(sectionIndex) ? ACTION_BEATS[sectionIndex] : undefined;
+    if(beat)kind=beat==='A'?'dodge':beat==='B'?'transfer':'double';
     this.lastTrafficKind=kind;
     const variant = this.rng.int(0, 19);
     // Assemble before filtering, so rejected destinations take their ramps.
-    let specs = this.course.prepareSpecs(trafficEncounter(start, from, kind, variant)
+    let specs = this.course.prepareSpecs((beat ? actionEncounter(start,from,beat,variant) : trafficEncounter(start, from, kind, variant))
       .filter(s => s.d1 < end - 5 && (s.kind === 'mtrain' || s.d0 >= this.busy[s.lane])));
     let res = solve(specs, start, end, this.reach, speedAt, true, from);
     if (!res.ok) {
@@ -108,6 +113,7 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
     for (let d=start+3; d<end-4; d+=2.1) {
       if (!this.course.allowsPickup(d)) continue;
       const pt=trafficRoute(start,from,kind,d,speedAt(start+36));
+      if(beat){const reward=actionRoute(start,from,beat,variant,d,speedAt(start+36));this.sink.coin(reward.lane,d,reward.y);continue;}
       const sliding=kind!=='double';
       this.sink.coin(pt.lane,d,sliding && d>start+78 && d<start+86 ? .45 : pt.y+.85);
     }
