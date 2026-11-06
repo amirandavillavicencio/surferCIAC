@@ -34,7 +34,7 @@ test('reservations cover the full train sweep; ramps cannot survive without trai
 });
 
 test('100 seeds, tutorial and normal: generated zones stay empty and all chunks remain traversable', () => {
-  let movers = 0, trains = 0;
+  let movers = 0, trains = 0, ramps = 0;
   for (let seed=1; seed<=100; seed++) for (const tutorial of [true,false]) {
     const s = new Sim(seed);
     s.noSpawn = true;
@@ -47,16 +47,35 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
         movers++;
         assert.ok(o.cars >= 3, 'no isolated one-car train');
       }
-      if (o.kind==='train') trains++;
+      if (o.kind==='train') {
+        trains++;
+        assert.ok(o.cars>=3 && o.cars<=4, 'parked trains have complete multi-car roofs');
+      }
+      if (o.kind==='ramp') {
+        ramps++;
+        assert.ok(s.obs.some(train => train.kind==='train' && train.lane===o.lane &&
+          Math.abs(train.d0-o.d1)<0.01), 'every access ramp must lead to a train roof');
+      }
     }
     assert.ok(s.coinList.every(c=>s.track.course.allowsPickup(c.d)));
     assert.ok(s.powers.every(p=>s.track.course.allowsPickup(p.d)));
     const result = solve(s.obs.map(o=>Sim.specOf(o)),0,s.track.frontier,[1],speedAt);
     assert.ok(result.ok, `seed ${seed}, tutorial ${tutorial}, at ${result.failAt}`);
   }
-  assert.ok(movers > 300, 'moving trains should remain common even with quiz reservations');
-  assert.equal(trains, 0, 'no stationary railcars in normal runs or tutorial');
-  console.log(JSON.stringify({generatedMovingTrains:movers,generatedParkedTrains:trains}));
+  assert.ok(movers > 100, 'moving trains remain common even with quiz reservations');
+  assert.ok(trains > 100, 'rooftop routes return in normal gameplay');
+  assert.ok(ramps > 50, 'ramps provide playable access to parked train roofs');
+  console.log(JSON.stringify({generatedMovingTrains:movers,generatedParkedTrains:trains,generatedRamps:ramps}));
+});
+
+test('tutorial teaches jumping onto the train after its first protected question', () => {
+  const s = new Sim(19);
+  s.noSpawn=true;
+  s.reset(19,true);
+  const ramps=s.obs.filter(o=>o.kind==='ramp');
+  assert.ok(ramps.some(r=>r.d0>=190 && s.obs.some(o=>o.kind==='train' &&
+    o.lane===r.lane && Math.abs(o.d0-r.d1)<0.01)),
+    'tutorial ramp and stationary train must form an accessible roof after first gate');
 });
 
 test('oncoming train moves before it becomes visible and keeps moving as the runner approaches', () => {

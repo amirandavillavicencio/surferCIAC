@@ -10,35 +10,38 @@ const replaceOnce = (before, after, name) => {
   source = source.replace(before, after);
 };
 
-// Los vagones estacionarios de un solo coche dominaban el inicio de la carrera.
-// Todas las variantes de patrón ferroviario pasan ahora por el simulador móvil,
-// que conserva la colisión, el movimiento y el solucionador de caminos.
-const from = source.indexOf('    const train = (l: number, at: number, withRamp: boolean, maxCars: number) => {');
-const until = source.indexOf('    const mover = (l: number, at: number, maxCars: number) => {', from);
-if (from < 0 || until <= from) throw new Error('No se encontró el generador original de trenes');
-source = source.slice(0, from) + `    const train = (l: number, at: number, _withRamp: boolean, maxCars: number) => {
-      // Sin rampa: un tren que llega de frente no es una plataforma estática.
-      return mover(l, at, Math.max(3, maxCars));
-    };
-` + source.slice(until);
+// Dos clases de encuentro, tal como permite el motor original:
+// trenes que vienen de frente y trenes estacionados con acceso por rampa.
+// El corredor puede volver a subir a los techos en los tres carriles.
+replaceOnce('const cars = r.int(1, maxCars);',
+  'const cars = r.int(3, Math.max(3, Math.min(4, maxCars)));',
+  'tres o cuatro vagones estacionados');
 replaceOnce('const cars = r.int(1, Math.min(3, maxCars));',
   'const cars = r.int(3, Math.max(3, Math.min(4, maxCars)));',
-  'mínimo de tres vagones');
+  'tres o cuatro vagones móviles');
 replaceOnce('busy[l] = at + MOVER.ratio * MOVER.trigger + len + 4;',
   'busy[l] = at + len / (1 + MOVER.ratio) + v * 0.95 + 9;',
   'distancia de seguridad para trenes móviles');
+replaceOnce('const rampP = 0.25 + 0.35 * L;',
+  'const rampP = 0.52 + 0.18 * L;',
+  'accesos a techos');
 
-// En el tutorial se conservan las señales de salto y deslizamiento,
-// pero se sustituyen los trenes quietos por trenes móviles y se retiran
-// sus rampas. La reserva de preguntas se aplica antes de construir la pista.
-replaceOnce('    specs = this.course.prepareSpecs(specs);',
-  `    specs = this.course.prepareSpecs(specs.filter(spec => spec.kind !== 'ramp').map(spec => {
-      if (spec.kind !== 'train') return spec;
-      const cars = Math.max(3, spec.cars || 1);
-      return {
-        ...spec, kind: 'mtrain' as const, cars,
-        d1: spec.d0 + trainLength(cars) / (1 + MOVER.ratio)
-      };
-    }));`,
-  'tutorial de trenes');
+// Tutorial: primero saltar y deslizarse; después de la primera pregunta,
+// acceder a un tren estacionado por una rampa y recorrer su techo.
+// Nada invade la franja reservada entre los metros 140 y 190.
+replaceOnce("      { kind: 'train', lane: 1, d0: s + 100, d1: s + 100 + trainLength(2), cars: 2, hint: 'lane' },",
+  '',
+  'eliminar tren tutorial en el espacio de la primera pregunta');
+replaceOnce("{ kind: 'ramp', lane: 0, d0: s + 150, d1: s + 157, hint: 'ramp' }",
+  "{ kind: 'ramp', lane: 0, d0: s + 177, d1: s + 184, hint: 'ramp' }",
+  'rampa tras primera pregunta');
+replaceOnce("{ kind: 'train', lane: 0, d0: s + 157, d1: s + 157 + trainLength(3), cars: 3 }",
+  "{ kind: 'train', lane: 0, d0: s + 184, d1: s + 184 + trainLength(3), cars: 3 }",
+  'primer tren de techo');
+replaceOnce('const end = s + 200;',
+  'const end = s + 240;',
+  'distancia del tutorial');
+replaceOnce('this.busy = [s + 157 + trainLength(3) + 12, s + 120, s + 120];',
+  'this.busy = [s + 184 + trainLength(3) + 12, s + 120, s + 120];',
+  'reserva final de vías del tutorial');
 await writeFile(path, source);

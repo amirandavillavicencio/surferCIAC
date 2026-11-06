@@ -152,6 +152,10 @@ Se reemplaza la geometría visible del personaje original por un **nuevo corredo
 
 ## Trenes completos y en movimiento
 
-La partida utiliza trenes de **3 a 4 vagones** en las **tres vías existentes**. El generador ya no produce trenes estáticos de un solo vagón. Los trenes avanzan de frente respecto del corredor, con desplazamiento vinculado a la simulación, y conservan el solucionador de rutas para permitir esquivarlos. También en el tutorial se sustituyen los trenes fijos; las señales de salto y deslizamiento se conservan.
+La partida combina **trenes móviles que vienen de frente** y **trenes estacionados de 3 a 4 vagones**, siempre dentro de las tres vías existentes. Los estacionados permiten subir al techo mediante las rampas originales, mientras que los móviles conservan la simulación de encuentro y las colisiones. En el tutorial se practican salto y deslizamiento y, después de la primera pregunta, se presenta un recorrido por el techo de un tren estacionado.
 
 La reserva de preguntas considera el intervalo de **encuentro con el jugador** del tren móvil, no toda la distancia recorrida por su morro antes de encontrarse. Esto permite que los trenes circulen visiblemente en la distancia sin invadir los 36 m de franjas de respuesta ni sus márgenes protegidos. El render por vagones y acoples se conserva. No se alteran preguntas, controles, puntuaciones, API ni ranking.
+
+## Ritmo de obstáculos y recorridos en techos (referencia de gameplay, 06-11-2026)
+
+Se recuperaron las rampas y los trenes estacionados como superficies transitables, alternándolos con trenes móviles. El generador sigue validando que haya rutas posibles antes de publicar cada tramo. Se incrementa moderadamente la aparición de rampas y se asegura que los trenes de la pista tengan varios vagones completos. Se conservan el ritmo de las preguntas, las zonas protegidas, el cálculo de velocidad, los controles táctiles y la clasificación.
