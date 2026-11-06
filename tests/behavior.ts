@@ -1,0 +1,286 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { Sim } from '../upstream/src/sim/sim';
+import { solve } from '../upstream/src/sim/track';
+import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX } from '../upstream/src/config';
+import { QuizCourse } from '../upstream/src/ciac/course';
+import { RacePace } from '../upstream/src/ciac/pace';
+import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
+import { CIACQuiz } from '../upstream/src/ciac/game';
+import { bindSwipe } from '../upstream/src/ciac/swipe';
+import { PlayerView } from '../upstream/src/view/player';
+import { World } from '../upstream/src/view/world';
+import { Instanced } from '../upstream/src/view/pools';
+import * as THREE from '../upstream/node_modules/three';
+import { GLTFLoader } from '../upstream/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+
+const h = 1 / 120;
+const near = (a: number, b: number, tolerance = 1e-8) => assert.ok(Math.abs(a-b) < tolerance, `${a} != ${b}`);
+
+test('reservations cover the full train sweep; ramps cannot survive without trains', () => {
+  const course = new QuizCourse();
+  const crossing = {kind:'mtrain' as const,lane:1,d0:100,d1:104,cars:1};
+  assert.equal(course.allowsObstacle(crossing), false);
+  assert.equal(course.allowsObstacle({...crossing,d0:40,d1:44}), true);
+  assert.equal(course.allowsObstacle({...crossing,d0:195,d1:199}), true);
+  assert.deepEqual(course.prepareSpecs([
+    {kind:'ramp',lane:0,d0:120,d1:127},
+    {kind:'train',lane:0,d0:127,d1:147,cars:3}
+  ]), []);
+  for (let d=140; d<=190; d+=0.5) assert.equal(course.allowsPickup(d),false);
+});
+
+test('100 seeds, tutorial and normal: generated zones stay empty and all chunks remain traversable', () => {
+  let movers = 0, trains = 0;
+  for (let seed=1; seed<=100; seed++) for (const tutorial of [true,false]) {
+    const s = new Sim(seed);
+    s.noSpawn = true;
+    s.reset(seed,tutorial);
+    while (s.track.frontier < 4000) s.track.ensure(4000);
+    for (const o of s.obs) {
+      assert.ok(o.lane>=0 && o.lane<=2);
+      assert.ok(s.track.course.allowsObstacle(Sim.specOf(o)));
+      if (o.kind==='mtrain') movers++;
+      if (o.kind==='train') trains++;
+    }
+    assert.ok(s.coinList.every(c=>s.track.course.allowsPickup(c.d)));
+    assert.ok(s.powers.every(p=>s.track.course.allowsPickup(p.d)));
+    const result = solve(s.obs.map(o=>Sim.specOf(o)),0,s.track.frontier,[1],speedAt);
+    assert.ok(result.ok, `seed ${seed}, tutorial ${tutorial}, at ${result.failAt}`);
+  }
+  assert.ok(movers > 100 && trains > 100);
+  console.log(JSON.stringify({generatedMovingTrains:movers,generatedParkedTrains:trains}));
+});
+
+test('continuous runs: nothing retires in front of the camera; moving trains and pickups return after gates', () => {
+  let observedMovers = 0, crossed = 0;
+  for (let seed=1; seed<=12; seed++) {
+    const s = new Sim(seed); s.invincible=true; s.reset(seed,false); s.start();
+    let gate=180;
+    while(s.d<2000) {
+      s.questionGate=gate;
+      const previous = s.obs.map(o=>({id:o.id,d1:o.d1,meet:o.meet,len:o.len,kind:o.kind}));
+      const coins = s.coinList.map(c=>({id:c.id,d:c.d,pulled:c.pulled}));
+      const before=s.d;
+      s.update(1/60);
+      const picked = s.drainEvents().filter(e=>e.type==='coin');
+      for(const o of previous) if(!s.obs.some(n=>n.id===o.id)) {
+        const end = o.kind==='mtrain'?moverFront(o.meet,s.d)+o.len:o.d1;
+        assert.ok(end < s.d-14+1e-6, `premature obstacle removal at ${s.d}`);
+      }
+      const removedCoins=coins.filter(c=>!s.coinList.some(n=>n.id===c.id));
+      assert.equal(removedCoins.filter(c=>c.d>=s.d-14).length,picked.length);
+      for(const c of removedCoins) {
+        assert.ok(c.d < s.d-14 || c.d-before<1.5 || c.pulled || picked.length>0);
+      }
+      for(const o of s.obs) if(o.kind==='mtrain') {
+        near(o.d0,moverFront(o.meet,s.d)); near(o.d1-o.d0,trainLength(o.cars));
+        observedMovers++;
+      }
+      const zone = gate > 180 && gate - s.d > 140 ? gate - 150 : gate;
+      if(s.d>=zone-40 && s.d<=zone+10) {
+        assert.ok(s.obs.every(o=>o.d1 < s.d-12 || o.d0>zone+10));
+        assert.ok(s.coinList.every(c=>c.d<zone-40 || c.d>zone+10), JSON.stringify({seed,d:s.d,gate,power:s.power,coins:s.coinList.filter(c=>c.d>=gate-40 && c.d<=gate+10)}));
+      }
+      if(s.d>=gate) { crossed++; gate+=150; }
+    }
+  }
+  assert.ok(observedMovers>0 && crossed>100);
+});
+
+test('72% transition and recovery are continuous and independent of frame rate', () => {
+  const samples:number[]=[];
+  for(const dt of [1/120,1/60,1/30,1/20]) {
+    const p=new RacePace();
+    near(p.step(dt,143,180),1);
+    let previous=1;
+    for(let t=0;t<1;t+=dt) { const f=p.step(dt,145,180); assert.ok(f<=previous+1e-12); previous=f; }
+    near(p.factor,.72);
+    assert.ok(p.step(dt,180,180)>.72 && p.factor<1);
+    for(let t=0;t<1;t+=dt) p.step(dt,181,180);
+    samples.push(p.factor);
+  }
+  for(const value of samples) near(value,1);
+});
+
+test('wrong answers retain 3 seconds at 55%, including a strip and pause, then recover', () => {
+  const p=new RacePace(); p.penalize(3);
+  for(let i=0;i<360;i++) near(p.step(h,150,180),.55);
+  assert.ok(p.penaltyRemaining<1e-10);
+  const remaining=p.penaltyRemaining;
+  // A paused game never calls Sim.update: no wall-clock penalty timer.
+  near(p.penaltyRemaining,remaining);
+  for(let i=0;i<121;i++) p.step(h,200,180);
+  near(p.factor,1);
+  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.start();s.pace.penalize(3);
+  for(let i=0;i<360;i++) {const d=s.d;s.update(h);near(s.speed/speedAt(d),.55);}
+});
+
+test('answer strips use the same distance as world transforms and survive the crossing', () => {
+  const scene=new THREE.Scene(), course=new QuizCourse(), track=new QuizAnswerTrack(scene);
+  const count=scene.children.length;
+  for(const d of [0,100,139,140,144,179.9,180,185,193.9,194.1,290,330,344.1]) {
+    track.update(d,course);
+    assert.equal(scene.children.length,count);
+    if(d>=140 && d<=193.9) {
+      const strip=scene.children.find(o=>o.visible && Math.abs(o.position.z-(d-180+18))<1e-8);
+      assert.ok(strip,`strip removed at ${d}`);
+    }
+  }
+  assert.equal(new Set(scene.children.map((o:any)=>o.geometry)).size,2);
+});
+
+// Minimal DOM adapter for the production quiz and swipe handlers. No browser,
+// rendered pixels, Safari gestures or native touch dispatch are claimed here.
+class ElementAdapter {
+  children:any[]=[]; hidden=false; disabled=false; value=''; textContent=''; clientWidth=390;
+  listeners=new Map<string,Function[]>();
+  className=''; attrs:any={}; parent:any;
+  classList={add(){},remove(){},toggle(){}};
+  append(...nodes:any[]) { for(const node of nodes) {this.children.push(node);node.parent=this;} }
+  insertBefore(node:any,_ref:any) {this.append(node);}
+  replaceChildren(...nodes:any[]) {this.children=[];this.append(...nodes);}
+  setAttribute(name:string,value:any) {this.attrs[name]=value;}
+  querySelector(_selector:string) {return this.children.find(c=>c.type==='submit')||new ElementAdapter();}
+  closest(_selector:string) {return null;}
+  setPointerCapture(_id:number) {}
+  addEventListener(type:string,cb:Function) {this.listeners.set(type,[...(this.listeners.get(type)||[]),cb]);}
+  emit(type:string,data:any) {for(const cb of this.listeners.get(type)||[]) cb(data);}
+}
+function dom() {
+  const elements=new Map<string,ElementAdapter>();
+  const get=(key:string)=>{if(!elements.has(key))elements.set(key,new ElementAdapter());return elements.get(key)!;};
+  (globalThis as any).Element=ElementAdapter;
+  (globalThis as any).document={querySelector:get,getElementById:get,createElement:()=>new ElementAdapter(),addEventListener(){}};
+  (globalThis as any).window={addEventListener(){}};
+}
+
+test('short iPhone-width swipes: four directions, one action per gesture, diagonals and rapid reversals', () => {
+  dom(); const target=new ElementAdapter(), actions:string[]=[]; let prevented=0;
+  bindSwipe(target as any,a=>actions.push(a),()=>true);
+  const touch=(type:string,x:number,y:number)=>target.emit(type,{target,cancelable:true,
+    preventDefault(){prevented++;},touches:type==='touchend'?[]:[{identifier:1}],
+    changedTouches:[{identifier:1,clientX:x,clientY:y}]});
+  for(const [dx,dy] of [[-15,0],[15,0],[0,-15],[0,15],[-15,0],[15,0]]) {
+    touch('touchstart',195,500);touch('touchmove',195+dx,500+dy);
+    touch('touchmove',195+dx*3,500+dy*3);touch('touchend',195+dx*3,500+dy*3);
+  }
+  assert.deepEqual(actions,['left','right','up','down','left','right']);
+  touch('touchstart',195,500);touch('touchmove',210,515);touch('touchend',210,515);
+  assert.equal(actions.length,6); assert.ok(prevented>=24);
+  target.emit('pointerdown',{pointerType:'touch',isPrimary:true,button:0,pointerId:1,target});
+  target.emit('pointermove',{pointerId:1,clientX:100,clientY:500});
+  assert.equal(actions.length,6);
+});
+
+test('real quiz: 24 questions, one request at each crossing, delayed answers, failures and stale responses', async () => {
+  dom();
+  const bank=JSON.parse(readFileSync('data/questions.json','utf8'));
+  const questions=Array.isArray(bank)?bank:bank.questions;
+  assert.equal(questions.length,24);
+  const course=new QuizCourse(), scene=new THREE.Scene(); let index=0, answers=0, penalty=0;
+  let resolveAnswer:any; let delay=false;
+  const response=(data:any)=>({ok:true,json:async()=>data});
+  (globalThis as any).fetch=async(path:string,options:any)=>{
+    if(path.includes('leaderboard'))return response({ranking:[]});
+    if(path.endsWith('start'))return response({token:'',question:questions[0]});
+    assert.equal(path,'/api/answer'); assert.ok([0,1,2].includes(JSON.parse(options.body).lane));
+    answers++; index++;
+    const data={correct:index%2===0,points:100*Math.floor(index/2),penaltySeconds:index%2?3:0,question:questions[index]||null};
+    if(delay) return new Promise(resolve=>{resolveAnswer=()=>resolve(response(data));});
+    return response(data);
+  };
+  const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;}});
+  await quiz.start();
+  for(let n=0;n<24;n++) {
+    const gate=quiz.activeGate; assert.ok(Number.isFinite(gate));
+    quiz.tick(gate-40.1,1); assert.equal((quiz as any).dialog.hidden,true);
+    quiz.tick(gate-40,1); assert.equal((quiz as any).dialog.hidden,false);
+    quiz.tick(gate-36,1); assert.equal(quiz.questionSlow,true);
+    delay=n===2;
+    quiz.tick(gate,n%3);quiz.tick(gate+.1,n%3);
+    assert.equal(answers,n+1);
+    if(delay) {quiz.tick(gate+220,1);resolveAnswer();}
+    await new Promise(resolve=>setImmediate(resolve));
+    if(n<23) assert.ok(quiz.activeGate>=gate+150);
+  }
+  assert.equal(answers,24);assert.equal(penalty,36);assert.equal(quiz.activeGate,Infinity);
+  assert.equal(course.intersects(5500,5600),false);
+  const existing = new Sim(); existing.reset(4,false);
+  const ids = existing.obs.map(o=>o.id);
+  existing.track.course.stop(existing.track.frontier);
+  assert.deepEqual(existing.obs.map(o=>o.id),ids);
+  assert.equal(typeof (existing as any).clearObstaclesUntil,'undefined');
+  // Reset while a response is outstanding must not resurrect the previous run.
+  index=0;delay=true;course.reset();quiz.reset();await quiz.start();quiz.tick(180,1);quiz.reset();resolveAnswer();
+  await new Promise(resolve=>setImmediate(resolve));assert.equal(quiz.activeGate,Infinity);
+  (globalThis as any).fetch=async()=>{throw new Error('network unavailable');};
+  course.reset();quiz.reset();await quiz.start();assert.equal(quiz.activeGate,Infinity);
+  assert.equal(course.intersects(5500,5600),false);
+});
+
+test('physical movement: rapid lanes, jump landing, slide, and original collision outcomes', () => {
+  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.start();
+  s.left();s.update(.04);const x=s.x;s.right();near(s.x,x);s.update(.04);s.right();
+  for(let i=0;i<30;i++)s.update(h);near(s.x,laneX(2));
+  s.jump();let peak=0;
+  for(let i=0;i<120;i++){s.update(h);peak=Math.max(peak,s.y);}
+  assert.ok(peak>1.5 && peak<1.9);assert.ok(s.grounded);near(s.y,0);
+  s.down();assert.ok(s.sliding);for(let i=0;i<80;i++)s.update(h);assert.equal(s.sliding,false);
+  for(const kind of ['train','mtrain','low','hurdle','overhead'] as const) {
+    s.reset(1,false);s.clearWorld();s.start();
+    s.addOb({kind,lane:1,d0:14,d1:14+(kind==='train'?trainLength(2):1),cars:2});
+    for(let i=0;i<360&&s.alive;i++)s.update(h);
+    assert.equal(s.alive,false,kind);
+  }
+});
+
+test('original GLB: complete train instances and finite animation clips hold instead of restarting', async () => {
+  const file=readFileSync('upstream/public/assets/core.glb');
+  const jsonLength=file.readUInt32LE(12), data=JSON.parse(file.subarray(20,20+jsonLength).toString());
+  // Textures are irrelevant to bounds and clip evaluation and need browser decoders.
+  for(const material of data.materials||[]) {
+    delete material.pbrMetallicRoughness?.baseColorTexture;
+    delete material.pbrMetallicRoughness?.metallicRoughnessTexture;
+    delete material.normalTexture;delete material.occlusionTexture;delete material.emissiveTexture;
+  }
+  delete data.images;delete data.textures;
+  const json=Buffer.from(JSON.stringify(data));const padded=Buffer.alloc(Math.ceil(json.length/4)*4,32);json.copy(padded);
+  const rest=file.subarray(20+jsonLength), header=Buffer.alloc(20);
+  file.copy(header,0,0,12);header.writeUInt32LE(20+padded.length+rest.length,8);
+  header.writeUInt32LE(padded.length,12);header.writeUInt32LE(0x4e4f534a,16);
+  const bytes=Buffer.concat([header,padded,rest]);
+  const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
+  const train=gltf.scene.getObjectByName('train')!;
+  const scene=new THREE.Scene(), pool=new Instanced(train,60,scene,{colors:true});
+  const sim=new Sim();sim.noSpawn=true;sim.reset(1,false);sim.clearWorld();sim.start();
+  const mover=sim.addOb({kind:'mtrain',lane:0,d0:80,d1:95,cars:3});
+  const emptyPool=()=>new Instanced(train,60,scene);
+  const world=Object.create(World.prototype) as World;
+  Object.assign(world, {scene,camera:new THREE.PerspectiveCamera(76,390/844,.3,260),
+    pools:{train:pool},coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
+    poles:emptyPool(),powerCards:{magnet:emptyPool(),shoes:emptyPool(),double:emptyPool()},
+    scrollTex:[],movers:[],camX:0,camY:0,shake:0,flash:0,aspect:390/844,time:0,
+    fx:{update(){},burst(){}},player:{menu(){}}
+  });
+  const matrix=new THREE.Matrix4(), expected=new THREE.Matrix4();
+  for(let frame=0;frame<1400;frame++) {
+    sim.invincible=true;sim.update(h);world.sync(sim,h,false);
+    const count=sim.obs.includes(mover) && mover.d1>=sim.d-12 ? 3 : 0;
+    assert.equal(pool.count,count);
+    for(const part of pool.parts) {
+      assert.equal(part.mesh.count,count);
+      for(let car=0;car<count;car++) {
+        const center=mover.d0+car*(CAR_LEN+CAR_GAP)+CAR_LEN/2;
+        expected.makeTranslation(laneX(mover.lane),0,sim.d-center).multiply(part.local);
+        part.mesh.getMatrixAt(car,matrix);
+        for(let k=0;k<16;k++)near(matrix.elements[k],expected.elements[k],1e-5);
+      }
+    }
+  }
+  const player=new PlayerView(gltf,new THREE.Scene());
+  player.play('jump',0,1,true);player.mixer.update(10);
+  const time=player.actions.jump.time;player.play('jump',0,1);near(player.actions.jump.time,time);
+  player.play('jump',0,1,true);near(player.actions.jump.time,0);
+});

@@ -1,6 +1,6 @@
 /* Líneas laterales ligeras de velocidad: no capturan gestos. */
 .ciac-rush{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;overflow:hidden;transition:opacity .22s ease}
-.ciac-rush i{position:absolute;top:-20vh;width:2px;height:12vh;border-radius:2px;background:rgba(255,255,255,.8);animation:ciac-rush-line var(--ciac-streak-time,.7s) linear infinite}
+.ciac-rush i{position:absolute;top:-20vh;width:2px;height:12vh;border-radius:2px;background:rgba(255,255,255,.8);animation:ciac-rush-line .9s linear infinite}
 .ciac-rush i:nth-child(1){left:4%;animation-delay:-.13s}
 .ciac-rush i:nth-child(2){left:12%;animation-delay:-.48s;height:9vh}
 .ciac-rush i:nth-child(3){right:4%;animation-delay:-.36s}

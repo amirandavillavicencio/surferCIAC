@@ -1,7 +1,19 @@
 import { access, mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+
+const original = ['index.html', 'src/main.ts', 'src/sim/track.ts', 'src/config.ts',
+  'src/sim/sim.ts', 'src/input.ts', 'src/ui.ts', 'src/view/world.ts', 'src/view/player.ts'];
+if (execFileSync('git', ['-C', 'upstream', 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim() !==
+    '79f9159d97c618bf9741b480872c87e4dab16417') throw new Error('Submódulo inesperado');
+for (const path of original) {
+  const content = execFileSync('git', ['-C', 'upstream', 'show', 'HEAD:' + path]);
+  await writeFile('upstream/' + path, content);
+}
 
 await access('upstream/src/main.ts');
 await mkdir('upstream/src/ciac', {recursive:true});
+await copyFile('ciac/course.ts','upstream/src/ciac/course.ts');
+await copyFile('ciac/pace.ts','upstream/src/ciac/pace.ts');
 await copyFile('ciac/swipe.ts','upstream/src/ciac/swipe.ts');
 await copyFile('ciac/game.ts','upstream/src/ciac/game.ts');
 await copyFile('ciac/game.css','upstream/src/ciac/game.css');
@@ -29,9 +41,9 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
     ["    watchPerf(dt);", "    if (elapsed < 0.25) watchPerf(elapsed);"],
     ["        if (gap < 90 && !horned.has(o.id))", "        if (o.d0 > sim.d && gap < 90 && !horned.has(o.id))"],
     ["  let seed = (Date.now() % 100000) + 1;",
-     "  const quiz = new CIACQuiz({\n    scene: world.scene,\n    notice: (message: string) => ui.toast(message),\n  });\n  const raceFX = new RaceFX(document.getElementById('ui')!);\n  const clearQuizCorridor = () => {\n    const until = quiz.safeCorridorUntil;\n    if (until <= sim.d) return;\n    sim.clearObstaclesUntil(until);\n    sim.clearCollectiblesUntil(until);\n  };\n  let seed = (Date.now() % 100000) + 1;"],
+     "  const quiz = new CIACQuiz({\n    scene: world.scene,\n    notice: (message: string) => ui.toast(message),\n    course: sim.track.course,\n    frontier: () => sim.track.frontier,\n    penalize: (seconds: number) => sim.pace.penalize(seconds),\n  });\n  const raceFX = new RaceFX(document.getElementById('ui')!);\n  let seed = (Date.now() % 100000) + 1;"],
     ["    overTimer = 0;\n    state = 'start';",
-     "    overTimer = 0;\n    if (!TEST) { quiz.reset(); raceFX.reset(); }\n    state = 'start';"],
+     "    overTimer = 0;\n    quiz.reset(); raceFX.reset();\n    state = 'start';"],
     ["    ui.show('play');\n  }\n  function pause() {",
      "    ui.show('play');\n    if (!TEST) void quiz.start();\n  }\n  function pause() {"],
     ["    audio.unlock();\n    if (a === 'pause') pause();",
@@ -40,13 +52,13 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
      "        overTimer = 0;\n        if (!TEST) quiz.endRun();\n        break;"],
     ["  let seed = (Date.now() % 100000) + 1;\n",
      "  let tutorialDone = load('tutorialDone', false);\n  let seed = (Date.now() % 100000) + 1;\n"],
-    ["sim.reset(seed, !load('tutorialDone', false));", "sim.reset(seed, !tutorialDone);"],
+    ["sim.reset(seed, !load('tutorialDone', false));", "sim.track.course.reset(!TEST); sim.reset(seed, !tutorialDone);"],
     ["    if (state === 'play' && sim.d > 260 && !load('tutorialDone', false)) save('tutorialDone', true);",
      "    if (state === 'play' && sim.d > 260 && !tutorialDone) {\n      tutorialDone = true;\n      save('tutorialDone', true);\n    }"],
     ["    if (state === 'play') sim.update(dt);",
-     "    if (state === 'play' && !TEST) {\n      quiz.tick(sim.d, dt, sim.lane);\n      sim.speedOverride = quiz.slowed ? speedAt(sim.d) * 0.55 : quiz.questionSlow ? speedAt(sim.d) * 0.72 : 0;\n      clearQuizCorridor();\n    }\n    if (state === 'play') sim.update(dt);\n    if (state === 'play' && !TEST) clearQuizCorridor();"],
+     "    if (state === 'play' && !TEST) {\n      quiz.tick(sim.d, sim.lane);\n      sim.questionGate = quiz.activeGate;\n    }\n    if (state === 'play') sim.update(dt);\n    if (state === 'play' && !TEST && sim.alive) quiz.tick(sim.d, sim.lane);"],
     ["    world.sync(sim, state === 'pause' ? 0 : dt, state === 'start');",
-     "    world.sync(sim, state === 'pause' ? 0 : dt, state === 'start');\n    if (!TEST) {\n      raceFX.update(sim, world, dt, state === 'play', quiz.safeCorridorUntil > sim.d);\n    }"],
+     "    world.sync(sim, state === 'pause' ? 0 : dt, state === 'start');\n    if (!TEST && state !== 'start' && sim.alive) quiz.render(sim.d);\n    if (!TEST) {\n      raceFX.update(sim, world, dt, state === 'play', quiz.questionSlow);\n    }"],
   ];
   for (const [before, after] of changes) {
     if (source.split(before).length !== 2) throw new Error('La versión original cambió: no se encontró un único punto de integración: ' + before);
@@ -57,12 +69,30 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   if (scenery < 0 || testEntry < 0) throw new Error('Carga original del escenario cambió');
   source = (source.slice(0, scenery) + source.slice(testEntry)).replace('      sceneryReady,\n', '');
 
+  source = source.replace('  world.warm(renderer);', '  if (!TEST) quiz.render(sim.d);\n  world.warm(renderer);');
+
   // Mantener el generador y su comprobación de rutas esquivables.
   const trackPath = 'upstream/src/sim/track.ts';
   let track = await readFile(trackPath,'utf8');
   const oldWeight = 'mt: L < 0.12 ? 0 : 0.06 + 0.22 * L,';
   if (track.split(oldWeight).length !== 2) throw new Error('Patrón original de trenes cambió');
   track = track.replace(oldWeight, 'mt: 0.17 + 0.10 * L,');
+  track = "import { QuizCourse } from '../ciac/course';\n" + track;
+  track = track.replace('  rng: Rng;', '  readonly course = new QuizCourse();\n  rng: Rng;');
+  track = track.replace('    const specs: Spec[] = [', '    let specs: Spec[] = [');
+  track = track.replace('    const res = solve(specs, s, end,', '    specs = this.course.prepareSpecs(specs);\n    const res = solve(specs, s, end,');
+  track = track.replace('specs = this.buildRows(start, end, lvl, v, attempt > 18, busy);',
+    'specs = this.course.prepareSpecs(this.buildRows(start, end, lvl, v, attempt > 18, busy));');
+  track = track.replace('    this.sink.coin(lane, d, y);', '    if (this.course.allowsPickup(d)) this.sink.coin(lane, d, y);');
+  track = track.replace('this.sink.coin(lane, d, 0.85);', 'if (this.course.allowsPickup(d)) this.sink.coin(lane, d, 0.85);');
+  track = track.replace('      if (clear) {', '      if (clear && this.course.allowsPickup(d)) {');
+  track = track.replace("      specs.push({ kind, lane: l, d0: at, d1: at + OB[kind].depth });",
+    "      const spec: Spec = { kind, lane: l, d0: at, d1: at + OB[kind].depth };\n      if (!this.course.allowsObstacle(spec)) return;\n      specs.push(spec);");
+  track = track.replace('      const cars = r.int(1, maxCars);',
+    '      const cars = r.int(1, maxCars);\n      const far = at + (withRamp ? OB.ramp.depth : 0) + trainLength(cars);\n      if (!this.course.allowsObstacle({kind: \'train\', lane:l, d0:at, d1:far, cars})) return false;');
+  track = track.replace('      const len = trainLength(cars);',
+    '      const len = trainLength(cars);\n      if (!this.course.allowsObstacle({kind: \'mtrain\', lane:l, d0:at, d1:at + len / (1 + MOVER.ratio), cars})) return false;');
+
   await writeFile(trackPath, track);
 
   const configPath = 'upstream/src/config.ts';
@@ -73,37 +103,19 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   await writeFile(configPath,config);
 
   const simPath = 'upstream/src/sim/sim.ts';
-  const simSource = await readFile(simPath, 'utf8');
-  const clearWorld = '  clearWorld() {';
-  if (simSource.split(clearWorld).length !== 2) throw new Error('Reciclaje original cambió');
-  await writeFile(simPath, simSource.replace(clearWorld, `  clearObstaclesUntil(until: number) {
-    for (let i = this.obs.length - 1; i >= 0; i--) {
-      const obstacle = this.obs[i];
-      const start = obstacle.kind === 'mtrain' ? obstacle.meet : obstacle.d0;
-      const end = obstacle.kind === 'mtrain' ? obstacle.meet + moverSpan(obstacle.len) : obstacle.d1;
-      if (Math.min(start, obstacle.d0) >= until || Math.max(end, obstacle.d1) <= this.d - 12) continue;
-      this.freeObs.push(obstacle);
-      this.obs.splice(i, 1);
-    }
-  }
-
-  clearCollectiblesUntil(until: number) {
-    const behind = this.d - 12;
-    for (let i = this.coinList.length - 1; i >= 0; i--) {
-      const coin = this.coinList[i];
-      if (coin.d < behind || coin.d >= until) continue;
-      this.freeCoins.push(coin);
-      this.coinList.splice(i, 1);
-    }
-    for (let i = this.powers.length - 1; i >= 0; i--) {
-      const power = this.powers[i];
-      if (power.d < behind || power.d >= until) continue;
-      this.freePowers.push(power);
-      this.powers.splice(i, 1);
-    }
-  }
-
-` + clearWorld));
+  let simSource = await readFile(simPath, 'utf8');
+  const replaceSim = (before, after) => {
+    if (simSource.split(before).length !== 2) throw new Error('Simulación original cambió: ' + before);
+    simSource = simSource.replace(before, after);
+  };
+  simSource = "import { RacePace } from '../ciac/pace';\n" + simSource;
+  replaceSim('  speedOverride = 0;', '  speedOverride = 0;\n  readonly pace = new RacePace();\n  questionGate = Infinity;');
+  replaceSim('    this.track.reset(seed, tutorial);', '    this.pace.reset();\n    this.questionGate = Infinity;\n    this.track.reset(seed, tutorial);');
+  replaceSim('const base = this.speedOverride || speedAt(this.d);',
+    'const base = this.speedOverride || speedAt(this.d) * this.pace.step(dt, this.d, this.questionGate);');
+  replaceSim('if (magnet && ahead < MAGNET_RANGE && ahead > -2) c.pulled = true;',
+    'if (magnet && ahead < MAGNET_RANGE && ahead > -2 && !this.track.course.intersects(Math.min(this.d, c.d), Math.max(this.d, c.d))) c.pulled = true;');
+  await writeFile(simPath, simSource);
 
   const inputPath = 'upstream/src/input.ts';
   const input = await readFile(inputPath, 'utf8');
@@ -159,6 +171,8 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
     }
     s.add(skyline);`);
   replaceWorld('    const sx = sim.x * 0.72;', '    this.camX += (sim.x * 0.66 - this.camX) * (1 - Math.exp(-dt * 10));');
+  replaceWorld('Math.min(1, dt * 5)', '(1 - Math.exp(-dt * 5))');
+  replaceWorld('Math.min(1, dt * 3)', '(1 - Math.exp(-dt * 3))');
   replaceWorld('this.shake * 0.5', 'this.shake * 0.25');
   replaceWorld('cam.position.set(sx + ox, this.camY + height + oy, dist);', 'const bob = Math.sin(sim.d * 0.72) * 0.035 * Math.max(0, Math.min(1, (sim.speed - 12) / 15));\n    cam.position.set(this.camX + ox, this.camY + height + oy + bob, dist);');
   replaceWorld('const fov = 58 + portrait * 17 + speedFactor * 10;', 'const fov = 59 + portrait * 17 + speedFactor * 14;');
@@ -171,6 +185,15 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   const landing = 'this.squash = Math.min(0.22, 0.08 + e.fall * 0.04);';
   if (player.split(landing).length !== 2) throw new Error('Animación de aterrizaje original cambió');
   player = player.replace(landing, 'this.squash = Math.min(0.15, 0.04 + e.fall * 0.035);');
+  player = player.replace('timeScale = 1) {', 'timeScale = 1, restart = false) {');
+  player = player.replace("d / (air * 1.1));", "d / (air * 1.1), true);");
+  player = player.replace("/ (PLAYER.slideTime * 1.05));", "/ (PLAYER.slideTime * 1.05), true);");
+  player = player.replace("this.play('runlookback', 0.08, 1.8);", "this.play('runlookback', 0.08, 1.8, true);");
+  player = player.replace('if (this.current === name && next.isRunning()) return;', 'if (this.current === name && !restart) return;');
+  player = player.replaceAll('0.9 + sim.speed / 22', '(0.9 + speedAt(sim.d) / 22) * sim.speed / speedAt(sim.d)');
+  player = player.replace('GRAVITY, laneX', 'GRAVITY, laneX, speedAt');
+  player = player.replace("(this.current === 'jump' && !sim.grounded)", "(this.current === 'jump' && !sim.grounded && this.actions.jump.isRunning())");
+  player = player.replace("if (!sim.grounded && sim.vy < -3 && this.current !== 'jump')", "if (!sim.grounded && sim.vy < -3 && (this.current !== 'jump' || !this.actions.jump.isRunning()))");
   await writeFile(playerPath, player);
   await writeFile(file, source);
 }

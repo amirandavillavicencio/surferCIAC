@@ -11,6 +11,8 @@ export class RaceFX {
   private tilt = 0;
   private noticeLeft = 0;
   private paceBand = -1;
+  private readonly streaks: Animation[];
+  private playbackRate = 1;
   private readonly reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(root: HTMLElement) {
@@ -24,6 +26,7 @@ export class RaceFX {
     this.notice.setAttribute('role', 'status');
     this.notice.hidden = true;
     root.append(this.rush, this.notice);
+    this.streaks = this.rush.getAnimations({ subtree: true });
   }
 
   reset() {
@@ -49,18 +52,19 @@ export class RaceFX {
     this.rush.classList.toggle('active', !this.reducedMotion.matches);
     this.rush.classList.toggle('question', inQuestion);
     const band = Math.round(pace * 4);
+    const rate = Math.max(0.1, sim.speed / 12);
+    if (Math.abs(rate - this.playbackRate) > 0.01) {
+      this.playbackRate = rate;
+      for (const animation of this.streaks) animation.updatePlaybackRate(rate);
+    }
     if (band !== this.paceBand) {
       this.paceBand = band;
-      this.rush.style.setProperty('--ciac-streak-time', (0.9 - band * 0.09).toFixed(2) + 's');
       this.rush.style.setProperty('--ciac-rush-opacity', (0.12 + band * 0.045).toFixed(2));
     }
 
     if (inQuestion) {
       this.notice.hidden = true;
       this.noticeLeft = 0;
-      this.tilt = 0;
-      this.previousLane = sim.lane;
-      return;
     }
 
     if (sim.lane !== this.previousLane) {
@@ -74,6 +78,7 @@ export class RaceFX {
     if (this.noticeLeft === 0) this.notice.hidden = true;
 
     let incoming = false;
+    if (inQuestion) return;
     for (const train of sim.obs) {
       if (train.kind !== 'mtrain') continue;
       const gap = train.d0 - sim.d;
@@ -82,9 +87,6 @@ export class RaceFX {
         this.passed.add(train.id);
         if (this.passed.size > 100) this.passed.clear();
         this.show('¡Tren esquivado!', 1.1, false);
-        world.fx.burst(sim.x, sim.y + 0.35, 0.1, 5, 0xcceeff, {
-          speed: 1.3, up: 0.35, size: 0.18, life: 0.28, grav: 0
-        });
       }
     }
     if (incoming && this.noticeLeft < 0.2) {
