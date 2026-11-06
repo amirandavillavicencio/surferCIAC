@@ -291,11 +291,20 @@ test('original GLB: complete train instances and finite animation clips hold ins
   const player=new PlayerView(gltf,actorScene);
   const shadow=actorScene.children.find(o=>o.type==='Mesh' && (o as THREE.Mesh).geometry.type==='CircleGeometry');
   assert.ok(shadow,'ground contact shadow remains attached to the player renderer');
+  const oldCostume=player.model.getObjectByName('Boy01_Body_Geo') as THREE.Mesh;
+  assert.ok(oldCostume && !oldCostume.visible,'original character geometry is hidden');
+  const replacement:THREE.Object3D[]=[];
+  player.model.traverse(o=>{if(o.name.startsWith('campus-runner:'))replacement.push(o);});
+  assert.ok(replacement.length>=25, 'the student runner is a new articulated 3D model');
+  assert.ok(replacement.some(o=>o.name==='campus-runner:cabello'),'replacement has uncovered short hair');
+  assert.ok(replacement.some(o=>o.name==='campus-runner:polera'),'replacement wears a sports jersey');
+  const oldMeshCount=player.model.children.length;
   const nodes=actorScene.children.length;
   const runner=new Sim();runner.noSpawn=true;runner.reset(2,false);runner.clearWorld();runner.start();
   for(let frame=0;frame<120;frame++){
     runner.update(h);player.update(runner,h,[]);
     assert.equal(actorScene.children.length,nodes,'no new scene nodes per frame');
+    assert.equal(player.model.children.length,oldMeshCount,'rig keeps its character structure');
   }
   player.play('jump',0,1,true);player.mixer.update(10);
   const time=player.actions.jump.time;player.play('jump',0,1);near(player.actions.jump.time,time);

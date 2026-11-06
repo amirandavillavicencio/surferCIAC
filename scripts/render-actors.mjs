@@ -72,9 +72,17 @@ await writeFile(worldPath, world);
 const playerPath = 'upstream/src/view/player.ts';
 let player = await readFile(playerPath, 'utf8');
 player = patch(player,
+  "import * as THREE from 'three';",
+  "import * as THREE from 'three';\nimport { applyCampusRunner } from '../ciac/campus-runner';",
+  'nuevo modelo universitario');
+player = patch(player,
   '  private menuT = 0;',
   '  private menuT = 0;\n  private shadow: THREE.Mesh;\n  private runRate = 1;',
   'estado del personaje');
+player = patch(player,
+  '    this.root.add(holder);',
+  '    applyCampusRunner(model);\n    this.root.add(holder);',
+  'cambio real de geometría del personaje');
 player = patch(player,
   '    scene.add(this.root);',
   `    scene.add(this.root);

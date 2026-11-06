@@ -145,3 +145,7 @@ Durante una pregunta, los tres carriles quedan sin obstáculos, monedas ni poten
 ## Renderizado del tren y personaje (noviembre 2026)
 
 Se dibujan vagones individuales con margen de salida por detrás de la cámara, uniones visibles entre ellos y un material más legible que conserva la textura original de `core.glb`. El personaje conserva su esqueleto y clips originales, pero recibe una sombra de contacto que acompaña el salto, un acabado de material ligeramente ajustado y cambios de cadencia de carrera progresivos. Se mantienen los tres carriles, las preguntas, las colisiones, el ranking y el submódulo de origen. Los nuevos objetos 3D se crean una sola vez, al cargar la escena.
+
+## Corredor universitario: nuevo modelo 3D
+
+Se reemplaza la geometría visible del personaje original por un **nuevo corredor deportivo de estilo universitario** construido con piezas 3D ligeras. Lleva polera azul, pantalón oscuro, zapatillas claras y pelo corto; no usa gorra, mochila ni capucha. Cada parte está anclada a los huesos Mixamo ya presentes en `core.glb`, de modo que mantiene los ocho clips originales (carrera, salto, deslizamiento, caída, etc.). La geometría anterior queda oculta, pero permanece en el modelo para conservar el esqueleto y las animaciones. No se agregan modelos externos, descargas ni dependencias; se conservan trenes, preguntas, controles y ranking.

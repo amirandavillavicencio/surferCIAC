@@ -14,6 +14,7 @@ await access('upstream/src/main.ts');
 await mkdir('upstream/src/ciac', {recursive:true});
 await copyFile('ciac/course.ts','upstream/src/ciac/course.ts');
 await copyFile('ciac/pace.ts','upstream/src/ciac/pace.ts');
+await copyFile('ciac/campus-runner.ts','upstream/src/ciac/campus-runner.ts');
 await copyFile('ciac/swipe.ts','upstream/src/ciac/swipe.ts');
 await copyFile('ciac/game.ts','upstream/src/ciac/game.ts');
 await copyFile('ciac/game.css','upstream/src/ciac/game.css');
