@@ -14,17 +14,67 @@ const replaceOnce = (before, after, name) => {
 // trenes que vienen de frente y trenes estacionados con acceso por rampa.
 // El corredor puede volver a subir a los techos en los tres carriles.
 replaceOnce('const cars = r.int(1, maxCars);',
-  'const cars = r.int(3, Math.max(3, Math.min(4, maxCars)));',
-  'tres o cuatro vagones estacionados');
+  'const cars = r.int(1, Math.min(4, maxCars + 1));',
+  'longitud variable de trenes estacionados');
 replaceOnce('const cars = r.int(1, Math.min(3, maxCars));',
-  'const cars = r.int(3, Math.max(3, Math.min(4, maxCars)));',
-  'tres o cuatro vagones móviles');
-replaceOnce('busy[l] = at + MOVER.ratio * MOVER.trigger + len + 4;',
-  'busy[l] = at + len / (1 + MOVER.ratio) + v * 0.95 + 9;',
-  'distancia de seguridad para trenes móviles');
+  'const cars = r.int(1, Math.min(4, maxCars + 2));',
+  'longitud variable de trenes móviles');
 replaceOnce('const rampP = 0.25 + 0.35 * L;',
   'const rampP = 0.52 + 0.18 * L;',
   'accesos a techos');
+
+// Commit the ramp and its destination together, only after checking the fit.
+replaceOnce(`      let t0 = at;
+      if (withRamp) {
+        specs.push({ kind: 'ramp', lane: l, d0: at, d1: at + OB.ramp.depth });
+        t0 = at + OB.ramp.depth;
+      }
+      const t1 = t0 + trainLength(cars);
+      if (t1 > end - 6) return false;`,
+  `      const t0 = at + (withRamp ? OB.ramp.depth : 0);
+      const t1 = t0 + trainLength(cars);
+      if (t1 > end - v * 0.8) return false;
+      if (withRamp) specs.push({ kind: 'ramp', lane: l, d0: at, d1: t0 });`,
+  'rampa y techo se generan juntos');
+replaceOnce('      specs.push({ kind: \'mtrain\', lane: l, d0: at, d1: at + len / (1 + MOVER.ratio), cars, variant: r.int(0, 2) });',
+  `      const tailMeet = at + len / (1 + MOVER.ratio);
+      if (tailMeet > end - v * 0.8) return false;
+      specs.push({ kind: 'mtrain', lane: l, d0: at, d1: tailMeet, cars, variant: r.int(0, 2) });`,
+  'el encuentro completo pertenece al tramo comprobado');
+
+replaceOnce('const end = start + this.rng.range(90, 130);',
+  'const end = start + Math.round(this.rng.range(90, 130) / STEP) * STEP;', 'malla compartida entre tramos');
+replaceOnce('    let d = start + gap * 0.6;',
+  '    let d = start + v * 0.65;', 'tempo de leitura no início do trecho');
+replaceOnce('    while (d < end - 12) {',
+  '    while (d < end - v * 0.8 - 16) {', 'espaço para reagir entre trechos');
+
+// The fallback route must be runnable without assuming a jump or slide.
+replaceOnce("    if (s.kind !== 'train' && s.kind !== 'ramp' && s.kind !== 'mtrain') continue;",
+  '', 'incluir barreras en el solucionador');
+replaceOnce('  const walkTrain = new Uint8Array(n * L);',
+  '  const barrier = new Uint8Array(n * L);\n  const walkTrain = new Uint8Array(n * L);',
+  'ocupación de barreras');
+replaceOnce('      } else if (d >= s.d0 && d <= s.d1) ramp[i * L + s.lane] = d - s.d0;',
+  `      } else if (s.kind === 'ramp') {
+        if (d >= s.d0 && d <= s.d1) ramp[i * L + s.lane] = d - s.d0;
+      } else if (d >= s.d0 - PLAYER.halfD && d <= s.d1 + PLAYER.halfD) {
+        barrier[i * L + s.lane] = 1;
+      }`, 'separar barreras de techos');
+replaceOnce('Math.floor((s.d0 - start) / STEP)', 'Math.floor((s.d0 - PLAYER.halfD - start) / STEP)', 'margen frontal');
+replaceOnce('Math.ceil((s.d1 - start) / STEP)', 'Math.ceil((s.d1 + PLAYER.halfD - start) / STEP)', 'margen posterior');
+replaceOnce('!body[i * L + l] &&', '!body[i * L + l] && !barrier[i * L + l] &&', 'suelo transitable');
+replaceOnce(`if (ramp[j * L + l] >= 0) mark(j, l, 1, k);
+          else if (!body[j * L + l]) mark(j, l, 0, k);`,
+  `if (ramp[j * L + l] >= 0) mark(j, l, 1, k);
+          else if (groundOk(j, l)) mark(j, l, 0, k);`, 'avance en suelo');
+replaceOnce('if (t <= i + lcSteps / 2 && body[t * L + l])', 'if (t <= i + lcSteps / 2 && !groundOk(t, l))', 'salida del carril');
+replaceOnce('if (walkTrain[j * L + l] || body[j * L + l] || ramp[j * L + l] >= 0)',
+  'if (walkTrain[j * L + l] || ramp[j * L + l] >= 0)', 'un tren móvil carece de apoyo');
+replaceOnce('else if (!body[j * L + l]) mark(j, l, 0, k);',
+  'else if (groundOk(j, l)) mark(j, l, 0, k);', 'salida del techo');
+replaceOnce('if (walkTrain[t * L + m] || body[t * L + m] || ramp[t * L + m] >= 0)',
+  'if (!groundOk(t, m) || ramp[t * L + m] >= 0)', 'descenso a vía libre');
 
 // Tutorial: primero saltar y deslizarse; después de la primera pregunta,
 // acceder a un tren estacionado por una rampa y recorrer su techo.

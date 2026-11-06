@@ -33,6 +33,14 @@ test('reservations cover the full train sweep; ramps cannot survive without trai
   for (let d=140; d<=190; d+=0.5) assert.equal(course.allowsPickup(d),false);
 });
 
+test('route solver rejects simultaneous barriers on every ground lane', () => {
+  const specs = [0, 1, 2].map(lane => ({
+    kind: 'overhead' as const, lane, d0: 25, d1: 27,
+  }));
+  assert.equal(solve(specs, 0, 50, [1], speedAt).ok, false);
+  assert.equal(solve(specs.slice(0, 2), 0, 50, [1], speedAt).ok, true);
+});
+
 test('100 seeds, tutorial and normal: generated zones stay empty and all chunks remain traversable', () => {
   let movers = 0, trains = 0, ramps = 0;
   for (let seed=1; seed<=100; seed++) for (const tutorial of [true,false]) {
@@ -45,11 +53,15 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
       assert.ok(s.track.course.allowsObstacle(Sim.specOf(o)));
       if (o.kind==='mtrain') {
         movers++;
-        assert.ok(o.cars >= 3, 'no isolated one-car train');
+        assert.ok(o.cars >= 1 && o.cars <= 4, 'moving train length');
+        const furthestTail = moverFront(o.meet, 0) + o.len;
+        assert.ok(s.obs.every(other => other === o || other.lane !== o.lane ||
+          (other.kind === 'mtrain' ? other.meet <= o.meet || other.meet > furthestTail :
+            other.d1 < o.meet || other.d0 > furthestTail)), 'train has an unobstructed lane through its approach');
       }
       if (o.kind==='train') {
         trains++;
-        assert.ok(o.cars>=3 && o.cars<=4, 'parked trains have complete multi-car roofs');
+        assert.ok(o.cars>=1 && o.cars<=4, 'parked train length');
       }
       if (o.kind==='ramp') {
         ramps++;
