@@ -3,17 +3,21 @@ import * as THREE from 'three';
 // Corredor universitario ligero sobre los huesos Mixamo ya animados.
 // Se sustituye la geometría visible original, no su rig ni sus ocho clips.
 export function applyCampusRunner(model: THREE.Object3D): void {
-  const bone = (name: string): THREE.Bone => {
-    const found = model.getObjectByName('mixamorig:' + name);
-    if (!(found instanceof THREE.Bone)) throw new Error('Falta hueso del corredor: ' + name);
-    return found;
-  };
+  const skeleton = new Map<string, THREE.Bone>();
 
-  // Los modelos de ropa originales se ocultan; siguen vivos todos los huesos
-  // y AnimationMixer continúa manejando carrera, salto, caída y deslizamiento.
+  // GLTFLoader normaliza nombres como mixamorig:Spine2 a mixamorigSpine2.
+  // Resolverlos por su nombre de articulación permite conservar el rig real.
   model.traverse(node => {
+    if (node instanceof THREE.Bone) {
+      skeleton.set(node.name.replace(/^mixamorig[:_]?/, ''), node);
+    }
     if ((node as THREE.Mesh).isMesh) node.visible = false;
   });
+  const bone = (name: string): THREE.Bone => {
+    const found = skeleton.get(name);
+    if (!found) throw new Error('Falta hueso del corredor: ' + name);
+    return found;
+  };
 
   const material = (color: number, roughness = 0.94) =>
     new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
