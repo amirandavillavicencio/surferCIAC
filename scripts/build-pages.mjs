@@ -16,6 +16,8 @@ const run = (command, args) => execFileSync(command, args, {
 run('node', ['scripts/prepare.mjs']);
 run('npm', ['--prefix', 'upstream', 'ci']);
 run('npm', ['--prefix', 'upstream', 'run', 'build']);
+// Ejecutar las pruebas de simulación, animaciones y ranking antes de publicar.
+run('npm', ['test']);
 await rm('dist', { recursive: true, force: true });
 await cp('upstream/dist', 'dist', { recursive: true });
 await rm('dist/assets/scenery.glb', { force: true });
