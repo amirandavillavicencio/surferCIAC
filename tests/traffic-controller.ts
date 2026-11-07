@@ -17,8 +17,8 @@ export function driveTraffic(s:Sim,plans:Plan[]){
   if(local>=100)move(1);return;
  }
  if((p.kind==='transfer'||p.kind==='roof-traffic')&&local>=36&&!p.jumped){s.jump();move(1);p.jumped=true;}
- if(p.kind==='dodge'&&local>=52-s.speed*.2&&!p.jumped){s.jump();p.jumped=true;}
- if(local>=82-s.speed*.2&&!p.exited){if(p.kind==='double')s.jump();else s.down();p.exited=true;}
+ if(p.kind==='dodge'&&local>=52-s.speed*.2&&!p.jumped){if((p.variant||0)%2===1)s.down();else s.jump();p.jumped=true;}
+ if(local>=82-s.speed*.2&&!p.exited){if(p.kind==='double'||(p.kind==='dodge'&&(p.variant||0)%2===1))s.jump();else s.down();p.exited=true;}
  if(local>=100)move(1);
 }
 

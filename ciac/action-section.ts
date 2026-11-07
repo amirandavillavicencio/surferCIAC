@@ -10,7 +10,7 @@ export function actionEncounter(start:number,from:number,beat:ActionBeat,variant
   const specs=trafficEncounter(start,from,kind,variant);
   const shift=actionShift(variant);
   if(beat==='A') {
-    const middle=specs.find(s=>s.kind==='low'&&s.d0===start+52)!;
+    const middle=specs.find(s=>(s.kind==='low'||s.kind==='overhead')&&s.d0===start+52)!;
     const sliding=Math.floor(variant/3)%2===1;
     middle.kind=sliding?'overhead':'low';middle.d0+=shift;
     middle.d1=middle.d0+OB[middle.kind].depth;

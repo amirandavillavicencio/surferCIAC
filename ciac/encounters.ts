@@ -55,17 +55,32 @@ export function trafficEncounter(start: number, from: number, kind: TrafficKind,
   const mover=(lane:number,offset:number):Spec=>({kind:'mtrain',lane,d0:start+16,d1:start+85,
     activation:start, trainSpeed:52+((variant+offset)%5)*4,cars:1+((variant+offset)%4)});
   const anchor:Spec={kind:'overhead',lane:from,d0:start+8,d1:start+8+OB.overhead.depth};
-  const exit:Spec={kind:kind==='double'?'low':'overhead',lane:from,d0:start+82,
-    d1:start+82+(kind==='double'?OB.low.depth:OB.overhead.depth)};
+  // Regular dodges now alternate the actual required actions: jump/slide or
+  // slide/jump. A/B/C keeps its independently scripted action sequence.
+  const reverseDodge=kind==='dodge' && variant%2===1;
+  const exitKind=kind==='double'||reverseDodge?'low':'overhead';
+  const exit:Spec={kind:exitKind,lane:from,d0:start+82,
+    d1:start+82+OB[exitKind].depth};
   const specs:Spec[]=[anchor,exit];
-  if(kind==='pass')return [...specs,mover(other,1)];
-  if(kind==='dodge')return [...specs,{kind:'low',lane:from,d0:start+52,d1:start+52+OB.low.depth},mover(1,0)];
+  if(kind==='pass') {
+    // Two separate oncoming waves pass beside the escape lane. Alternating
+    // relative speeds changes the order of the two near-misses, not their
+    // reachable path or the academic reservations.
+    const center=mover(1,0), outside=mover(other,1);
+    center.trainSpeed=variant%2===0?68:60; center.cars=1;
+    outside.trainSpeed=variant%2===0?52:68; outside.cars=variant%2===0?3:2;
+    return [...specs,center,outside];
+  }
+  if(kind==='dodge') {
+    const middleKind=reverseDodge?'overhead':'low';
+    return [...specs,{kind:middleKind,lane:from,d0:start+52,d1:start+52+OB[middleKind].depth},mover(1,0)];
+  }
   if(kind==='double') {
     const a=mover(1,0), b=mover(other,2);
     // Short, fast convoys clear before the exit barrier: a ground escape
     // remains available even when the player elects not to jump.
-    a.trainSpeed=64; a.cars=1; a.d1=start+71;
-    b.trainSpeed=68; b.cars=2; b.d1=start+71;
+    a.trainSpeed=variant%2===0?64:68; a.cars=1; a.d1=start+71;
+    b.trainSpeed=variant%2===0?68:64; b.cars=2; b.d1=start+71;
     specs.push(a,b);
   }
   if(kind==='double'||kind==='recovery') {
@@ -91,7 +106,7 @@ export function trafficRoute(start:number,from:number,kind:TrafficKind,d:number,
     else if(d>=start+31&&d<=start+31+trainLength(3))y=3.4;
     else if(d>start+31+trainLength(3)) {const t=(d-start-31-trainLength(3))/speed;y=Math.max(0,3.4-.5*34.9*t*t);}
   }
-  const jump=kind==='dodge'?52:82;
+  const jump=kind==='dodge'&&!reverseDodge?52:82;
   if((kind==='dodge'||kind==='double')&&Math.abs(d-start-jump)<speed*.3) {
     const t=(d-(start+jump-speed*.2))/speed;
     if(t>0)y=Math.max(y,Math.max(0,30.3*.34*t-.5*30.3*t*t));

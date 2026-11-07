@@ -107,7 +107,7 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
       res = solve(specs, start, end, this.reach, speedAt, true, from);
       if (!res.ok) throw new Error('Encounter has no escape at '+start);
     }
-    for (const s of specs) this.sink.ob({...s,planKind:kind});
+    for (const s of specs) this.sink.ob({...s,planKind:kind,actionVariant:variant});
     // Coins describe the intended physical action sequence. Do not draw a roof
     // trajectory when a short/tutorial chunk could not retain both roofs.
     for (let d=start+3; d<end-4; d+=2.1) {

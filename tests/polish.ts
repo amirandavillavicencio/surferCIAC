@@ -144,7 +144,7 @@ test('every traffic family has a physical route and a human anticipation window'
  for(const kind of families)for(const from of [0,2])for(const variant of [0,1,2,3,4])for(const speed of [6,12,20,27]) {
   const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.speedOverride=speed;s.start();s.d=20;
   for(const spec of trafficEncounter(40,from,kind,variant))s.addOb(spec);
-  const plan=[{start:40,from,kind}];let steps=0;
+  const plan=[{start:40,from,kind,variant}];let steps=0;
   while(s.d<150&&s.alive&&steps++<10000){driveTraffic(s,plan);s.update(1/120);}
   assert.ok(s.alive&&s.d>=150,JSON.stringify({kind,from,variant,speed,state:s.snapshot()}));
   for(const vehicle of trafficEncounter(40,from,kind,variant).filter(o=>o.trainSpeed)){
