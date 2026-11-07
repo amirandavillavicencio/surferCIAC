@@ -112,7 +112,7 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
     // trajectory when a short/tutorial chunk could not retain both roofs.
     for (let d=start+3; d<end-4; d+=2.1) {
       if (!this.course.allowsPickup(d)) continue;
-      const pt=trafficRoute(start,from,kind,d,speedAt(start+36));
+      const pt=trafficRoute(start,from,kind,d,speedAt(start+36),variant);
       if(beat){const reward=actionRoute(start,from,beat,variant,d,speedAt(start+36));this.sink.coin(reward.lane,d,reward.y);continue;}
       const sliding=kind!=='double';
       this.sink.coin(pt.lane,d,sliding && d>start+78 && d<start+86 ? .45 : pt.y+.85);

@@ -97,7 +97,7 @@ export function trafficEncounter(start: number, from: number, kind: TrafficKind,
   return specs;
 }
 
-export function trafficRoute(start:number,from:number,kind:TrafficKind,d:number,speed:number) {
+export function trafficRoute(start:number,from:number,kind:TrafficKind,d:number,speed:number,variant=0) {
   if(d<start+12)return {lane:1,y:0};
   if(kind==='roof-traffic'||kind==='transfer')return encounterRoute(start,from,d,speed);
   let y=0;
@@ -106,7 +106,7 @@ export function trafficRoute(start:number,from:number,kind:TrafficKind,d:number,
     else if(d>=start+31&&d<=start+31+trainLength(3))y=3.4;
     else if(d>start+31+trainLength(3)) {const t=(d-start-31-trainLength(3))/speed;y=Math.max(0,3.4-.5*34.9*t*t);}
   }
-  const jump=kind==='dodge'&&!reverseDodge?52:82;
+  const jump=kind==='dodge'&&variant%2===0?52:82;
   if((kind==='dodge'||kind==='double')&&Math.abs(d-start-jump)<speed*.3) {
     const t=(d-(start+jump-speed*.2))/speed;
     if(t>0)y=Math.max(y,Math.max(0,30.3*.34*t-.5*30.3*t*t));
