@@ -1,0 +1,89 @@
+{
+  "label": "after",
+  "perf": {
+    "median": 1.2000000000698492,
+    "p95": 49.09999999997672,
+    "stats": {
+      "objects": 241,
+      "programs": 26,
+      "calls": 112,
+      "triangles": 56304,
+      "geometries": 116,
+      "textures": 14,
+      "pixelRatio": 1,
+      "created": {
+        "obs": 5,
+        "coins": 85,
+        "powers": 0
+      }
+    }
+  },
+  "panel": {
+    "height": 151,
+    "width": 366,
+    "scrollHeight": 149,
+    "visible": true,
+    "text": "FIS100 · v₀=2 m/s, a=3 m/s², t=4 s: vA · 14 m/sB · 12 m/sC · 6 m/sElige un carril y cruza su franja de color."
+  },
+  "answer": {
+    "correct": false,
+    "points": 0,
+    "question": {
+      "id": "q11",
+      "curso": "FIS100",
+      "tema": "Cinemática",
+      "enunciado": "Desde el reposo y con a = 2 m/s², ¿qué distancia se recorre en 3 s?",
+      "breve": "Desde reposo: a=2, t=3 s: d",
+      "opciones": [
+        "6 m",
+        "9 m",
+        "18 m"
+      ]
+    },
+    "penaltySeconds": 3
+  },
+  "rows": [
+    {
+      "asked": 1,
+      "correct": 0,
+      "status": "active"
+    }
+  ],
+  "state": {
+    "screen": "play",
+    "lane": 1,
+    "x": 0,
+    "y": 0,
+    "vy": 0,
+    "d": 185.23,
+    "speed": 13.04,
+    "grounded": true,
+    "sliding": false,
+    "alive": true,
+    "running": true,
+    "coins": 51,
+    "score": 347,
+    "mult": 1,
+    "power": {
+      "magnet": 0,
+      "shoes": 0,
+      "double": 0
+    },
+    "sinceStumble": 114.32,
+    "groundY": 0,
+    "obs": 12,
+    "coinCount": 92,
+    "powers": 1,
+    "created": {
+      "obs": 13,
+      "coins": 105,
+      "powers": 1
+    },
+    "pooled": {
+      "obs": 1,
+      "coins": 13,
+      "powers": 0
+    }
+  },
+  "errors": []
+}

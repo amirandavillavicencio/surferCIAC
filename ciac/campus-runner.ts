@@ -22,9 +22,9 @@ export function applyCampusRunner(model: THREE.Object3D): void {
   const material = (color: number, roughness = 0.94) =>
     new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
 
-  const jersey = material(0x246d84);
+  const jersey = material(0x246d84, .78);
   const jerseyLight = material(0x3a92a6);
-  const trousers = material(0x293d54);
+  const trousers = material(0x293d54, .86);
   const cuffs = material(0x1d3446);
   const skin = material(0xd9a07e, .67);
   const skinShade = material(0xc78c6c, .72);
@@ -85,6 +85,8 @@ export function applyCampusRunner(model: THREE.Object3D): void {
   ball('Spine2', 'polera', [0, 1, 0], [21, 25, 13], jersey);
   ball('Spine1', 'cintura-polera', [0, 1, 0], [17, 13, 11], jersey);
   ball('Spine2', 'pechera', [0, 9, 11], [11, 9, 2], jerseyLight);
+  ball('Spine2', 'cuello-polera', [0, 18, 0], [10, 4, 10], cuffs);
+  ball('Spine2', 'costura-espalda', [0, 8, -12], [16, 1.1, 1], jerseyLight);
   segment('Neck', 'Head', 0, 1, 6.5, skin, 'cuello');
   ball('Hips', 'cintura-pantalon', [0, 0, 0], [18, 13, 11], trousers);
 

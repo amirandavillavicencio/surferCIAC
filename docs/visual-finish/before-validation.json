@@ -1,0 +1,89 @@
+{
+  "label": "before",
+  "perf": {
+    "median": 1,
+    "p95": 38.90000000002328,
+    "stats": {
+      "objects": 232,
+      "programs": 23,
+      "calls": 105,
+      "triangles": 34000,
+      "geometries": 107,
+      "textures": 16,
+      "pixelRatio": 1,
+      "created": {
+        "obs": 5,
+        "coins": 78,
+        "powers": 0
+      }
+    }
+  },
+  "panel": {
+    "height": 151,
+    "width": 370,
+    "scrollHeight": 149,
+    "visible": true,
+    "text": "MAT060 · Distancia: (0,0) a (3,4)A · 5B · 7C · 12Elige un carril y cruza su franja de color."
+  },
+  "answer": {
+    "correct": false,
+    "points": 0,
+    "question": {
+      "id": "q09",
+      "curso": "FIS100",
+      "tema": "Vectores",
+      "enunciado": "Si un vector mide 10 y forma 60° con el eje X, ¿cuál es su componente x?",
+      "breve": "Vector 10 a 60°: componente x",
+      "opciones": [
+        "10",
+        "8,66",
+        "5"
+      ]
+    },
+    "penaltySeconds": 3
+  },
+  "rows": [
+    {
+      "asked": 1,
+      "correct": 0,
+      "status": "active"
+    }
+  ],
+  "state": {
+    "screen": "play",
+    "lane": 1,
+    "x": 0,
+    "y": 0,
+    "vy": 0,
+    "d": 185.23,
+    "speed": 13.04,
+    "grounded": true,
+    "sliding": false,
+    "alive": true,
+    "running": true,
+    "coins": 51,
+    "score": 347,
+    "mult": 1,
+    "power": {
+      "magnet": 0,
+      "shoes": 0,
+      "double": 0
+    },
+    "sinceStumble": 114.32,
+    "groundY": 0,
+    "obs": 12,
+    "coinCount": 92,
+    "powers": 1,
+    "created": {
+      "obs": 13,
+      "coins": 105,
+      "powers": 1
+    },
+    "pooled": {
+      "obs": 1,
+      "coins": 13,
+      "powers": 0
+    }
+  },
+  "errors": []
+}

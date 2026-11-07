@@ -208,3 +208,5 @@ await import("./train-dynamics.mjs");
 await import("./presentation.mjs");
 
 await import("./resource-integration.mjs");
+
+await import('./visual-finish.mjs');

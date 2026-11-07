@@ -36,9 +36,9 @@ export class OfficerModel {
   constructor(){this.buildOfficer();this.officerGroup.position.x=0;}
   buildOfficer() {
     // High-Fidelity Police Inspector Materials
-    const uniformMat = new THREE.MeshLambertMaterial({ color: 0x30485e }); // Deep Navy Security Uniform
+    const uniformMat = new THREE.MeshStandardMaterial({ color: 0x30485e, roughness:.83 }); // Deep Navy Security Uniform
     const pantsMat = new THREE.MeshLambertMaterial({ color: 0x243342 });   // Dark Navy Trousers
-    const skinMat = new THREE.MeshLambertMaterial({ color: 0xf5cda5 });    // Natural Skin Tone
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xe9b58e, roughness:.7 });    // Natural Skin Tone
     const hairMat = new THREE.MeshLambertMaterial({ color: 0x2c2c2c });    // Dark Hair / Mustache
     const capMat = new THREE.MeshLambertMaterial({ color: 0x0f172a });     // Police Peaked Cap
     const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.2 }); // Gold Badge / Trim

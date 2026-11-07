@@ -12,13 +12,21 @@ export class QuizAnswerTrack {
   private readonly finish: THREE.Mesh[] = [];
 
   constructor(scene: THREE.Scene) {
-    const stripGeometry = new THREE.PlaneGeometry(STRIP_WIDTH, STRIP_LENGTH);
+    const stripGeometry = new THREE.PlaneGeometry(STRIP_WIDTH, STRIP_LENGTH, 16, 1);
+    const position = stripGeometry.getAttribute('position');
+    const colors: number[] = [];
+    for (let i = 0; i < position.count; i++) {
+      const edge = Math.abs(position.getX(i)) > STRIP_WIDTH * .43;
+      const value = edge ? 1 : .76;
+      colors.push(value, value, value);
+    }
+    stripGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     const lineGeometry = new THREE.PlaneGeometry(STRIP_WIDTH, 1.3);
     for (let slot = 0; slot < 3; slot++) for (let lane = 0; lane < 3; lane++) {
       const strip = new THREE.Mesh(
         stripGeometry,
         new THREE.MeshBasicMaterial({
-          color: COLORS[lane], transparent: true, opacity: 0.71,
+          color: COLORS[lane], vertexColors: true, transparent: true, opacity: 0.79,
           depthWrite: false, side: THREE.DoubleSide
         })
       );
