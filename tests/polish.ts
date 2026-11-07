@@ -154,3 +154,25 @@ test('every traffic family has a physical route and a human anticipation window'
  }
  console.log(JSON.stringify({trafficFamilies:6,physicalScenarios:240,minimumAnticipationSeconds:218/(27+68)}));
 });
+
+test('traffic rhythm has two distinct oncoming waves and physically playable reverse dodges',()=>{
+ for(const variant of [0,1,2,3]){
+  const pass=trafficEncounter(40,0,'pass',variant).filter(s=>s.kind==='mtrain');
+  assert.equal(pass.length,2,'adjacent trains must travel independently');
+  assert.deepEqual(pass.map(s=>s.lane).sort(),[1,2]);
+  assert.notEqual(pass[0].trainSpeed,pass[1].trainSpeed);
+  const dodge=trafficEncounter(40,0,'dodge',variant);
+  const middle=dodge.find(s=>s.d0===92)!;
+  const exit=dodge.find(s=>s.d0===122)!;
+  assert.equal(middle.kind,variant%2===1?'overhead':'low');
+  assert.equal(exit.kind,variant%2===1?'low':'overhead');
+  for(const speed of [12,20,27]){
+   const sim=new Sim();sim.noSpawn=true;sim.reset(1,false);sim.clearWorld();sim.d=20;sim.speedOverride=speed;sim.start();
+   for(const spec of dodge)sim.addOb(spec);
+   const plan=[{start:40,from:0,kind:'dodge',variant}];
+   let frames=0;
+   while(sim.d<150&&sim.alive&&frames++<16000){driveTraffic(sim,plan);sim.update(1/120);}
+   assert.ok(sim.alive&&sim.d>=150,JSON.stringify({variant,speed,state:sim.snapshot()}));
+  }
+ }
+});
