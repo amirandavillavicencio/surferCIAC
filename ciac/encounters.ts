@@ -63,13 +63,9 @@ export function trafficEncounter(start: number, from: number, kind: TrafficKind,
     d1:start+82+OB[exitKind].depth};
   const specs:Spec[]=[anchor,exit];
   if(kind==='pass') {
-    // Two separate oncoming waves pass beside the escape lane. Alternating
-    // relative speeds changes the order of the two near-misses, not their
-    // reachable path or the academic reservations.
-    const center=mover(1,0), outside=mover(other,1);
-    center.trainSpeed=variant%2===0?68:60; center.cars=1;
-    outside.trainSpeed=variant%2===0?52:68; outside.cars=variant%2===0?3:2;
-    return [...specs,center,outside];
+    // Keep the center available for the following encounter. Occupying it
+    // with another convoy removed safe obstacles and created long empty gaps.
+    return [...specs,mover(other,1)];
   }
   if(kind==='dodge') {
     const middleKind=reverseDodge?'overhead':'low';

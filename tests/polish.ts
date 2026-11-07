@@ -155,12 +155,16 @@ test('every traffic family has a physical route and a human anticipation window'
  console.log(JSON.stringify({trafficFamilies:6,physicalScenarios:240,minimumAnticipationSeconds:218/(27+68)}));
 });
 
-test('traffic rhythm has two distinct oncoming waves and physically playable reverse dodges',()=>{
+test('traffic rhythm varies oncoming speed and makes reverse dodges physically playable',()=>{
  for(const variant of [0,1,2,3]){
   const pass=trafficEncounter(40,0,'pass',variant).filter(s=>s.kind==='mtrain');
-  assert.equal(pass.length,2,'adjacent trains must travel independently');
-  assert.deepEqual(pass.map(s=>s.lane).sort(),[1,2]);
-  assert.notEqual(pass[0].trainSpeed,pass[1].trainSpeed);
+  assert.equal(pass.length,1,'recovery lanes must stay open between encounters');
+  assert.equal(pass[0].lane,2);
+  const next=trafficEncounter(40,0,'pass',variant+1).find(s=>s.kind==='mtrain')!;
+  assert.notEqual(pass[0].trainSpeed,next.trainSpeed);
+  const double=trafficEncounter(40,0,'double',variant).filter(s=>s.kind==='mtrain');
+  assert.equal(double.length,2);
+  assert.notEqual(double[0].trainSpeed,double[1].trainSpeed);
   const dodge=trafficEncounter(40,0,'dodge',variant);
   const middle=dodge.find(s=>s.d0===92)!;
   const exit=dodge.find(s=>s.d0===122)!;
