@@ -2,57 +2,196 @@ import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {Instanced} from '../view/pools';
 
-// Original procedural scenery. Shared geometry, no downloads or per-frame allocation.
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {LANE_W} from '../config';
+
+const packs = {
+ commercial: ['city-kit-commercial', 'building-b', 'building-d', 'building-e', 'building-i', 'building-k', 'building-m'],
+ industrial: ['city-kit-industrial', 'building-c', 'building-i', 'building-k', 'building-s'],
+ roads: ['city-kit-roads', 'road-straight', 'road-straight-barrier', 'light-square', 'road-sign-warning'],
+ nature: ['nature-kit', 'tree_oak', 'tree_default', 'fence_simpleLow'],
+ station: ['building-kit', 'floor', 'column-wide', 'roof-flat-patch-large', 'wall-window-wide-square-detailed'],
+} as const;
+type Pack = keyof typeof packs;
+export type CityModels = Record<Pack, THREE.Group[]>;
+
+export async function loadCityArt(): Promise<CityModels> {
+ const loader = new GLTFLoader();
+ const entries = await Promise.all(Object.entries(packs).map(async ([key, [directory, ...names]]) => {
+  const models = await Promise.all(names.map(async name => {
+   const {scene} = await loader.loadAsync(`assets/kenney-city/${directory}/${name}.glb`);
+   return normalizeModel(scene, name);
+  }));
+  // The models in each pack reference one common palette. Share its GPU texture.
+  let palette: THREE.Texture | null = null;
+  const materials = new Set<THREE.MeshLambertMaterial>();
+  for (const model of models) model.traverse(object => {
+   if (object instanceof THREE.Mesh) materials.add(object.material);
+  });
+  const duplicateTextures = new Set<THREE.Texture>();
+  for (const material of materials) {
+   if (!material.map) continue;
+   palette ??= material.map;
+   if (material.map !== palette) duplicateTextures.add(material.map);
+   material.map = palette;
+  }
+  for (const texture of duplicateTextures) texture.dispose();
+  return [key, models];
+ }));
+ return Object.fromEntries(entries) as CityModels;
+}
+
+function normalizeModel(scene: THREE.Group, name: string) {
+ scene.updateMatrixWorld(true);
+ const bounds = new THREE.Box3().setFromObject(scene);
+ const size = bounds.getSize(new THREE.Vector3());
+ const center = bounds.getCenter(new THREE.Vector3());
+ const root = new THREE.Group();
+ root.name = name;
+ const batches = new Map<string, {parts: THREE.BufferGeometry[]; material: THREE.MeshLambertMaterial}>();
+ scene.traverse(object => {
+  if (!(object instanceof THREE.Mesh)) return;
+  const source = object.material as THREE.MeshStandardMaterial;
+  // Keep both the texture palette and untextured details such as tree trunks and windows.
+  const key = [source.map?.uuid, source.color.getHex(), source.side, source.opacity, source.transparent].join(':');
+  let batch = batches.get(key);
+  if (!batch) {
+   batch = {parts: [], material: new THREE.MeshLambertMaterial({
+    map: source.map, color: source.color, side: source.side,
+    opacity: source.opacity, transparent: source.transparent,
+   })};
+   batches.set(key, batch);
+  }
+  const geometry = object.geometry.clone() as THREE.BufferGeometry;
+  geometry.applyMatrix4(object.matrixWorld)
+   .translate(-center.x, -bounds.min.y, -center.z)
+   .scale(1 / size.x, 1 / size.y, 1 / size.z);
+  geometry.deleteAttribute('tangent');
+  batch.parts.push(geometry);
+ });
+ for (const {parts, material} of batches.values()) {
+  const merged = mergeGeometries(parts);
+  for (const part of parts) part.dispose();
+  if (!merged) throw new Error('Invalid city geometry: ' + name);
+  root.add(new THREE.Mesh(merged, material));
+ }
+ return root;
+}
+
+const TILE = 20;
+const TRACK_EDGE = LANE_W * 1.5;
+const loop = (n: number, length: number) => ((n % length) + length) % length;
+
+export function citySector(cell: number) {
+ const block = loop(cell, 19);
+ return block < 5 || block >= 14 ? 'commercial' : block < 8 ? 'station' : 'industrial';
+}
+
+export function isStationAt(distance: number) {
+ return citySector(Math.floor(distance / TILE)) === 'station';
+}
+
+function stationSign() {
+ const canvas = document.createElement('canvas');
+ canvas.width = 256; canvas.height = 64;
+ const g = canvas.getContext('2d')!;
+ g.fillStyle = '#12485e'; g.fillRect(0, 0, 256, 64);
+ g.fillStyle = '#ffca62'; g.fillRect(0, 58, 256, 6);
+ g.fillStyle = '#ffffff'; g.font = 'bold 26px sans-serif';
+ g.textAlign = 'center'; g.fillText('CIAC VITACURA', 128, 39);
+ const map = new THREE.CanvasTexture(canvas);
+ map.colorSpace = THREE.SRGBColorSpace;
+ return new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({map, side: THREE.DoubleSide}));
+}
+
+interface CityPlacement {
+ pool: Instanced;
+ x: number;
+ y: number;
+ z: number;
+ width: number;
+ height: number;
+ depth: number;
+ angle: number;
+ tint?: THREE.Color;
+}
+
 export class CityArt {
- private blocks:Instanced[]=[];
- private matrix=new THREE.Matrix4();
- constructor(scene:THREE.Scene){
-  for(let variant=0;variant<3;variant++){
-   const group=new THREE.Group();group.name='rail-neighborhood';
-   const pieces:THREE.BufferGeometry[][]=[[],[],[],[],[]];
-   const box=(k:number,w:number,h:number,d:number,x:number,y:number,z:number)=>pieces[k].push(new THREE.BoxGeometry(w,h,d).translate(x,y,z));
-   const height=7+variant*2;
-   box(0,5.5,height,10,0,height/2,0);
-   box(1,5.8,.25,10.3,0,height,0);
-   box(1,5.7,.35,10.2,0,.5,0);
-   for(let floor=1;floor<height-1;floor+=2.1){
-    box(1,5.6,.10,10.1,0,floor+.9,0);
-    for(const z of [-3.6,-1.2,1.2,3.6])for(const side of [-1,1]){
-     pieces[1].push(new THREE.PlaneGeometry(1.25,1.45).rotateY(side*Math.PI/2).translate(side*2.79,floor+.1,z));
-     pieces[2].push(new THREE.PlaneGeometry(1.02,1.17).rotateY(side*Math.PI/2).translate(side*2.85,floor+.13,z));
-     pieces[1].push(new THREE.PlaneGeometry(1.08,.07).rotateY(side*Math.PI/2).translate(side*2.91,floor+.1,z));
+ private readonly pools: Instanced[] = [];
+ private readonly tiles: CityPlacement[][] = [];
+ private readonly matrix = new THREE.Matrix4();
+
+ constructor(scene: THREE.Scene, models: CityModels) {
+  const makePool = (model: THREE.Object3D, colors = false) => {
+   const pool = new Instanced(model, 48, scene, {colors, name: 'city-' + model.name});
+   this.pools.push(pool);
+   return pool;
+  };
+  const commercial = models.commercial.map(m => makePool(m, true));
+  const facadeTints = [0xf6c08d, 0xa9dfc6, 0xffdc92, 0xc1d9f4, 0xf9b3a3, 0xd8caf6]
+   .map(color => new THREE.Color(color));
+  const industrial = models.industrial.map(m => makePool(m));
+  const [road, barrier, lamp, warning] = models.roads.map(m => makePool(m));
+  const [oak, tree, fence] = models.nature.map(m => makePool(m));
+  const [platform, column, roof, glazing] = models.station.map(m => makePool(m));
+  const sign = makePool(stationSign());
+  const floor = models.station[0].children[0] as THREE.Mesh;
+  const edge = makePool(new THREE.Mesh(floor.geometry, new THREE.MeshLambertMaterial({color: 0xf3b945})));
+  for (let cell = 0; cell < 19; cell++) {
+   const sector = citySector(cell);
+   const placements: CityPlacement[] = [];
+   this.tiles.push(placements);
+   for (const side of [-1, 1]) {
+    const put = (pool: Instanced, x: number, y: number, z: number, width: number, height: number, depth: number, angle = 0, tint?: THREE.Color) => {
+     const halfX = (Math.abs(Math.cos(angle)) * width + Math.abs(Math.sin(angle)) * depth) / 2;
+     if (x - halfX <= TRACK_EDGE) throw new Error('City scenery overlaps the rail corridor');
+     placements.push({pool, x: side * x, y, z, width, height, depth, angle, tint});
+    };
+    const variant = cell + (side === 1 ? 2 : 0);
+    const towardRail = -side * Math.PI / 2;
+    put(road, 9.15, -.11, 0, 3.5, .14, TILE);
+    if (sector === 'station') {
+     put(platform, 5.75, .25, 0, 3.4, .30, TILE);
+     put(edge, 4.23, .55, 0, .23, .018, TILE);
+     put(roof, 5.85, 3.65, 0, 3.55, .24, TILE);
+     for (const z of [-7, 3]) put(column, 7.15, .55, z, .34, 3.1, .40);
+     put(glazing, 7.16, .55, -2, .18, 2.8, 7.8);
+     put(lamp, 7, .55, 7, .78, 2.9, .28, towardRail + Math.PI / 2);
+     put(sign, 5.77, 3.24, 6.4, 2.65, .66, 1);
+     // Benches assembled from the same floor slab and column pieces.
+     put(platform, 6.70, 1.02, -1, .47, .13, 2);
+     for (const z of [-1.68, -.32]) put(column, 6.70, .55, z, .17, .47, .20);
+    } else if (sector === 'industrial') {
+     put(industrial[variant % industrial.length], 16, -.08, 0, 13.7, 5.3 + (variant % 3), 7.5, towardRail);
+     put(barrier, 12.12, -.09, 0, .24, .83, TILE);
+     put(warning, 7.12, .25, 5, .55, 1.58, .54, towardRail);
+    } else {
+     const building = variant % commercial.length;
+     put(commercial[building], 14.2 + (variant % 2) * .55, -.08, side * 1.75,
+      [8,8,15,9,16,10][building], [10,9,7,13,12,19][building], 6.3, towardRail, facadeTints[building]);
+     put(variant % 2 ? oak : tree, 6.35, .25, side * 3, 2.6, 3.7 + variant % 2, 2.55);
+     put(fence, 6.32, .25, side * 3 + 1.5, 2.3, .53, .22);
+     put(lamp, 7, .25, -5, .81, 3.3, .28);
     }
    }
-   box(1,1.6,.65,2,1,height+.44,-2);
-   for(const side of [-1,1]){
-    box(2,.12,1.7,1.6,side*2.84,1.2,0);
-    box(3,1.15,.16,3,side*3.2,2.35,0);
-    box(1,.7,.55,1.7,side*4.25,.55,3.8);
-    box(4,.65,.5,1.6,side*4.25,.95,3.8);
-   }
-   const trunk=new THREE.CylinderGeometry(.12,.19,2.5,6).translate(-4.3,1.5,-3.5);pieces[1].push(trunk);
-   for(const [x,y,z,r] of [[-4.3,3.5,-3.5,1.35],[-4.7,3,-3.1,1],[-3.7,3.1,-3.6,.9]])pieces[4].push(new THREE.IcosahedronGeometry(r,0).translate(x,y,z));
-   const colors=[ [0xd7ac79,0xe5cdb0,0x274c62,0x397b87,0x528760], [0x91b6b1,0xe8ddc2,0x294d61,0xca784d,0x6b9255], [0xc58468,0xf3d6ad,0x31576c,0xe6ad46,0x42785b]][variant];
-   const batches=pieces.map((parts,i)=>{
-    const geometry=mergeGeometries(parts.map(p=>p.index?p.toNonIndexed():p))!;
-    const color=new THREE.Color(colors[i]);const data=[];
-    for(let vertex=0;vertex<geometry.getAttribute('position').count;vertex++)data.push(color.r,color.g,color.b);
-    geometry.setAttribute('color',new THREE.Float32BufferAttribute(data,3));parts.forEach(p=>p.dispose());return geometry;
-   });
-   group.add(new THREE.Mesh(mergeGeometries(batches)!,new THREE.MeshLambertMaterial({vertexColors:true})));
-   batches.forEach(p=>p.dispose());
-   this.blocks.push(new Instanced(group,24,scene,{name:'city-'+variant}));
   }
  }
- update(distance:number){
-  this.blocks.forEach(p=>p.begin());
-  const first=Math.floor((distance-32)/14);
-  for(let i=0;i<17;i++)for(const side of [-1,1]){
-   const cell=first+i;const variant=((cell+(side===1?1:0))%3+3)%3;
-   this.matrix.makeRotationY(side===1?Math.PI:0).setPosition(side*(10.5+(variant===2?1:0)),0,distance-(cell*14+(side===1?5:0)));
-   this.blocks[variant].add(this.matrix);
+
+ update(distance: number) {
+  for (const pool of this.pools) pool.begin();
+  const first = Math.floor((distance - 40) / TILE);
+  const last = Math.ceil((distance + 220) / TILE);
+  for (let cell = first; cell <= last; cell++) {
+   for (const {pool, x, y, z, width, height, depth, angle, tint} of this.tiles[loop(cell, this.tiles.length)]) {
+    // Scale the columns of the rotation matrix without allocating per instance.
+    const matrix = this.matrix.makeRotationY(angle);
+    const e = matrix.elements;
+    e[0] *= width; e[2] *= width; e[5] *= height; e[8] *= depth; e[10] *= depth;
+    matrix.setPosition(x, y, distance - (cell * TILE + TILE / 2) + z);
+    pool.add(matrix, tint);
+   }
   }
-  this.blocks.forEach(p=>p.end());
+  for (const pool of this.pools) pool.end();
  }
 }
 
