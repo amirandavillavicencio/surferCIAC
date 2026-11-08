@@ -88,7 +88,10 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
     let kind = trafficKind(this.chunks + this.rng.int(0, 2), start);
     if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
     if (this.lastTrafficKind === 'double' || this.lastTrafficKind === 'transfer') kind='recovery';
-    else if (kind===this.lastTrafficKind) kind=trafficKind(this.chunks+3,start);
+    else if (kind===this.lastTrafficKind) {
+      kind=trafficKind(this.chunks+3,start);
+      if(kind===this.lastTrafficKind)kind=this.lastTrafficKind==='recovery'?'pass':'recovery';
+    }
     if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
     if(this.actionSectionStart<0 && end-start>100)this.actionSectionStart=start;
     const sectionIndex=(start-this.actionSectionStart)/150;
