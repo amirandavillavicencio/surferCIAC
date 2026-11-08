@@ -239,3 +239,28 @@ body { overflow: hidden; }
   pointer-events: none;
 }
 #ui:has(> .ciac-dialog:not([hidden])) .hud .toast { opacity: 0; }
+
+/* Match the station's dark enamel, yellow wayfinding and turquoise trim. */
+#ui .hud .icon-btn,
+#ui .hud :is(.mult,.coins),
+#ui > .ciac-mission {
+  background: #211d39;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px #f7ddec55, 0 3px #15132780;
+}
+#ui .hud .icon-btn {
+  box-shadow: inset 0 -2px #56d4be, inset 0 0 0 1px #f7ddec55, 0 3px #15132780;
+}
+#ui .hud .score {
+  color: #fff4db;
+  font-family: system-ui, sans-serif;
+  letter-spacing: .02em;
+  text-shadow: 1px 2px #211d39, 2px 3px #211d39;
+}
+#ui .hud .coins { color: #ffd268; }
+#ui .hud .mult.hot { background: #963b50; }
+#ui > .ciac-mission {
+  color: #f4ebff;
+  font-weight: 700;
+  box-shadow: inset 3px 0 #56d4be, inset 0 0 0 1px #f7ddec55, 0 3px #15132780;
+}

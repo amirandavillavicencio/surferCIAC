@@ -26,10 +26,10 @@ world=patch(world,'g.position.set(0, -0.02, z);','g.position.set(0, -0.12, z);')
 world=world.replaceAll('= trackTexture();','= ballastTexture();');
 world=world.replace('trackTexture, pavingTexture','pavingTexture');
 world=patch(world,"    const coin = node('coin');",'    const coin = rewardCoin();');
-world=patch(world,'s.fog = new THREE.Fog(HORIZON, 40, 180);','s.fog = new THREE.Fog(HORIZON, 55, 200);');
-world=patch(world,'0x8a7a62, 1.35','0x68788a, 1.05');
-world=patch(world,'0xfff1dc, 2.1','0xffe8cb, 2.35');
-world=patch(world,'this.sun.position.set(9, 22, 4);','this.sun.position.set(-12, 22, 8);');
+world=patch(world,'s.fog = new THREE.Fog(HORIZON, 40, 180);','s.fog = new THREE.Fog(HORIZON, 32, 148);');
+world=patch(world,'0xdcecff, 0x8a7a62, 1.35','0xc1c8ff, 0x805464, 1.12');
+world=patch(world,'0xfff1dc, 2.1','0xffdfaf, 2.65');
+world=patch(world,'this.sun.position.set(9, 22, 4);','this.sun.position.set(-19, 21, 5);');
 world=patch(world,'const height = 2.75 + portrait * 1.5;','const height = 2.9 + portrait * 1.5;');
 world=patch(world,'const fov = 59 + portrait * 17 + speedFactor * 8;','const fov = 59 + portrait * 14 + speedFactor * 8;');
 world=patch(world,'multiplyScalar(0.55)','multiplyScalar(0.26)');
@@ -37,7 +37,20 @@ world=patch(world,'sc.set(1.5, 1.5, 1.5)','sc.set(1.05, 1.05, 1.05)');
 world=world.replace('powerTexture, rampTexture, HORIZON','powerTexture, HORIZON');
 world=patch(world,'map: rampTexture()','map: rampDeck()');
 for(const kind of ['low','hurdle','overhead'])world=patch(world,`new Instanced(node('${kind}'),`, `new Instanced(obstacleFinish(node('${kind}'),'${kind}'),`);
+world=patch(world,'color: 0x9a9286','color: 0xc58162');
+world=patch(world,'{ map: pave }','{ map: pave, color: 0xeab5aa }');
 await writeFile('upstream/src/view/world.ts',world);
+
+const texturesPath='upstream/src/view/textures.ts';
+let textures=await readFile(texturesPath,'utf8');
+// Background and fog share the same horizon color.
+textures=patch(textures,"gr.addColorStop(0, '#3f8fe0');","gr.addColorStop(0, '#746fb6');");
+textures=patch(textures,"gr.addColorStop(0.45, '#8cc4f0');","gr.addColorStop(0.42, '#b4b3df');");
+textures=patch(textures,"gr.addColorStop(0.62, '#ffe6c7');","gr.addColorStop(0.59, '#e5bccc');");
+textures=patch(textures,"gr.addColorStop(1, '#ffd9b0');","gr.addColorStop(1, '#e5bccc');");
+textures=patch(textures,"new THREE.Color('#f6dcc0')","new THREE.Color('#e5bccc')");
+await writeFile(texturesPath,textures);
+
 
 const mainPath='upstream/src/main.ts';
 let main=await readFile(mainPath,'utf8');

@@ -2,7 +2,7 @@ import { access, mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 
 const original = ['index.html', 'src/main.ts', 'src/sim/track.ts', 'src/config.ts',
-  'src/sim/sim.ts', 'src/sim/types.ts', 'src/audio.ts', 'src/input.ts', 'src/ui.ts', 'src/view/world.ts', 'src/view/player.ts'];
+  'src/sim/sim.ts', 'src/sim/types.ts', 'src/audio.ts', 'src/input.ts', 'src/ui.ts', 'src/view/world.ts', 'src/view/player.ts', 'src/view/textures.ts'];
 if (execFileSync('git', ['-C', 'upstream', 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim() !==
     '79f9159d97c618bf9741b480872c87e4dab16417') throw new Error('Submódulo inesperado');
 for (const path of original) {

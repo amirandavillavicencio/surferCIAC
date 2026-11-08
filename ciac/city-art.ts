@@ -95,9 +95,11 @@ function stationSign() {
  const canvas = document.createElement('canvas');
  canvas.width = 256; canvas.height = 64;
  const g = canvas.getContext('2d')!;
- g.fillStyle = '#12485e'; g.fillRect(0, 0, 256, 64);
- g.fillStyle = '#ffca62'; g.fillRect(0, 58, 256, 6);
- g.fillStyle = '#ffffff'; g.font = 'bold 26px sans-serif';
+ g.fillStyle = '#12375d'; g.fillRect(0, 0, 256, 64);
+ g.fillStyle = '#ffbf42'; g.fillRect(0, 58, 256, 6);
+ g.fillStyle = '#48d6c0';
+ g.beginPath(); g.moveTo(0, 0); g.lineTo(28, 0); g.lineTo(0, 28); g.fill();
+ g.fillStyle = '#fff7e8'; g.font = 'bold 26px sans-serif';
  g.textAlign = 'center'; g.fillText('CIAC VITACURA', 128, 39);
  const map = new THREE.CanvasTexture(canvas);
  map.colorSpace = THREE.SRGBColorSpace;
@@ -128,12 +130,18 @@ export class CityArt {
    return pool;
   };
   const commercial = models.commercial.map(m => makePool(m, true));
-  const facadeTints = [0xf6c08d, 0xa9dfc6, 0xffdc92, 0xc1d9f4, 0xf9b3a3, 0xd8caf6]
+  const facadeTints = [0xffa054, 0x60d7bd, 0xffd261, 0x9a8be7, 0xff7d73, 0xd29af3]
    .map(color => new THREE.Color(color));
-  const industrial = models.industrial.map(m => makePool(m));
+  const industrial = models.industrial.map(m => makePool(m, true));
+  const industrialTints = [0xb18fc9, 0xb8c2d7, 0xb8887a, 0x82a7af]
+   .map(color => new THREE.Color(color));
   const [road, barrier, lamp, warning] = models.roads.map(m => makePool(m));
   const [oak, tree, fence] = models.nature.map(m => makePool(m));
-  const [platform, column, roof, glazing] = models.station.map(m => makePool(m));
+  const [platform, column, roof, glazing] = models.station.map(m => makePool(m, true));
+  const platformTint = new THREE.Color(0xe2d7d3);
+  const enamel = new THREE.Color(0x537ccf);
+  const canopy = new THREE.Color(0x59ccb9);
+  const glass = new THREE.Color(0x83cbd0);
   const sign = makePool(stationSign());
   const floor = models.station[0].children[0] as THREE.Mesh;
   const edge = makePool(new THREE.Mesh(floor.geometry, new THREE.MeshLambertMaterial({color: 0xf3b945})));
@@ -151,18 +159,18 @@ export class CityArt {
     const towardRail = -side * Math.PI / 2;
     put(road, 9.15, -.11, 0, 3.5, .14, TILE);
     if (sector === 'station') {
-     put(platform, 5.75, .25, 0, 3.4, .30, TILE);
+     put(platform, 5.75, .25, 0, 3.4, .30, TILE, 0, platformTint);
      put(edge, 4.23, .55, 0, .23, .018, TILE);
-     put(roof, 5.85, 3.65, 0, 3.55, .24, TILE);
-     for (const z of [-7, 3]) put(column, 7.15, .55, z, .34, 3.1, .40);
-     put(glazing, 7.16, .55, -2, .18, 2.8, 7.8);
+     put(roof, 5.85, 3.65, 0, 3.55, .24, TILE, 0, canopy);
+     for (const z of [-7, 3]) put(column, 7.15, .55, z, .34, 3.1, .40, 0, enamel);
+     put(glazing, 7.16, .55, -2, .18, 2.8, 7.8, 0, glass);
      put(lamp, 7, .55, 7, .78, 2.9, .28, towardRail + Math.PI / 2);
      put(sign, 5.77, 3.24, 6.4, 2.65, .66, 1);
      // Benches assembled from the same floor slab and column pieces.
-     put(platform, 6.70, 1.02, -1, .47, .13, 2);
-     for (const z of [-1.68, -.32]) put(column, 6.70, .55, z, .17, .47, .20);
+     put(platform, 6.70, 1.02, -1, .47, .13, 2, 0, platformTint);
+     for (const z of [-1.68, -.32]) put(column, 6.70, .55, z, .17, .47, .20, 0, enamel);
     } else if (sector === 'industrial') {
-     put(industrial[variant % industrial.length], 16, -.08, 0, 13.7, 5.3 + (variant % 3), 7.5, towardRail);
+     put(industrial[variant % industrial.length], 16, -.08, 0, 13.7, 5.3 + (variant % 3), 7.5, towardRail, industrialTints[variant % industrial.length]);
      put(barrier, 12.12, -.09, 0, .24, .83, TILE);
      put(warning, 7.12, .25, 5, .55, 1.58, .54, towardRail);
     } else {
@@ -197,12 +205,12 @@ export class CityArt {
 
 export function ballastTexture(){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
- const ctx=canvas.getContext('2d')!;ctx.fillStyle='#827e76';ctx.fillRect(0,0,256,256);
+ const ctx=canvas.getContext('2d')!;ctx.fillStyle='#a87361';ctx.fillRect(0,0,256,256);
  let seed=19;const random=()=>((seed=seed*16807%2147483647)/2147483647);
  for(let i=0;i<4200;i++){
   const x=random()*256,y=random()*256,r=1+random()*2;
-  const shade=95+Math.floor(random()*65);ctx.fillStyle=`rgb(${shade+6},${shade+3},${shade})`;
-  ctx.fillRect(x,y,r*1.8,r);ctx.fillStyle='rgba(35,40,43,.18)';ctx.fillRect(x,y+r,r*1.8,1);
+  const shade=111+Math.floor(random()*37);ctx.fillStyle=`rgb(${shade+35},${shade-2},${shade-18})`;
+  ctx.fillRect(x,y,r*1.8,r);ctx.fillStyle='rgba(65,30,52,.18)';ctx.fillRect(x,y+r,r*1.8,1);
  }
  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;return texture;
