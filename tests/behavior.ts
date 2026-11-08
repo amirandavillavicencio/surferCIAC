@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Sim } from '../upstream/src/sim/sim';
+import { decisionSection } from '../upstream/src/ciac/rhythm';
 import { solve } from '../upstream/src/sim/track';
 import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_AHEAD } from '../upstream/src/config';
 import { QuizCourse } from '../upstream/src/ciac/course';
@@ -436,4 +437,54 @@ test('complete train instances and retargeted Skater animation clips', async () 
   player.play('jump',0,1,true);player.mixer.update(10);
   const time=player.actions.jump.time;player.play('jump',0,1);near(player.actions.jump.time,time);
   player.play('jump',0,1,true);near(player.actions.jump.time,0);
+});
+
+
+test('oncoming trains replace only the third parked roof and stay outside academic gates', () => {
+  const course = new QuizCourse();
+  course.stop(4000);
+  for (const start of [40, 190, 340, 490, 640]) for (let variant = 0; variant < 36; variant++) {
+    const rampLane = variant % 3;
+    const landingLane = (rampLane + 1 + (variant % 2)) % 3;
+    const thirdLane = 3 - rampLane - landingLane;
+    const section = decisionSection(start, rampLane, landingLane, variant);
+    const movers = section.specs.filter(spec => spec.kind === 'mtrain');
+    const enabled = start >= 190 && variant % 3 === 0;
+    assert.equal(movers.length, Number(enabled));
+    assert.ok(section.specs.every(spec => course.allowsObstacle(spec)), 'nothing enters a quiz reserve');
+    assert.ok(section.specs.some(spec => spec.kind === 'ramp' && spec.lane === rampLane));
+    assert.ok(section.specs.some(spec => spec.kind === 'train' && spec.lane === rampLane));
+    assert.ok(section.specs.some(spec => spec.kind === 'train' && spec.lane === landingLane));
+    if (enabled) {
+      const mover = movers[0];
+      assert.equal(mover.lane, thirdLane);
+      assert.equal(mover.activation, start);
+      assert.equal(mover.cars, 2);
+      assert.ok(mover.trainSpeed! >= 56 && mover.trainSpeed! <= 68);
+      assert.ok(!section.specs.some(spec => spec.kind === 'train' && spec.lane === thirdLane));
+    } else {
+      assert.ok(section.specs.some(spec => spec.kind === 'train' && spec.lane === thirdLane));
+    }
+  }
+});
+
+test('seeded generated races have genuine timed oncoming trains without changing protected routes', () => {
+  let oncoming = 0;
+  for (let seed = 1; seed <= 25; seed++) {
+    const sim = new Sim(seed);
+    sim.noSpawn = true;
+    sim.reset(seed, false);
+    while (sim.track.frontier < 3040) sim.track.ensure(3040);
+    const movers = sim.obs.filter(ob => ob.kind === 'mtrain');
+    assert.ok(movers.length >= 2, 'each seeded run should contain moving encounters');
+    oncoming += movers.length;
+    for (const ob of movers) {
+      assert.ok(ob.activation !== undefined && ob.trainSpeed! > 0);
+      assert.ok(sim.track.course.allowsObstacle(Sim.specOf(ob)));
+      assert.ok(sim.obs.some(roof => roof.kind === 'train' && roof.lane !== ob.lane
+        && Math.abs(roof.d0 - (ob.activation! + 24)) < 45),
+        'the encounter still includes a separate roof route');
+    }
+  }
+  assert.ok(oncoming >= 100);
 });
