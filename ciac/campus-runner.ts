@@ -1,144 +1,114 @@
 import * as THREE from 'three';
 
-// Corredor universitario ligero sobre los huesos Mixamo ya animados.
-// Se sustituye la geometría visible original, no su rig ni sus ocho clips.
-export function applyCampusRunner(model: THREE.Object3D): void {
-  const skeleton = new Map<string, THREE.Bone>();
+const jointNames: Record<string, string> = {
+  Chest: 'Spine1',
+  UpperChest: 'Spine2',
+  LeftToes: 'LeftToeBase',
+  RightToes: 'RightToeBase',
+};
 
-  // GLTFLoader normaliza nombres como mixamorig:Spine2 a mixamorigSpine2.
-  // Resolverlos por su nombre de articulación permite conservar el rig real.
-  model.traverse(node => {
-    if (node instanceof THREE.Bone) {
-      skeleton.set(node.name.replace(/^mixamorig[:_]?/, ''), node);
-    }
-    if ((node as THREE.Mesh).isMesh) node.visible = false;
-  });
-  const bone = (name: string): THREE.Bone => {
-    const found = skeleton.get(name);
-    if (!found) throw new Error('Falta hueso del corredor: ' + name);
-    return found;
-  };
+export class CampusRunner {
+  private readonly joints: {
+    source: THREE.Bone;
+    target: THREE.Bone;
+    inverseSourceRest: THREE.Quaternion;
+    targetRest: THREE.Quaternion;
+  }[] = [];
+  private readonly frame = new THREE.Quaternion();
+  private readonly inverseFrame = new THREE.Quaternion();
+  private readonly rotation = new THREE.Quaternion();
+  private readonly parentRotation = new THREE.Quaternion();
+  private readonly point = new THREE.Vector3();
+  private readonly sourceHip: THREE.Bone;
+  private readonly targetHip: THREE.Bone;
+  private readonly sourceHipRest: THREE.Vector3;
+  private readonly targetHipRest: THREE.Vector3;
+  private readonly mesh: THREE.SkinnedMesh;
+  private readonly soles: number[] = [];
 
-  const material = (color: number, roughness = 0.94) =>
-    new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
-
-  const jersey = material(0x246d84, .78);
-  const jerseyLight = material(0x3a92a6);
-  const trousers = material(0x293d54, .86);
-  const cuffs = material(0x1d3446);
-  const skin = material(0xd9a07e, .67);
-  const skinShade = material(0xc78c6c, .72);
-  const hair = material(0x29303a, .82);
-  const shoe = material(0xe9f2ef, .64);
-  const sole = material(0x8cc4bd);
-  const eyes = material(0x1c2836);
-  const up = new THREE.Vector3(0, 1, 0);
-
-  const attach = (
-    part: THREE.Object3D, to: THREE.Bone, name: string
-  ) => {
-    part.name = 'campus-runner:' + name;
-    part.traverse(child => {
-      const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) {
-        mesh.castShadow = true;
-        mesh.receiveShadow = false;
-        mesh.frustumCulled = false;
-      }
-    });
-    to.add(part);
-  };
-
-  // Una forma sólida entre dos articulaciones. Las piezas siguen la
-  // rotación de su propio hueso, incluso durante roll y jump.
-  function segment(
-    name: string, childName: string, start: number, finish: number,
-    radius: number, mat: THREE.Material, label: string
+  constructor(
+    private readonly holder: THREE.Object3D,
+    source: THREE.Object3D,
+    private readonly skater: THREE.Object3D,
   ) {
-    const joint = bone(name);
-    const direction = bone(childName).position.clone();
-    const from = direction.clone().multiplyScalar(start);
-    const to = direction.clone().multiplyScalar(finish);
-    const displacement = to.sub(from);
-    const length = displacement.length();
-    if (length < 0.001) throw new Error('Segmento de rig demasiado corto: ' + label);
-    const geometry = new THREE.CapsuleGeometry(
-      radius, Math.max(0, length - radius * 1.7), 3, 10
-    );
-    const piece = new THREE.Mesh(geometry, mat);
-    piece.position.copy(from).addScaledVector(displacement, 0.5);
-    piece.quaternion.setFromUnitVectors(up, displacement.normalize());
-    attach(piece, joint, label);
-  }
+    skater.scale.setScalar(0.48);
+    holder.add(skater);
+    holder.updateWorldMatrix(true, true);
 
-  const ball = (
-    parent: string, label: string, pos: [number, number, number],
-    scale: [number, number, number], mat: THREE.Material
-  ) => {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), mat);
-    mesh.position.set(...pos);
-    mesh.scale.set(...scale);
-    attach(mesh, bone(parent), label);
-  };
+    const sourceBones = new Map<string, THREE.Bone>();
+    source.traverse(node => {
+      if (node instanceof THREE.Bone) {
+        sourceBones.set(node.name.replace(/^mixamorig[:_]?/, ''), node);
+      }
+      if ((node as THREE.Mesh).isMesh) node.visible = false;
+    });
+    const inverseFrame = holder.getWorldQuaternion(this.inverseFrame).invert();
+    skater.traverse(target => {
+      if (!(target instanceof THREE.Bone)) return;
+      const sourceName = jointNames[target.name] ?? target.name;
+      const driver = sourceBones.get(sourceName);
+      if (!driver) return;
+      this.joints.push({
+        source: driver,
+        target,
+        inverseSourceRest: driver.getWorldQuaternion(new THREE.Quaternion()).premultiply(inverseFrame).invert(),
+        targetRest: target.getWorldQuaternion(new THREE.Quaternion()).premultiply(inverseFrame),
+      });
+    });
 
-  // Polera deportiva limpia, sin mochila, gorro ni capucha.
-  ball('Spine2', 'polera', [0, 1, 0], [21, 25, 13], jersey);
-  ball('Spine1', 'cintura-polera', [0, 1, 0], [17, 13, 11], jersey);
-  ball('Spine2', 'pechera', [0, 9, 11], [11, 9, 2], jerseyLight);
-  ball('Spine2', 'cuello-polera', [0, 18, 0], [10, 4, 10], cuffs);
-  ball('Spine2', 'costura-espalda', [0, 8, -12], [16, 1.1, 1], jerseyLight);
-  segment('Neck', 'Head', 0, 1, 6.5, skin, 'cuello');
-  ball('Hips', 'cintura-pantalon', [0, 0, 0], [18, 13, 11], trousers);
+    const hips = this.joints.find(joint => joint.target.name === 'Hips');
+    if (!hips) throw new Error('El Skater requiere una articulación de cadera');
+    this.sourceHip = hips.source;
+    this.targetHip = hips.target;
+    this.sourceHipRest = holder.worldToLocal(this.sourceHip.getWorldPosition(new THREE.Vector3()));
+    this.targetHipRest = holder.worldToLocal(this.targetHip.getWorldPosition(new THREE.Vector3()));
 
-  for (const side of ['Left', 'Right']) {
-    segment(side + 'Shoulder', side + 'Arm', 0, 1, 8.8, jersey, side + '-hombro');
-    segment(side + 'Arm', side + 'ForeArm', 0, 0.54, 8.4, jersey, side + '-manga');
-    segment(side + 'Arm', side + 'ForeArm', 0.55, 1, 6.3, skin, side + '-brazo');
-    segment(side + 'ForeArm', side + 'Hand', 0, 1, 6, skin, side + '-antebrazo');
-    ball(side + 'Hand', side + '-mano', [0, 5, 0], [6.5, 9, 5.5], skinShade);
-
-    segment(side + 'UpLeg', side + 'Leg', 0, 1, 11, trousers, side + '-muslo');
-    segment(side + 'Leg', side + 'Foot', 0, 1, 9.2, trousers, side + '-pierna');
-    segment(side + 'Foot', side + 'ToeBase', 0, 0.28, 7.8, cuffs, side + '-tobillo');
-    segment(side + 'Foot', side + 'ToeBase', 0.27, 1, 9.3, shoe, side + '-zapatilla');
-    ball(side + 'ToeBase', side + '-puntera', [0, 2, 0], [9.2, 4.6, 10], sole);
-  }
-
-  // Rostro amable, pelo corto y sin accesorios de estética callejera.
-  ball('Head', 'cabeza', [0, 18, 0], [17.5, 21, 16], skin);
-  ball('Head', 'oreja-izq', [17, 17, 0], [4.5, 6, 4.5], skinShade);
-  ball('Head', 'oreja-der', [-17, 17, 0], [4.5, 6, 4.5], skinShade);
-  ball('Head', 'cabello', [0, 34, -2], [18.2, 9, 16.5], hair);
-  ball('Head', 'cabello-frente', [0, 31, 12], [17, 5.5, 6], hair);
-  for (const side of [-1, 1]) {
-    ball('Head', side < 0 ? 'ojo-izq' : 'ojo-der',
-      [side * 7.5, 22.5, 14.8], [2, 2.5, 1.5], eyes);
-  }
-  ball('Head', 'nariz', [0, 17, 16.4], [2.6, 4, 3], skinShade);
-  ball('Head', 'sonrisa', [0, 9, 15.8], [5, 1.2, 0.8], skinShade);
-}
-
-// Pose-space sole contact: keep the Mixamo rig and collider untouched. Only the
-// shoe geometry below the support plane is compressed, like a flexible sole.
-// Rest coordinates are retained so correction never accumulates between clips.
-const soleRest = new WeakMap<THREE.BufferGeometry, Float32Array>();
-const contactPoint = new THREE.Vector3();
-const contactInverse = new THREE.Matrix4();
-export function correctCampusContact(model: THREE.Object3D, supportY: number) {
-  model.updateWorldMatrix(true, true);
-  model.traverse(node => {
-    if (!node.name.endsWith('-zapatilla') && !node.name.endsWith('-puntera')) return;
-    const mesh = node as THREE.Mesh<THREE.BufferGeometry>;
-    const position = mesh.geometry.getAttribute('position') as THREE.BufferAttribute;
-    let rest = soleRest.get(mesh.geometry);
-    if (!rest) { rest = new Float32Array(position.array); soleRest.set(mesh.geometry, rest); }
-    contactInverse.copy(mesh.matrixWorld).invert();
-    for (let i=0; i<position.count; i++) {
-      contactPoint.fromArray(rest, i*3).applyMatrix4(mesh.matrixWorld);
-      if (contactPoint.y < supportY) contactPoint.y = supportY;
-      contactPoint.applyMatrix4(contactInverse);
-      position.setXYZ(i,contactPoint.x,contactPoint.y,contactPoint.z);
+    const mesh = skater.getObjectByProperty('isSkinnedMesh', true) as THREE.SkinnedMesh;
+    this.mesh = mesh;
+    mesh.castShadow = true;
+    mesh.frustumCulled = false;
+    const positions = mesh.geometry.getAttribute('position');
+    for (let i = 0; i < positions.count; i++) {
+      this.point.fromBufferAttribute(positions, i);
+      if (mesh.localToWorld(this.point).y < 0.08) this.soles.push(i);
     }
-    position.needsUpdate = true;
-  });
+  }
+
+  update(supportY: number) {
+    const { holder, skater, point, mesh } = this;
+    skater.position.set(0, 0, 0);
+    holder.updateWorldMatrix(true, true);
+    holder.getWorldQuaternion(this.frame);
+    this.inverseFrame.copy(this.frame).invert();
+
+    // Carry hip motion and global rest-relative rotations across the two rigs.
+    holder.worldToLocal(this.sourceHip.getWorldPosition(point));
+    point.sub(this.sourceHipRest).add(this.targetHipRest);
+    this.targetHip.parent!.worldToLocal(holder.localToWorld(point));
+    this.targetHip.position.copy(point);
+
+    for (const { source, target, inverseSourceRest, targetRest } of this.joints) {
+      source.getWorldQuaternion(this.rotation)
+        .premultiply(this.inverseFrame).multiply(inverseSourceRest)
+        .multiply(targetRest).premultiply(this.frame);
+      target.parent!.getWorldQuaternion(this.parentRotation).invert();
+      target.quaternion.copy(this.rotation).premultiply(this.parentRotation);
+      target.updateWorldMatrix(false, false);
+    }
+
+    skater.updateMatrixWorld(true);
+    let lowest = Infinity;
+    const positions = mesh.geometry.getAttribute('position');
+    for (const index of this.soles) {
+      point.fromBufferAttribute(positions, index);
+      mesh.boneTransform(index, point);
+      lowest = Math.min(lowest, mesh.localToWorld(point).y);
+    }
+    if (lowest < supportY) {
+      // Apply contact only to the rendered model, in world vertical.
+      point.setFromMatrixPosition(skater.matrixWorld);
+      point.y += supportY - lowest;
+      skater.position.copy(holder.worldToLocal(point));
+    }
+  }
 }

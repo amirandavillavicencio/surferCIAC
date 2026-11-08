@@ -351,8 +351,8 @@ test('runner can take a ramp, jump between roofs and return to ground', () => {
   assert.ok(sim.grounded);
 });
 
-test('original GLB: complete train instances and finite animation clips hold instead of restarting', async () => {
-  const file=readFileSync('upstream/public/assets/core.glb');
+async function parseUntexturedGLB(path: string) {
+  const file=readFileSync(path);
   const jsonLength=file.readUInt32LE(12), data=JSON.parse(file.subarray(20,20+jsonLength).toString());
   // Textures are irrelevant to bounds and clip evaluation and need browser decoders.
   for(const material of data.materials||[]) {
@@ -366,7 +366,14 @@ test('original GLB: complete train instances and finite animation clips hold ins
   file.copy(header,0,0,12);header.writeUInt32LE(20+padded.length+rest.length,8);
   header.writeUInt32LE(padded.length,12);header.writeUInt32LE(0x4e4f534a,16);
   const bytes=Buffer.concat([header,padded,rest]);
-  const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
+  return new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
+}
+
+test('complete train instances and retargeted Skater animation clips', async () => {
+  const gltf=await parseUntexturedGLB('upstream/public/assets/core.glb');
+  const skater=await parseUntexturedGLB('third_party/kenney-skater/skater-ciac.glb');
+  skater.scene.name='kenney-skater';
+  gltf.scene.add(skater.scene);
   const train=gltf.scene.getObjectByName('train')!;
   const scene=new THREE.Scene();
   const cabPool=new Instanced(train,60,scene,{colors:true});
@@ -413,11 +420,10 @@ test('original GLB: complete train instances and finite animation clips hold ins
   assert.ok(shadow,'ground contact shadow remains attached to the player renderer');
   const oldCostume=player.model.getObjectByName('Boy01_Body_Geo') as THREE.Mesh;
   assert.ok(oldCostume && !oldCostume.visible,'original character geometry is hidden');
-  const replacement:THREE.Object3D[]=[];
-  player.model.traverse(o=>{if(o.name.startsWith('campus-runner:'))replacement.push(o);});
-  assert.ok(replacement.length>=25, 'the student runner is a new articulated 3D model');
-  assert.ok(replacement.some(o=>o.name==='campus-runner:cabello'),'replacement has uncovered short hair');
-  assert.ok(replacement.some(o=>o.name==='campus-runner:polera'),'replacement wears a sports jersey');
+  const replacement=skater.scene.getObjectByProperty('isSkinnedMesh',true) as THREE.SkinnedMesh;
+  assert.ok(replacement?.visible && replacement.skeleton.bones.length >= 32);
+  const knee=skater.scene.getObjectByName('LeftLeg')!;
+  const rest=knee.quaternion.clone();
   const oldMeshCount=player.model.children.length;
   const nodes=actorScene.children.length;
   const runner=new Sim();runner.noSpawn=true;runner.reset(2,false);runner.clearWorld();runner.start();
@@ -426,6 +432,7 @@ test('original GLB: complete train instances and finite animation clips hold ins
     assert.equal(actorScene.children.length,nodes,'no new scene nodes per frame');
     assert.equal(player.model.children.length,oldMeshCount,'rig keeps its character structure');
   }
+  assert.ok(knee.quaternion.angleTo(rest) > 0.01, 'the Mixamo pose drives the Skater knee');
   player.play('jump',0,1,true);player.mixer.update(10);
   const time=player.actions.jump.time;player.play('jump',0,1);near(player.actions.jump.time,time);
   player.play('jump',0,1,true);near(player.actions.jump.time,0);
