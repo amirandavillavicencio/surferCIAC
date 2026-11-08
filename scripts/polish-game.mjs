@@ -94,7 +94,10 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
     let kind = this.director.choose(this.chunks, start, this.rng.int(0, 2), this.busy[1] > start+40);
     if(this.actionSectionStart<0 && end-start>100)this.actionSectionStart=start;
     const sectionIndex=(start-this.actionSectionStart)/150;
-    const beat=sectionIndex>=0 && sectionIndex<3 && Number.isInteger(sectionIndex) ? ACTION_BEATS[sectionIndex] : undefined;
+    // Repeat the tested three-beat action sequence after a varied encounter.
+    const cycleIndex = sectionIndex % (ACTION_BEATS.length + 1);
+    const beat = sectionIndex >= 0 && Number.isInteger(sectionIndex) &&
+      cycleIndex < ACTION_BEATS.length ? ACTION_BEATS[cycleIndex] : undefined;
     if(beat)kind=beat==='A'?'dodge':beat==='B'?'transfer':'double';
     this.director.remember(kind);
     const variant = this.rng.int(0, 19);

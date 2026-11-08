@@ -8,12 +8,16 @@ export class RaceDirector {
   reset() { this.last = undefined; }
 
   choose(index: number, start: number, variant: number, centerBusy: boolean): TrafficKind {
-    if (this.last === 'double' || this.last === 'transfer') return 'recovery';
+    // Prefer active encounters rather than long passive recovery runs.
+    // The physically verified encounter variants and quiz slots stay unchanged.
     const preferred = start > 900 && variant % 3 === 0
       ? 'dodge' : trafficKind(index + variant % 3, start);
+    const active = preferred === 'pass' || preferred === 'recovery'
+      ? (this.last === 'roof-traffic' || this.last === 'transfer' ? 'dodge' : 'roof-traffic')
+      : preferred;
     const available = (kind: TrafficKind) =>
       kind !== this.last && (!centerBusy || (kind !== 'transfer' && kind !== 'roof-traffic'));
-    const choices: TrafficKind[] = [preferred, 'dodge', 'pass', 'recovery'];
+    const choices: TrafficKind[] = [active, 'roof-traffic', 'dodge', 'double', 'transfer'];
     return choices.find(available) ?? 'pass';
   }
 
