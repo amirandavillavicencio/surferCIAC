@@ -70,14 +70,20 @@ world=patch(world,'w.position.set(laneX(l), 6.45, z);','w.position.set(laneX(l),
 await writeFile('upstream/src/view/world.ts',world);
 await copyFile('ciac/encounters.ts','upstream/src/ciac/encounters.ts');
 await copyFile('ciac/action-section.ts','upstream/src/ciac/action-section.ts');
+await copyFile('ciac/rhythm.ts','upstream/src/ciac/rhythm.ts');
 let track=await readFile('upstream/src/sim/track.ts','utf8');
-track="import { ACTION_BEATS, actionEncounter, actionRoute } from '../ciac/action-section';\nimport { trafficEncounter, trafficRoute, trafficKind } from '../ciac/encounters';\n"+track;
+track="import { RaceDirector, connectEncounter, rhythmBarrier } from '../ciac/rhythm';\nimport { ACTION_BEATS, actionEncounter, actionRoute } from '../ciac/action-section';\nimport { trafficEncounter, trafficRoute } from '../ciac/encounters';\n"+track;
 const a=track.indexOf('  private genChunk() {');
 const b=track.indexOf('  private buildRows(',a);
 if(a<0||b<0)throw Error('Missing generator');
 track=track.replace(/type Pattern = [^\n]+\n/, '');
-track=track.replace('export class Track {', 'export class Track {\n  actionSectionStart = -1;\n  private lastTrafficKind = \"\";');
-track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.lastTrafficKind = \"\";\n    this.actionSectionStart = -1;');
+track=track.replace('export class Track {', 'export class Track {\n  actionSectionStart = -1;\n  private readonly director = new RaceDirector();');
+track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.director.reset();\n    this.actionSectionStart = -1;');
+track=patch(track,'    if (tutorial) this.tutorialChunk();',`    if (tutorial) this.tutorialChunk();
+    else {
+      this.sink.ob(rhythmBarrier(1, 24, 'low'));
+      this.sink.ob(rhythmBarrier(seed % 2 === 0 ? 0 : 2, 24, 'low'));
+    }`);
 const generatorStart=track.indexOf('  private genChunk() {');
 const generatorEnd=track.indexOf('  private buildRows(',generatorStart);
 track=track.slice(0,generatorStart)+`  private genChunk() {
@@ -85,23 +91,21 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
     const end = 190 + Math.floor((start - 40) / 150) * 150;
     let from = this.rng.chance(.5) ? 0 : 2;
     if (this.busy[from] > start+8) from=2-from;
-    let kind = trafficKind(this.chunks + this.rng.int(0, 2), start);
-    if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
-    if (this.lastTrafficKind === 'double' || this.lastTrafficKind === 'transfer') kind='recovery';
-    else if (kind===this.lastTrafficKind) {
-      kind=trafficKind(this.chunks+3,start);
-      if(kind===this.lastTrafficKind)kind=this.lastTrafficKind==='recovery'?'pass':'recovery';
-    }
-    if (this.busy[1] > start+40 && (kind==='transfer'||kind==='roof-traffic')) kind='recovery';
+    let kind = this.director.choose(this.chunks, start, this.rng.int(0, 2), this.busy[1] > start+40);
     if(this.actionSectionStart<0 && end-start>100)this.actionSectionStart=start;
     const sectionIndex=(start-this.actionSectionStart)/150;
     const beat=sectionIndex>=0 && sectionIndex<3 && Number.isInteger(sectionIndex) ? ACTION_BEATS[sectionIndex] : undefined;
     if(beat)kind=beat==='A'?'dodge':beat==='B'?'transfer':'double';
-    this.lastTrafficKind=kind;
+    this.director.remember(kind);
     const variant = this.rng.int(0, 19);
     // Assemble before filtering, so rejected destinations take their ramps.
     let specs = this.course.prepareSpecs((beat ? actionEncounter(start,from,beat,variant) : trafficEncounter(start, from, kind, variant))
       .filter(s => s.d1 < end - 5 && (s.kind === 'mtrain' || s.d0 >= this.busy[s.lane])));
+    const connectors = connectEncounter(start, from, kind, variant)
+      .filter(s => s.d1 < end - 5 && s.d0 >= this.busy[s.lane] && this.course.allowsObstacle(s) &&
+        !specs.some(train => train.kind === 'mtrain' && train.lane === s.lane && s.d1 >= train.d0));
+    const connected = [...specs, ...connectors];
+    if ([0, 1, 2].every(lane => solve(connected, start, end, [lane], speedAt).endLanes.length === 3)) specs = connected;
     let res = solve(specs, start, end, this.reach, speedAt, true, from);
     if (!res.ok) {
       this.failures++;
@@ -110,7 +114,7 @@ track=track.slice(0,generatorStart)+`  private genChunk() {
       res = solve(specs, start, end, this.reach, speedAt, true, from);
       if (!res.ok) throw new Error('Encounter has no escape at '+start);
     }
-    for (const s of specs) this.sink.ob({...s,planKind:kind,actionVariant:variant});
+    for (const s of specs) this.sink.ob({...s,planKind:s.d0===start+8 && s.lane!==from ? undefined : kind,actionVariant:variant});
     // Coins describe the intended physical action sequence. Do not draw a roof
     // trajectory when a short/tutorial chunk could not retain both roofs.
     for (let d=start+3; d<end-4; d+=2.1) {

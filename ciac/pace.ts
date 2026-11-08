@@ -1,3 +1,4 @@
+import { speedAt } from '../config';
 import { QUESTION_VISIBLE_DISTANCE } from './course';
 
 export class RacePace {
@@ -25,7 +26,7 @@ export class RacePace {
       this.elapsed = 0;
       return this.factor;
     }
-    const target = distance >= gate - QUESTION_VISIBLE_DISTANCE && distance < gate ? 0.60 : 1;
+    const target = distance >= gate - QUESTION_VISIBLE_DISTANCE && distance < gate ? Math.min(.88, 15 / speedAt(gate)) : 1;
     if (target !== this.target) {
       this.from = this.factor;
       this.target = target;
