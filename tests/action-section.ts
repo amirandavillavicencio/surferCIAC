@@ -19,12 +19,13 @@ test('A/B/C variants are physically playable with real two-gesture roof transfer
  console.log(JSON.stringify({actionVariants:cases}));
 });
 
-test('integrated section has A/B/C once, varied decisions, then returns to normal generation',()=>{
+test('connected A/B/C action sequences recur throughout the run',()=>{
  const signatures=new Set<string>();const durations:number[]=[];
  for(let seed=1;seed<=12;seed++)for(const tutorial of [false,true]) {
   const s=new Sim(seed);s.noSpawn=true;s.reset(seed,tutorial);while(s.track.frontier<1300)s.track.ensure(1300);
   const plans=plansOf(s),action=plans.filter(p=>p.beat);
-  assert.deepEqual(action.map(p=>p.beat),['A','B','C']);assert.equal(action.length,3);
+  assert.deepEqual(action.map(p=>p.beat).slice(0,6),['A','B','C','A','B','C']);
+  assert.ok(action.length >= 6, 'action sequences must recur beyond the opening');
   assert.ok(plans.some(p=>!p.beat&&p.start>action[2].start));
   for(const p of action)if(p.beat==='A')p.lateEvade=true;
   signatures.add(JSON.stringify(action.map(p=>({from:p.from,variant:p.variant}))));

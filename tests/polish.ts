@@ -86,7 +86,10 @@ test('continuous seeded runs connect encounters through questions without telepo
  for(let seed=1;seed<=30;seed++){
   const s=new Sim(seed);s.noSpawn=true;s.reset(seed,false);while(s.track.frontier<4200)s.track.ensure(4200);
   const trafficPlans=plansOf(s);
-  for(let i=1;i<trafficPlans.length;i++){assert.notEqual(trafficPlans[i].kind,trafficPlans[i-1].kind);if(!trafficPlans[i].beat&&!trafficPlans[i-1].beat&&['double','transfer'].includes(trafficPlans[i-1].kind))assert.equal(trafficPlans[i].kind,'recovery');}
+  for(let i=1;i<trafficPlans.length;i++)if(!trafficPlans[i].beat&&!trafficPlans[i-1].beat)
+    assert.notEqual(trafficPlans[i].kind,trafficPlans[i-1].kind);
+  assert.ok(trafficPlans.filter(p=>!p.beat).every(p=>p.kind!=='recovery'&&p.kind!=='pass'),
+    'normal encounters should not select passive families');
   const clock=new FrameClock();let frames=0;s.start();
   while(s.d<4000&&s.alive&&frames++<100000){clock.advance(schedules[seed%schedules.length][frames%schedules[seed%schedules.length].length],dt=>{
    driveTraffic(s,trafficPlans);

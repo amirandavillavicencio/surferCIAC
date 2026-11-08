@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Sim } from '../upstream/src/sim/sim';
+import { RaceDirector } from '../ciac/rhythm';
 
 test('the opening barrier requires action and leaves two real ways through', () => {
   for (const seed of [1, 2]) {
@@ -21,5 +22,18 @@ test('the opening barrier requires action and leaves two real ways through', () 
       }
       assert.equal(sim.alive, action !== 'none', `${seed}: ${action}`);
     }
+  }
+});
+
+
+test('director chooses varied active encounters instead of passive recovery', () => {
+  const director = new RaceDirector();
+  let previous = '';
+  for (let i = 0; i < 40; i++) {
+    const kind = director.choose(i, 40 + 150 * i, i % 3, i % 4 === 0);
+    assert.ok(kind !== 'pass' && kind !== 'recovery', `passive encounter at ${i}: ${kind}`);
+    assert.notEqual(kind, previous);
+    director.remember(kind);
+    previous = kind;
   }
 });
