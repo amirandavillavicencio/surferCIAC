@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import {Sim} from '../upstream/src/sim/sim';
 import {ChaseState} from '../upstream/src/ciac/chase';
 import {FrameClock} from '../ciac/frame-clock';
-import {trainDetailPrototype} from '../upstream/src/ciac/rail-art';
+import {fitTrainModel} from '../upstream/src/ciac/rail-art';
+import {CAR_LEN, OB} from '../upstream/src/config';
+import {readFileSync} from 'node:fs';
+import {GLTFLoader} from '../upstream/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from '../upstream/node_modules/three';
 
 test('chase observes real stumbles/capture and never turns an academic slowdown into defeat',()=>{
@@ -41,8 +44,37 @@ test('speed progression changes actual motion smoothly while retaining the verif
  console.log(JSON.stringify({effectiveSpeedProgression:values}));
 });
 
-test('new train details have real doors/windows/roof geometry within the existing collision envelope',()=>{
- const root=trainDetailPrototype();const box=new THREE.Box3().setFromObject(root);
- assert.ok(box.min.x>=-1.18&&box.max.x<=1.18);assert.ok(box.min.z>=-3.37&&box.max.z<=3.37);assert.ok(box.max.y<=3.405);
- assert.equal(root.children.length,3);assert.ok(root.getObjectByName('windows'));assert.ok(root.getObjectByName('roof-door-frames'));
+test('Kenney train meshes fit the collision envelope and have a walkable coach roof', async () => {
+ for (const suffix of ['a', 'b'] as const) {
+  const name = `train-electric-subway-${suffix}` as const;
+  const original = readFileSync(`third_party/kenney-train-kit/${name}.glb`);
+  const jsonEnd = 20 + original.readUInt32LE(12);
+  const document = JSON.parse(original.toString('utf8', 20, jsonEnd));
+  // Node has no image decoder. Chromium checks the original textured files.
+  for (const material of document.materials) delete material.pbrMetallicRoughness.baseColorTexture;
+  const json = Buffer.from(JSON.stringify(document));
+  const aligned = (json.length + 3) & ~3;
+  const bytes = Buffer.alloc(20 + aligned + original.length - jsonEnd, 32);
+  original.copy(bytes, 0, 0, 20);
+  bytes.writeUInt32LE(bytes.length, 8);
+  bytes.writeUInt32LE(aligned, 12);
+  json.copy(bytes, 20);
+  original.copy(bytes, 20 + aligned, jsonEnd);
+  const {scene} = await new GLTFLoader().parseAsync(bytes.buffer, '');
+  const mesh = fitTrainModel(scene, name);
+  const box = new THREE.Box3().setFromObject(mesh);
+  const near = (actual: number, expected: number) => assert.ok(Math.abs(actual - expected) < 1e-5, `${actual} vs ${expected}`);
+  near(box.min.x, -OB.train.halfW);
+  near(box.max.x, OB.train.halfW);
+  near(box.min.y, 0);
+  near(box.max.y, OB.train.yt);
+  near(box.min.z, -CAR_LEN / 2);
+  near(box.max.z, CAR_LEN / 2);
+  if (suffix === 'b') {
+   for (const z of [-3, -2, -1, 0, 1, 2, 3]) {
+    const ray = new THREE.Raycaster(new THREE.Vector3(0, 5, z), new THREE.Vector3(0, -1, 0));
+    near(ray.intersectObject(mesh)[0].point.y, OB.train.yt);
+   }
+  }
+ }
 });

@@ -3,8 +3,6 @@ await copyFile('ciac/city-art.ts','upstream/src/ciac/city-art.ts');
 const patch=(s,a,b)=>{if(s.split(a).length!==2)throw Error('Visual finish anchor: '+a);return s.replace(a,b);};
 let world=await readFile('upstream/src/view/world.ts','utf8');
 world="import {CityArt,ballastTexture,rewardCoin,obstacleFinish,rampDeck} from '../ciac/city-art';\n"+world;
-world=patch(world,'trainDetailPrototype,RailBed','trainDetailPrototype,RailBed,trainBodyPrototype');
-world=patch(world,"const trainProto = node('train');",'const trainProto = trainBodyPrototype();');
 world=patch(world,'  private railBed:RailBed;','  private railBed:RailBed;\n  private city:CityArt;');
 world=patch(world,'    this.buildGround();','    this.buildGround();\n    this.city=new CityArt(s);');
 world=patch(world,'    this.railBed.update(pd);','    this.railBed.update(pd);\n    this.city.update(pd);');

@@ -39,9 +39,9 @@ with sync_playwright() as p:
  page.evaluate('''()=>{const r=__run;r.start({seed:7,tutorial:false});r.clock.reset();r.plans=[];}''');page.wait_for_function('__run.quiz.phase === "ready"')
  factors=[];questionVisible=False
  for target in [65,80,100,145,179,185,205,230,260,295,335,400,445]:
-  state=page.evaluate('''target=>{const r=__run,s=r.sim;while(s.d<target&&s.alive){for(const p of Traffic.plansOf(s))if(!r.plans.some(x=>x.start===p.start))r.plans.push(p);Traffic.driveTraffic(s,r.plans);r.frame(1/60);}r.render();const panel=document.querySelector('.ciac-dialog');const rect=panel.getBoundingClientRect();return {state:r.state(),factor:s.pace.factor,guard:{...r.presentation.chase.current},question:!panel.hidden,rect:{height:rect.height,bottom:rect.bottom},detailCars:r.world.trainDetails.count,baseCars:r.world.pools.train.count};}''',target)
+  state=page.evaluate('''target=>{const r=__run,s=r.sim;while(s.d<target&&s.alive){for(const p of Traffic.plansOf(s))if(!r.plans.some(x=>x.start===p.start))r.plans.push(p);Traffic.driveTraffic(s,r.plans);r.frame(1/60);}r.render();const panel=document.querySelector('.ciac-dialog');const rect=panel.getBoundingClientRect();return {state:r.state(),factor:s.pace.factor,guard:{...r.presentation.chase.current},question:!panel.hidden,rect:{height:rect.height,bottom:rect.bottom},cars:r.world.pools.train.count+r.world.pools.trainCab.count};}''',target)
   assert state['state']['alive'] and state['guard']['mode'] not in ['catching','captured','stumble'],state
-  assert state['detailCars']==state['baseCars'];factors.append(state['factor']);questionVisible|=state['question']
+  factors.append(state['factor']);questionVisible|=state['question']
   if state['question']:assert state['rect']['bottom']<844 and state['rect']['height']<321
   page.screenshot(path=str(OUT/f'run-{target}.png'));page.wait_for_timeout(80)
  assert questionVisible and len(answers)>=2 and any(x<.56 for x in factors),factors

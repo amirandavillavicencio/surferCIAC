@@ -1,4 +1,4 @@
-import {RailBed,trainDetailPrototype} from '../upstream/src/ciac/rail-art';
+import {RailBed} from '../upstream/src/ciac/rail-art';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -340,14 +340,16 @@ test('original GLB: complete train instances and finite animation clips hold ins
   const bytes=Buffer.concat([header,padded,rest]);
   const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
   const train=gltf.scene.getObjectByName('train')!;
-  const scene=new THREE.Scene(), pool=new Instanced(train,60,scene,{colors:true});
+  const scene=new THREE.Scene();
+  const cabPool=new Instanced(train,60,scene,{colors:true});
+  const coachPool=new Instanced(train,60,scene,{colors:true});
   const sim=new Sim();sim.noSpawn=true;sim.reset(1,false);sim.clearWorld();sim.start();
   const mover=sim.addOb({kind:'mtrain',lane:0,d0:80,d1:95,cars:3});
   const emptyPool=()=>new Instanced(train,60,scene);
   const couplers=new Instanced(new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.64, CAR_GAP + 0.18)), 60, scene);
   const world=Object.create(World.prototype) as World;
   Object.assign(world, {scene,camera:new THREE.PerspectiveCamera(76,390/844,.3,260),
-    pools:{train:pool},trainLinks:couplers,trainDetails:new Instanced(trainDetailPrototype(),72,scene),railBed:new RailBed(scene),city:{update(){}},coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
+    pools:{train:coachPool,trainCab:cabPool},trainLinks:couplers,railBed:new RailBed(scene),city:{update(){}},coins:emptyPool(),halos:new Instanced(train,340,scene,{colors:true}),
     poles:emptyPool(),powerCards:{magnet:emptyPool(),shoes:emptyPool(),double:emptyPool()},
     scrollTex:[],movers:[],camX:0,camY:0,camSupport:0,shake:0,flash:0,aspect:390/844,time:0,
     fx:{update(){},burst(){}},player:{menu(){}}
@@ -362,17 +364,18 @@ test('original GLB: complete train instances and finite animation clips hold ins
         if(center+CAR_LEN/2>=sim.d-26 && center-CAR_LEN/2<=sim.d+210+CAR_LEN) drawn.push(car);
       }
     }
-    assert.equal(pool.count,drawn.length);
-    assert.equal((world as any).trainDetails.count,drawn.length);
     assert.ok(world.camera.position.toArray().every(Number.isFinite));
     assert.ok(couplers.count<=Math.max(0,drawn.length));
-    for(const part of pool.parts) {
-      assert.equal(part.mesh.count,drawn.length);
-      for(let index=0;index<drawn.length;index++) {
-        const center=mover.d0+drawn[index]*(CAR_LEN+CAR_GAP)+CAR_LEN/2;
-        expected.makeTranslation(laneX(mover.lane),0,sim.d-center).multiply(part.local);
-        part.mesh.getMatrixAt(index,matrix);
-        for(let k=0;k<16;k++)near(matrix.elements[k],expected.elements[k],1e-5);
+    for (const [pool, cars] of [[cabPool, drawn.filter(car => car === 0)], [coachPool, drawn.filter(car => car > 0)]] as const) {
+      assert.equal(pool.count, cars.length);
+      for (const part of pool.parts) {
+        assert.equal(part.mesh.count, cars.length);
+        for (const [index, car] of cars.entries()) {
+          const center = mover.d0 + car * (CAR_LEN + CAR_GAP) + CAR_LEN / 2;
+          expected.makeTranslation(laneX(mover.lane), 0, sim.d - center).multiply(part.local);
+          part.mesh.getMatrixAt(index, matrix);
+          for (let k = 0; k < 16; k++) near(matrix.elements[k], expected.elements[k], 1e-5);
+        }
       }
     }
   }

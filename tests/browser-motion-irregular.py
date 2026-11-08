@@ -15,8 +15,8 @@ with sync_playwright() as p:
   if(Math.abs(r.world.player.root.rotation.z)>.2)throw Error('lean oscillation');
   clips.add(r.world.player.current);
   const expected=[];for(const o of v.obs){if(o.kind!=='mtrain')continue;if(o.d0>v.d+216.74||o.d1<v.d-26)continue;for(let c=0;c<o.cars;c++){const center=o.d0+c*7.04+3.37;if(center+3.37<v.d-26||center-3.37>v.d+216.74)continue;expected.push({x:(o.lane-1)*2.5,z:v.d-center});}}
-  if(r.world.pools.train.count!==expected.length)throw Error('car lifetime');
-  for(const part of r.world.pools.train.parts){const m=r.world.camera.matrixWorld.clone(),inverse=part.local.clone().invert();for(let i=0;i<part.mesh.count;i++){part.mesh.getMatrixAt(i,m);m.multiply(inverse);const error=Math.min(...expected.map(e=>Math.max(Math.abs(e.x-m.elements[12]),Math.abs(e.z-m.elements[14]))));maxError=Math.max(maxError,error);if(error>1e-4)throw Error('train timestamp mismatch');}}
+  const pools=[r.world.pools.train,r.world.pools.trainCab];if(pools.reduce((n,p)=>n+p.count,0)!==expected.length)throw Error('car lifetime');
+  for(const pool of pools)for(const part of pool.parts){const m=r.world.camera.matrixWorld.clone(),inverse=part.local.clone().invert();for(let i=0;i<part.mesh.count;i++){part.mesh.getMatrixAt(i,m);m.multiply(inverse);const error=Math.min(...expected.map(e=>Math.max(Math.abs(e.x-m.elements[12]),Math.abs(e.z-m.elements[14]))));maxError=Math.max(maxError,error);if(error>1e-4)throw Error('train timestamp mismatch');}}
   const physical=JSON.stringify(s.snapshot());r.presentFrame(0);if(physical!==JSON.stringify(s.snapshot()))throw Error('presentation wrote physics');
  }
  r.input('pause');const frozen=JSON.stringify({state:s.snapshot(),camera:r.world.camera.position.toArray(),clip:r.world.player.actions[r.world.player.current].time});r.presentFrame(.2);if(frozen!==JSON.stringify({state:s.snapshot(),camera:r.world.camera.position.toArray(),clip:r.world.player.actions[r.world.player.current].time}))throw Error('pause advanced presentation');

@@ -53,8 +53,8 @@ with sync_playwright() as p:
   for target in [40,65,77,95,123,150]:
    result=page.evaluate("""target=>{const r=__run,s=r.sim;let guard=0;while(s.d<target&&s.alive&&guard++<10000){Traffic.driveTraffic(s,r.trafficPlan);r.frame(1/60);}r.render();
     const shown=r.presentation?.view||s;const expected=[];for(const o of shown.obs){if(o.kind!=='train'&&o.kind!=='mtrain')continue;if(o.d0>shown.d+216.74||o.d1<shown.d-26)continue;for(let c=0;c<o.cars;c++){const center=o.d0+c*7.04+3.37;if(center+3.37<shown.d-26||center-3.37>shown.d+216.74)continue;expected.push({x:(o.lane-1)*2.5,z:shown.d-center});}}
-    const pool=r.world.pools.train;if(pool.count!==expected.length)throw Error('missing wagon');
-    for(const part of pool.parts){const m=r.world.camera.matrixWorld.clone(),inverse=part.local.clone().invert();for(let i=0;i<part.mesh.count;i++){part.mesh.getMatrixAt(i,m);m.multiply(inverse);if(!expected.some(e=>Math.abs(e.x-m.elements[12])<1e-4&&Math.abs(e.z-m.elements[14])<1e-4))throw Error('render/physics mismatch');}}
+    const pools=[r.world.pools.train,r.world.pools.trainCab];if(pools.reduce((n,p)=>n+p.count,0)!==expected.length)throw Error('missing wagon');
+    for(const pool of pools)for(const part of pool.parts){const m=r.world.camera.matrixWorld.clone(),inverse=part.local.clone().invert();for(let i=0;i<part.mesh.count;i++){part.mesh.getMatrixAt(i,m);m.multiply(inverse);if(!expected.some(e=>Math.abs(e.x-m.elements[12])<1e-4&&Math.abs(e.z-m.elements[14])<1e-4))throw Error('render/physics mismatch');}}
     return {d:s.d,alive:s.alive,y:s.y,cars:expected.length,moving:s.obs.filter(o=>o.kind==='mtrain').map(o=>({front:o.d0,tail:o.d1,speed:o.trainSpeed,cars:o.cars,time:o.travelTime}))};}""",target)
    assert result['alive'],(kind,result)
    samples.append(result)
