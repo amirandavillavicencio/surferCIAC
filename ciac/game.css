@@ -221,3 +221,21 @@ body { overflow: hidden; }
   #ui > .ciac-danger { font-size: 13px; }
   #ui > .ciac-dialog .ciac-message { font-size: 12px; }
 }
+
+/* Brief stumble notices belong above the world without blocking the next
+   decision. Keep them compact, and never paint over academic choices. */
+#ui .hud .toast {
+  top: 22%;
+  width: min(300px, calc(100vw - 28px));
+  padding: 7px 10px;
+  border-radius: 11px;
+  border: 1px solid rgba(221, 238, 250, .45);
+  background: rgba(13, 38, 57, .88);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .16);
+  font-size: clamp(13px, 3.5vw, 16px);
+  line-height: 1.25;
+  font-weight: 700;
+  text-shadow: none;
+  pointer-events: none;
+}
+#ui:has(> .ciac-dialog:not([hidden])) .hud .toast { opacity: 0; }
