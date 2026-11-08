@@ -94,6 +94,12 @@ track=track.slice(0,begin)+`  private genChunk() {
     const variant = this.rng.int(0, 35);
     const section = decisionSection(start, rampLane, landingLane, variant);
     const specs = section.specs;
+    // A run that has exhausted the question bank no longer needs a reading
+    // break. Only fill a slot before its track has been generated.
+    for (const offset of [107, 130]) {
+      const row = decisionRow(start + offset, landingLane, variant + offset, false);
+      if (row.every(spec => this.course.allowsObstacle(spec))) specs.push(...row);
+    }
     if (specs.some(spec => !this.course.allowsObstacle(spec))) {
       throw new Error('Decision section overlaps the question at ' + start);
     }

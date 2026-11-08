@@ -39,3 +39,15 @@ test('30 seeds reach 4000 m with real inputs, roof landings and quiz slowdown', 
     assert.ok(run.roofJumps >= 20, JSON.stringify({seed, run}));
   }
 });
+
+test('when reading slots are disabled the generator fills them with playable decisions', () => {
+  for (const seed of [1, 2, 3, 4, 5, 6]) {
+    const sim = new Sim(seed);
+    sim.track.course.reset(false);
+    sim.reset(seed, false);
+    for (const distance of [147, 170]) {
+      assert.equal(sim.obs.filter(ob => ob.d0 === distance).length, 3);
+    }
+    assert.ok(verifyDecisionRun(seed, 4000, false, false, false).roofJumps >= 20);
+  }
+});

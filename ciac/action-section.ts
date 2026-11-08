@@ -93,7 +93,7 @@ export function decisionRow(distance: number, preferredLane: number, variant: nu
 
 export function roofSection(rampStart: number, rampLane: number, landingLane: number, variant: number, short: boolean): Spec[] {
   const roofStart = rampStart + OB.ramp.depth;
-  const sourceCars = 1 + variant % 2;
+  const sourceCars = rampStart < 100 ? 1 : 1 + variant % 2;
   const sourceEnd = roofStart + trainLength(sourceCars);
   const blockedAt = sourceEnd + 9;
   const train = (lane: number, d0: number, cars: number): Spec =>

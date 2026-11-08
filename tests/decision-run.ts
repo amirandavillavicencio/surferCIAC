@@ -1,11 +1,12 @@
 import { Sim } from '../upstream/src/sim/sim';
 import { decisionPilot } from './decision-pilot';
 
-export function verifyDecisionRun(seed: number, finish: number, tutorial = false, penalized = false) {
+export function verifyDecisionRun(seed: number, finish: number, tutorial = false, penalized = false, questions = true) {
   const sim = new Sim(seed);
+  sim.track.course.reset(questions);
   sim.reset(seed, tutorial);
   sim.start();
-  let gate = 180;
+  let gate = questions ? 180 : Infinity;
   let roofTime = 0;
   let roofJumps = 0;
   let jumpFrom = -1;
