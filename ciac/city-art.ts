@@ -106,6 +106,93 @@ function stationSign() {
  return new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({map, side: THREE.DoubleSide}));
 }
 
+const ink = 0x24304a;
+const cream = 0xffe4af;
+const glassBlue = 0x34616d;
+
+function frontage(name: string, design: (box: (x: number, y: number, width: number, height: number, color: number, depth?: number, z?: number) => void) => void) {
+ const parts: THREE.BufferGeometry[] = [];
+ design((x, y, width, height, color, depth = .07, z = 0) => {
+  const piece = new THREE.BoxGeometry(width, height, depth).translate(x, y + height / 2, z);
+  const rgb = new THREE.Color(color);
+  const colors = new Float32Array(piece.attributes.position.count * 3);
+  for (let i = 0; i < colors.length; i += 3) rgb.toArray(colors, i);
+  piece.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  parts.push(piece);
+ });
+ const geometry = mergeGeometries(parts)!;
+ for (const piece of parts) piece.dispose();
+ const mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({vertexColors: true}));
+ mesh.name = name;
+ return mesh;
+}
+
+function shopfronts() {
+ return [
+  frontage('corner-showcase', box => {
+   box(0, 0, .96, .92, ink);
+   box(-.17, .13, .51, .61, glassBlue, .03, .05);
+   box(.28, .035, .21, .70, 0x68aaa6, .03, .05);
+   for (const x of [-.32, -.09]) box(x, .18, .025, .56, cream, .03, .08);
+   box(-.17, .12, .54, .05, cream, .10, .05);
+   box(0, .76, 1, .11, 0xe36e5e, .48, .15);
+   for (const x of [-.37, -.12, .12, .37]) box(x, .76, .11, .11, cream, .49, .15);
+  }),
+  frontage('recessed-arcade', box => {
+   box(0, 0, .97, .82, 0x273b4f);
+   for (const x of [-.33, 0, .33]) {
+    box(x, .09, .25, .55, 0x568e91, .02, .046);
+    box(x, .62, .27, .065, 0xe7ba68, .11, .09);
+   }
+   for (const x of [-.48, -.165, .165, .48]) box(x, 0, .055, .79, 0x67b6a9, .20, .10);
+   box(0, .79, .99, .11, 0x226e69, .32, .13);
+  }),
+  frontage('shutter-and-studio', box => {
+   box(0, 0, .97, .85, 0x40324c);
+   box(-.26, .05, .36, .53, 0x695d83, .03, .05);
+   for (const y of [.12, .22, .32, .42, .52]) box(-.26, y, .36, .02, 0x9a8eb0, .035, .07);
+   box(.15, .14, .34, .47, 0x34616d, .03, .05);
+   box(.15, .13, .39, .055, 0xffbf64, .14, .10);
+   box(.40, 0, .13, .68, 0xc37764, .14, .07);
+   box(0, .71, .98, .09, 0xeb9466, .20, .09);
+  }),
+ ];
+}
+
+function wallArt(name: string, record: boolean) {
+ const canvas = document.createElement('canvas');
+ canvas.width = 256; canvas.height = 128;
+ const g = canvas.getContext('2d')!;
+ const shape = (color: string, points: number[]) => {
+  g.fillStyle = color;
+  g.beginPath();
+  g.moveTo(points[0], points[1]);
+  for (let i = 2; i < points.length; i += 2) g.lineTo(points[i], points[i + 1]);
+  g.closePath();
+  g.fill();
+ };
+ g.fillStyle = record ? '#442b58' : '#263653';
+ g.fillRect(0, 0, 256, 128);
+ if (record) {
+  shape('#e77a65', [0, 94, 216, 0, 256, 0, 256, 38, 0, 126]);
+  shape('#ffcb67', [76, 128, 256, 44, 256, 56, 107, 128]);
+  for (const [radius, color] of [[55, '#242840'], [43, '#66567a'], [40, '#242840'], [29, '#66567a'], [26, '#242840'], [16, '#65c4ab'], [4, '#242840']] as const) {
+   g.fillStyle = color; g.beginPath(); g.arc(145, 62, radius, 0, 2 * Math.PI); g.fill();
+  }
+ } else {
+  g.fillStyle = '#ffbb61'; g.beginPath(); g.arc(172, 43, 27, 0, 2 * Math.PI); g.fill();
+  shape('#f48779', [0, 98, 70, 37, 111, 69, 153, 39, 256, 101, 256, 128, 0, 128]);
+  shape('#ffe4af', [44, 61, 70, 37, 100, 60, 77, 54, 67, 66, 61, 55]);
+  shape('#66ccba', [0, 107, 81, 83, 123, 101, 195, 77, 256, 98, 256, 128, 0, 128]);
+  shape('#365376', [37, 128, 117, 98, 154, 100, 107, 128]);
+ }
+ const map = new THREE.CanvasTexture(canvas);
+ map.colorSpace = THREE.SRGBColorSpace;
+ const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).translate(0, .5, 0), new THREE.MeshLambertMaterial({map}));
+ mesh.name = name;
+ return mesh;
+}
+
 interface CityPlacement {
  pool: Instanced;
  x: number;
@@ -132,6 +219,15 @@ export class CityArt {
   const commercial = models.commercial.map(m => makePool(m, true));
   const facadeTints = [0xffa054, 0x60d7bd, 0xffd261, 0x9a8be7, 0xff7d73, 0xd29af3]
    .map(color => new THREE.Color(color));
+  const shops = shopfronts().map(model => makePool(model));
+  const murals = [wallArt('foothills-mural', false), wallArt('record-mural', true)].map(model => makePool(model));
+  const loadingBay = makePool(frontage('loading-bays', box => {
+   for (const x of [-.26, .24]) {
+    box(x, 0, .38, .76, 0x3c4155);
+    for (const y of [.14, .28, .42, .56]) box(x, y, .34, .018, 0x62697a, .03, .046);
+    box(x, .73, .40, .08, 0x8f7166, .32, .10);
+   }
+  }));
   const industrial = models.industrial.map(m => makePool(m, true));
   const industrialTints = [0xb18fc9, 0xb8c2d7, 0xb8887a, 0x82a7af]
    .map(color => new THREE.Color(color));
@@ -166,17 +262,29 @@ export class CityArt {
      put(glazing, 7.16, .55, -2, .18, 2.8, 7.8, 0, glass);
      put(lamp, 7, .55, 7, .78, 2.9, .28, towardRail + Math.PI / 2);
      put(sign, 5.77, 3.24, 6.4, 2.65, .66, 1);
+     put(sign, 6.94, 1.85, -2.2, 3.1, .77, 1, towardRail);
      // Benches assembled from the same floor slab and column pieces.
      put(platform, 6.70, 1.02, -1, .47, .13, 2, 0, platformTint);
      for (const z of [-1.68, -.32]) put(column, 6.70, .55, z, .17, .47, .20, 0, enamel);
     } else if (sector === 'industrial') {
      put(industrial[variant % industrial.length], 16, -.08, 0, 13.7, 5.3 + (variant % 3), 7.5, towardRail, industrialTints[variant % industrial.length]);
+     if (variant % 2 === 0) put(loadingBay, 12.2, 0, 0, 12, 3.2, 1, towardRail);
      put(barrier, 12.12, -.09, 0, .24, .83, TILE);
      put(warning, 7.12, .25, 5, .55, 1.58, .54, towardRail);
     } else {
      const building = variant % commercial.length;
-     put(commercial[building], 14.2 + (variant % 2) * .55, -.08, side * 1.75,
-      [8,8,15,9,16,10][building], [10,9,7,13,12,19][building], 6.3, towardRail, facadeTints[building]);
+     const buildingX = 14.2 + (variant % 2) * .55;
+     const buildingZ = side * 1.75;
+     const width = [8, 8, 15, 9, 16, 10][building];
+     put(commercial[building], buildingX, -.08, buildingZ,
+      width, [10, 9, 7, 13, 12, 19][building], 6.3, towardRail, facadeTints[building]);
+     const front = buildingX - 3.25;
+     put(shops[[0, 1, 2, 2, 1, 0][building]], front, -.04, buildingZ,
+      width * .94, [3.2, 4.1, 3.5, 4.3, 3.7, 4.6][building], 1, towardRail);
+     if (building === 2 || building === 4) {
+      put(murals[building === 2 ? 0 : 1], front - .05, 3.8, buildingZ - side * 2.3,
+       5.8, 2.9, 1, towardRail);
+     }
      put(variant % 2 ? oak : tree, 6.35, .25, side * 3, 2.6, 3.7 + variant % 2, 2.55);
      put(fence, 6.32, .25, side * 3 + 1.5, 2.3, .53, .22);
      put(lamp, 7, .25, -5, .81, 3.3, .28);
