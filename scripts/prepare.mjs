@@ -17,7 +17,7 @@ await copyFile('ciac/pace.ts','upstream/src/ciac/pace.ts');
 await copyFile('ciac/campus-runner.ts','upstream/src/ciac/campus-runner.ts');
 await copyFile('ciac/swipe.ts','upstream/src/ciac/swipe.ts');
 await copyFile('ciac/game.ts','upstream/src/ciac/game.ts');
-for (const name of ['missions', 'shield-view', 'gameplay-audio']) {
+for (const name of ['missions', 'shield-view', 'gameplay-audio', 'academic-powerups']) {
   await copyFile(`ciac/${name}.ts`, `upstream/src/ciac/${name}.ts`);
 }
 await copyFile('ciac/game.css','upstream/src/ciac/game.css');

@@ -145,3 +145,55 @@ test('guard is suppressed where a train intersects its path but remains visible 
   roof.observe(sim, 1 / 120, []);
   assert.equal(roof.current.visible, true);
 });
+
+import { ACADEMIC_POWERS, powerForCorrectAnswer } from '../upstream/src/ciac/academic-powerups';
+import { POWER_TIME } from '../upstream/src/config';
+
+test('cada respuesta correcta validada entrega uno de los tres poderes en rotación', () => {
+  const missions = new RunMissions();
+  const received: string[] = [];
+  for (let n = 1; n <= 9; n++) {
+    missions.answer(true, n * 100, 0);
+    received.push(powerForCorrectAnswer(missions.correct));
+  }
+  assert.deepEqual(received, [...ACADEMIC_POWERS, ...ACADEMIC_POWERS, ...ACADEMIC_POWERS]);
+  missions.answer(false, 900, 1);
+  assert.equal(missions.correct, 9, 'una respuesta incorrecta no entrega un nuevo premio');
+  missions.answer(true, 1000, -1);
+  assert.equal(powerForCorrectAnswer(missions.correct), 'magnet');
+  assert.throws(() => powerForCorrectAnswer(0), RangeError);
+  for (const kind of ACADEMIC_POWERS) assert.ok(POWER_TIME[kind] > 0);
+});
+
+test('no aparecen power-ups en vías: trenes y rampas mantienen su generación', () => {
+  let trains = 0, ramps = 0, moving = 0;
+  for (let seed = 1; seed <= 20; seed++) {
+    const sim = new Sim(seed);
+    sim.noSpawn = true;
+    sim.reset(seed, false);
+    while (sim.track.frontier < 3040) sim.track.ensure(3040);
+    assert.equal(sim.powers.length, 0, 'no se generan power-ups sueltos');
+    assert.equal(sim.created.powers, 0, 'ningún premio de la pista se crea');
+    trains += sim.obs.filter(ob => ob.kind === 'train').length;
+    ramps += sim.obs.filter(ob => ob.kind === 'ramp').length;
+    moving += sim.obs.filter(ob => ob.kind === 'mtrain').length;
+  }
+  assert.ok(trains > 2000 && ramps > 200 && moving > 100,
+    'las secuencias y los trenes en movimiento continúan presentes');
+});
+
+test('los poderes académicos se activan con los tiempos existentes de la simulación', () => {
+  const sim = new Sim();
+  sim.noSpawn = true;
+  sim.reset(1, false);
+  sim.clearWorld();
+  sim.start();
+  for (const kind of ACADEMIC_POWERS) {
+    sim.power[kind] = POWER_TIME[kind];
+    assert.equal(sim.power[kind], POWER_TIME[kind]);
+  }
+  sim.update(1 / 120);
+  for (const kind of ACADEMIC_POWERS) {
+    assert.ok(sim.power[kind] > 0 && sim.power[kind] < POWER_TIME[kind]);
+  }
+});

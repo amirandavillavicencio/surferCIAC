@@ -229,6 +229,7 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
   const questions=Array.isArray(bank)?bank:bank.questions;
   assert.equal(questions.length,24);
   const course=new QuizCourse(), scene=new THREE.Scene(); let index=0, answers=0, penalty=0;
+  const awarded: string[] = [];
   let resolveAnswer:any; let delay=false;
   const response=(data:any)=>({ok:true,json:async()=>data});
   (globalThis as any).fetch=async(path:string,options:any)=>{
@@ -240,7 +241,9 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
     if(delay) return new Promise(resolve=>{resolveAnswer=()=>resolve(response(data));});
     return response(data);
   };
-  const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;},threat(){return 0;},sound(){}});
+  const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;},threat(){return 0;},sound(){},
+    grantPower(kind){awarded.push(kind);}
+  });
   await quiz.start();
   for(let n=0;n<24;n++) {
     const gate=quiz.activeGate; assert.ok(Number.isFinite(gate));
@@ -252,9 +255,11 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
     assert.equal(answers,n+1);
     if(delay) {quiz.tick(gate+220,1);resolveAnswer();}
     await new Promise(resolve=>setImmediate(resolve));
+    assert.equal(awarded.length, Math.floor((n+1)/2), 'solo los aciertos verificados conceden poderes');
     if(n<23) assert.ok(quiz.activeGate>=gate+150);
   }
   assert.equal(answers,24);assert.equal(penalty,36);assert.equal(quiz.activeGate,Infinity);
+  assert.deepEqual(awarded, Array.from({length:12},(_,i)=>['magnet','double','shoes'][i%3]));
   assert.equal(course.intersects(5500,5600),false);
   const existing = new Sim(); existing.reset(4,false);
   const ids = existing.obs.map(o=>o.id);
@@ -274,6 +279,7 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
   const question={id:'q',curso:'MAT',enunciado:'Pregunta',opciones:['A','B','C']};
   const results=[true,true,true,true,true,true,false,true,true,true];
   const rewards: [boolean,number][]=[];
+  const granted: string[] = [];
   const danger:boolean[]=[];
   const sounds:string[]=[];
   let index=0;
@@ -286,6 +292,7 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
   const quiz=new CIACQuiz({
     scene:new THREE.Scene(),course:new QuizCourse(),frontier:()=>0,notice(){},penalize(){},
     reward(shield,bonus){if(shield||bonus)rewards.push([shield,bonus]);},
+    grantPower(kind){granted.push(kind);},
     threat(correct){danger.push(correct);return correct ? -1 : 1;},
     sound(cue){sounds.push(cue);}
   });
@@ -302,6 +309,7 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
   assert.equal(sounds.filter(cue=>cue==='wrong').length,1);
   assert.equal(sounds.filter(cue=>cue==='bonus').length,1);
   assert.deepEqual(danger,results);
+  assert.deepEqual(granted, Array.from({length:9},(_,i)=>['magnet','double','shoes'][i%3]));
   assert.deepEqual(rewards,[[true,0],[false,100],[true,0]]);
   quiz.endRun(1700.5,1200,true);
   const summary=(quiz as any).summary;
