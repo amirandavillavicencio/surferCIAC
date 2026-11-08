@@ -51,3 +51,15 @@ test('later traffic includes more double-train encounter families and recovery',
  assert.ok(later.filter(x=>x==='double').length>earlier.filter(x=>x==='double').length);
  assert.ok(later.includes('recovery'));
 });
+
+test('academic shield absorbs one stumble and expires after 150 metres or restart',()=>{
+ const chase=new ChaseState();
+ chase.grantShield(200);
+ assert.equal(chase.absorbStumble(349),true);
+ assert.equal(chase.absorbStumble(349),false);
+ chase.grantShield(200);
+ assert.equal(chase.absorbStumble(350),false);
+ chase.grantShield(400);
+ chase.reset();
+ assert.equal(chase.hasShield(0),false);
+});

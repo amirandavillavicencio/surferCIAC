@@ -9,6 +9,7 @@ type Phase = 'idle' | 'ready' | 'question' | 'submitting' | 'complete' | 'ended'
 interface Hooks {
   scene: Scene; notice(message: string): void; course: QuizCourse;
   frontier(): number; penalize(seconds: number): void;
+  reward?(shield:boolean, bonus:number):void;
   threat?(correct:boolean):number;
 }
 
@@ -22,6 +23,10 @@ async function api(path: string, body?: object): Promise<any> {
 }
 
 export class CIACQuiz {
+  private correctAnswers=0;
+  private streak=0;
+  private bestStreak=0;
+  private summary: HTMLElement;
   private phase: Phase = 'idle';
   private runSerial = 0;
   private hooks: Hooks;
@@ -122,7 +127,9 @@ export class CIACQuiz {
     this.resultForm.append(resultTitle, this.playerName, button, this.formStatus);
     this.resultForm.addEventListener('submit', (event) => { event.preventDefault(); void this.saveScore(); });
     this.resultForm.addEventListener('pointerdown', (event) => event.stopPropagation());
-    overPanel.append(this.resultForm);
+    this.summary=document.createElement('p');
+    this.summary.className='ciac-run-summary';
+    overPanel.append(this.summary,this.resultForm);
   }
 
   get activeGate() {
@@ -135,11 +142,13 @@ export class CIACQuiz {
       this.currentDistance < this.nextDistance;
   }
 
-  setDanger(level:number) {
-    if(level===this.lastDanger)return;
-    this.lastDanger=level;
-    this.dangerHUD.hidden=level===0;
-    this.dangerHUD.textContent='Guardia cerca · '+level+'/4';
+  setDanger(level:number, shield=false) {
+    if(this.phase==='ended')return;
+    const display=level+(shield?5:0);
+    if(display===this.lastDanger)return;
+    this.lastDanger=display;
+    this.dangerHUD.hidden=level===0&&!shield;
+    this.dangerHUD.textContent=[level?'Guardia · '+level+'/4':'',shield?'Escudo activo':''].filter(Boolean).join(' · ');
     this.dangerHUD.setAttribute('data-danger',String(level));
   }
 
@@ -148,6 +157,8 @@ export class CIACQuiz {
     this.phase = 'idle';
     this.question = null;
     this.token = '';
+    this.correctAnswers=this.streak=this.bestStreak=0;
+    this.summary.textContent='';
     this.dialog.hidden = true;
     this.setDanger(0);
     this.resultForm.hidden = true;
@@ -252,10 +263,19 @@ export class CIACQuiz {
         gateDistance + GATE_SPACING, this.currentDistance + QUESTION_VISIBLE_DISTANCE
       ));
       this.phase = this.question ? 'ready' : 'complete';
-      if(this.hooks.threat)this.setDanger(this.hooks.threat(response.correct));
+      this.hooks.threat?.(response.correct);
       if (response.correct) {
-        this.hooks.notice('¡Correcto! · ' + response.points + ' puntos académicos');
+        this.correctAnswers++;
+        this.streak++;
+        this.bestStreak=Math.max(this.bestStreak,this.streak);
+        const shield=this.streak===3;
+        const bonus=this.streak===5?100:0;
+        this.hooks.reward?.(shield,bonus);
+        this.hooks.notice(shield?'3 aciertos seguidos · Escudo por 150 m':
+          bonus?'5 aciertos seguidos · +100 puntos de carrera':
+          '¡Correcto! · '+response.points+' puntos académicos');
       } else {
+        this.streak=0;
         this.hooks.penalize(Number(response.penaltySeconds) || 3);
         this.hooks.notice('Incorrecto · 3 segundos corriendo más lento.');
       }
@@ -273,7 +293,8 @@ export class CIACQuiz {
     }
   }
 
-  endRun() {
+  endRun(distance:number, score:number, caught:boolean) {
+    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.correctAnswers} aciertos · Mejor racha: ${this.bestStreak} · ${caught?'Te alcanzó el guardia':'Choque con un obstáculo'}`;
     this.runSerial++;
     this.phase = 'ended';
     this.dangerHUD.hidden=true;

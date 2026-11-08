@@ -150,15 +150,15 @@ test('continuous runs: nothing retires in front of the camera; moving trains and
   assert.ok(observedMovers>0 && crossed>100);
 });
 
-test('72% transition and recovery are continuous and independent of frame rate', () => {
+test('60% transition and recovery are continuous and independent of frame rate', () => {
   const samples:number[]=[];
   for(const dt of [1/120,1/60,1/30,1/20]) {
     const p=new RacePace();
-    near(p.step(dt,143,180),1);
+    near(p.step(dt,139,180),1);
     let previous=1;
     for(let t=0;t<1;t+=dt) { const f=p.step(dt,145,180); assert.ok(f<=previous+1e-12); previous=f; }
-    near(p.factor,.72);
-    assert.ok(p.step(dt,180,180)>.72 && p.factor<1);
+    near(p.factor,.60);
+    assert.ok(p.step(dt,180,180)>.60 && p.factor<1);
     for(let t=0;t<1;t+=dt) p.step(dt,181,180);
     samples.push(p.factor);
   }
@@ -279,6 +279,39 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
   (globalThis as any).fetch=async()=>{throw new Error('network unavailable');};
   course.reset();quiz.reset();await quiz.start();assert.equal(quiz.activeGate,Infinity);
   assert.equal(course.intersects(5500,5600),false);
+});
+
+test('quiz awards a shield and career bonus once per streak and reports the run', async () => {
+  dom();
+  const question={id:'q',curso:'MAT',enunciado:'Pregunta',opciones:['A','B','C']};
+  const results=[true,true,true,true,true,true,false,true,true,true];
+  const rewards: [boolean,number][]=[];
+  const danger:boolean[]=[];
+  let index=0;
+  (globalThis as any).fetch=async(path:string)=>({ok:true,json:async()=>{
+    if(path.endsWith('start'))return {token:'',question};
+    if(path.includes('leaderboard'))return {ranking:[]};
+    return {correct:results[index++],points:0,question};
+  }});
+  const quiz=new CIACQuiz({
+    scene:new THREE.Scene(),course:new QuizCourse(),frontier:()=>0,notice(){},penalize(){},
+    reward(shield,bonus){if(shield||bonus)rewards.push([shield,bonus]);},
+    threat(correct){danger.push(correct);return 0;}
+  });
+  await quiz.start();
+  for(const _ of results) {
+    const gate=quiz.activeGate;
+    quiz.tick(gate,1);
+    quiz.tick(gate+1,1);
+    await new Promise(resolve=>setImmediate(resolve));
+  }
+  assert.deepEqual(danger,results);
+  assert.deepEqual(rewards,[[true,0],[false,100],[true,0]]);
+  quiz.endRun(1700.5,1200,true);
+  const summary=(quiz as any).summary;
+  assert.match(summary.textContent,/1700 m.*1200 puntos.*9 aciertos.*Mejor racha: 6.*guardia/);
+  quiz.reset();
+  assert.equal(summary.textContent,'');
 });
 
 test('physical movement: rapid lanes, jump landing, slide, and original collision outcomes', () => {

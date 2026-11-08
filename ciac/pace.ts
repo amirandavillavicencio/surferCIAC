@@ -1,4 +1,4 @@
-import { STRIP_LENGTH } from './course';
+import { QUESTION_VISIBLE_DISTANCE } from './course';
 
 export class RacePace {
   factor = 1;
@@ -25,7 +25,7 @@ export class RacePace {
       this.elapsed = 0;
       return this.factor;
     }
-    const target = distance >= gate - STRIP_LENGTH && distance < gate ? 0.72 : 1;
+    const target = distance >= gate - QUESTION_VISIBLE_DISTANCE && distance < gate ? 0.60 : 1;
     if (target !== this.target) {
       this.from = this.factor;
       this.target = target;

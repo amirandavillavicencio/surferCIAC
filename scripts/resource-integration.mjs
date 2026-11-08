@@ -25,13 +25,16 @@ world=patch(world,'    this.player = new PlayerView(core, s);','    this.player 
 world=patch(world,'  resetScenery() {','  resetScenery() {\n    this.guard.reset();');
 await writeFile('upstream/src/view/world.ts',world);
 let main=await readFile('upstream/src/main.ts','utf8');
-main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger);");
+main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger,presentation.chase.hasShield(sim.d));");
 main=patch(main,'    penalize: (seconds: number) => sim.pace.penalize(seconds),',
-  '    penalize: (seconds: number) => sim.pace.penalize(seconds),\n    threat: (correct: boolean) => presentation.chase.answer(correct),');
+  '    penalize: (seconds: number) => sim.pace.penalize(seconds),\n    threat: (correct: boolean) => presentation.chase.answer(correct),\n    reward: (shield: boolean, bonus: number) => {\n      if(shield)presentation.chase.grantShield(sim.d);\n      sim.score+=bonus;\n    },');
 main=patch(main,'    presentation.capture(sim, dt, events);',
   "    presentation.capture(sim, dt, events);\n    if(QUIZ && state==='play' && sim.alive && presentation.chase.current.mode==='captured')sim.caughtByGuard();");
+main=patch(main,'if (QUIZ) quiz.endRun();',"if (QUIZ) quiz.endRun(sim.d,score,ev.kind==='caught');");
+main=patch(main,'  let tutorialDone', '  sim.absorbStumble = () => QUIZ && presentation.chase.absorbStumble(sim.d);\n  let tutorialDone');
 await writeFile('upstream/src/main.ts',main);
 let sim=await readFile('upstream/src/sim/sim.ts','utf8');
+sim=patch(sim,'  private stumble() {','  absorbStumble = () => false;\n\n  private stumble() {\n    if(this.absorbStumble())return;');
 sim=patch(sim,"  private crash(kind: ObKind | 'caught', o?: Ob) {",
   "  caughtByGuard() { if(this.alive) this.crash('caught'); }\n\n  private crash(kind: ObKind | 'caught', o?: Ob) {");
 await writeFile('upstream/src/sim/sim.ts',sim);

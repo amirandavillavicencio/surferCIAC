@@ -46,8 +46,8 @@ export function trafficKind(index: number, start: number): TrafficKind {
   // A shuffled family, with recovery after a multi-decision encounter. The
   // caller supplies a seeded index; difficulty never increases vehicle speed.
   const kinds: TrafficKind[] = start < 1000
-    ? ['pass','dodge','roof-traffic','recovery','transfer']
-    : ['pass','double','roof-traffic','recovery','double','recovery','transfer','dodge','double','recovery'];
+    ? ['pass','dodge','roof-traffic','recovery','transfer','pass']
+    : ['pass','double','roof-traffic','recovery','double','transfer','dodge','double','roof-traffic','recovery'];
   return kinds[((index % kinds.length)+kinds.length)%kinds.length];
 }
 export function trafficEncounter(start: number, from: number, kind: TrafficKind, variant = 0): Spec[] {

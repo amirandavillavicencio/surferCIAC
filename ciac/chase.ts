@@ -11,11 +11,20 @@ export class ChaseState {
   previous=frame();current=frame();readonly view=frame();
   private timer=0;private history:Point[]=[];private lastD=-2.4;
   danger=0;
+  shieldUntil=0;
+
+  grantShield(distance:number) { this.shieldUntil=distance+150; }
+  hasShield(distance:number) { return this.shieldUntil>distance; }
+  absorbStumble(distance:number) {
+    if(!this.hasShield(distance)) return false;
+    this.shieldUntil=0;
+    return true;
+  }
   answer(correct:boolean){
     this.danger=Math.max(0,Math.min(4,this.danger+(correct?-1:1)));
     return this.danger;
   }
-  reset(){this.previous=frame();this.current=frame();Object.assign(this.view,this.current);this.timer=0;this.history=[];this.lastD=-2.4;this.danger=0;}
+  reset(){this.previous=frame();this.current=frame();Object.assign(this.view,this.current);this.timer=0;this.history=[];this.lastD=-2.4;this.danger=0;this.shieldUntil=0;}
   observe(s:Sim,dt:number,events:SimEvent[]){
     Object.assign(this.previous,this.current);
     const c=this.current;
@@ -29,14 +38,15 @@ export class ChaseState {
       this.danger=Math.min(4,this.danger+1);
       c.mode='stumble';this.timer=.65;
     }
-    if(s.alive&&this.danger>=4&&c.mode!=='captured'){
+    if(s.alive&&this.danger>=4&&c.mode!=='captured'&&c.mode!=='catching'){
       c.mode='catching';this.timer=0;
     }
+    if(s.alive&&this.danger<4&&c.mode==='catching')c.mode='distant';
     if(this.danger>0&&c.mode==='intro')c.mode='distant';
     if(c.mode==='intro'||c.mode==='stumble'){this.timer=Math.max(0,this.timer-dt);if(this.timer===0)c.mode='distant';}
     if(c.mode==='catching'){this.timer+=dt;if(c.gap<.76){c.mode='captured';}}
-    const target=c.mode==='distant'?[14,8,5.25,2.5,1.2][this.danger]
-      :c.mode==='catching'||c.mode==='captured'?.65:2.4;
+    const target=c.mode==='distant'?[14,6.4,4.4,2.1,1.2][this.danger]
+      :c.mode==='catching'||c.mode==='captured'?.65:c.mode==='stumble'?Math.max(2.1,8-this.danger*1.8):2.4;
     const change=(target-c.gap)*(1-Math.exp(-dt*(c.mode==='distant'?1.5:6)));
     // A falling-back guard still runs forward; it must not moonwalk backwards.
     c.gap+=Math.max(-dt*(c.mode==='catching'?18:Math.max(3,s.speed*.6)),Math.min(dt*s.speed*.45,change));
