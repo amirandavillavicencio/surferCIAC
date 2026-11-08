@@ -197,7 +197,7 @@ test('answer strips use the same distance as world transforms and survive the cr
 class ElementAdapter {
   children:any[]=[]; hidden=false; disabled=false; value=''; textContent=''; clientWidth=390;
   listeners=new Map<string,Function[]>();
-  className=''; attrs:any={}; parent:any;
+  className=''; attrs:any={}; dataset: Record<string, string>={}; parent:any;
   classList={add(){},remove(){},toggle(){}};
   append(...nodes:any[]) { for(const node of nodes) {this.children.push(node);node.parent=this;} }
   insertBefore(node:any,_ref:any) {this.append(node);}
@@ -252,7 +252,7 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
     if(delay) return new Promise(resolve=>{resolveAnswer=()=>resolve(response(data));});
     return response(data);
   };
-  const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;}});
+  const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;},threat(){return 0;},sound(){}});
   await quiz.start();
   for(let n=0;n<24;n++) {
     const gate=quiz.activeGate; assert.ok(Number.isFinite(gate));
@@ -287,16 +287,19 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
   const results=[true,true,true,true,true,true,false,true,true,true];
   const rewards: [boolean,number][]=[];
   const danger:boolean[]=[];
+  const sounds:string[]=[];
   let index=0;
   (globalThis as any).fetch=async(path:string)=>({ok:true,json:async()=>{
     if(path.endsWith('start'))return {token:'',question};
     if(path.includes('leaderboard'))return {ranking:[]};
-    return {correct:results[index++],points:0,question};
+    const correct=results[index++];
+    return {correct,points:100*results.slice(0,index).filter(Boolean).length,question};
   }});
   const quiz=new CIACQuiz({
     scene:new THREE.Scene(),course:new QuizCourse(),frontier:()=>0,notice(){},penalize(){},
     reward(shield,bonus){if(shield||bonus)rewards.push([shield,bonus]);},
-    threat(correct){danger.push(correct);return 0;}
+    threat(correct){danger.push(correct);return correct ? -1 : 1;},
+    sound(cue){sounds.push(cue);}
   });
   await quiz.start();
   for(const _ of results) {
@@ -304,7 +307,12 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
     quiz.tick(gate,1);
     quiz.tick(gate+1,1);
     await new Promise(resolve=>setImmediate(resolve));
+    const feedback=(quiz as any).feedback;
+    assert.match(feedback.textContent, _ ? /\+100 académicos · Guardia −1/ : /Incorrecto · Guardia \+1/);
   }
+  assert.equal(sounds.filter(cue=>cue==='correct').length,9);
+  assert.equal(sounds.filter(cue=>cue==='wrong').length,1);
+  assert.equal(sounds.filter(cue=>cue==='bonus').length,1);
   assert.deepEqual(danger,results);
   assert.deepEqual(rewards,[[true,0],[false,100],[true,0]]);
   quiz.endRun(1700.5,1200,true);

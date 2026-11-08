@@ -2,9 +2,9 @@ import type {Sim} from '../sim/sim';
 import type {SimEvent} from '../sim/types';
 import {laneX,PLAYER} from '../config';
 export type ChaseMode='hidden'|'intro'|'distant'|'stumble'|'catching'|'captured';
-export interface ChaseFrame {mode:ChaseMode;x:number;y:number;d:number;gap:number;phase:number;air:boolean;visible:boolean;reach:number;}
+export interface ChaseFrame {mode:ChaseMode;x:number;y:number;d:number;gap:number;phase:number;air:boolean;visible:boolean;reach:number; urgency:number;}
 type Point={d:number;x:number;y:number;groundY:number;grounded:boolean};
-const frame=():ChaseFrame=>({mode:'hidden',x:0,y:0,d:-2.4,gap:2.4,phase:0,air:false,visible:false,reach:0});
+const frame=():ChaseFrame=>({mode:'hidden',x:0,y:0,d:-2.4,gap:2.4,phase:0,air:false,visible:false,reach:0,urgency:0});
 // State transitions adapted from Saurabh's Sprint (MIT, third_party license).
 // The academic danger controls proximity; the simulator owns the actual capture.
 export class ChaseState {
@@ -55,12 +55,14 @@ export class ChaseState {
     for(const p of this.history){if(p.d<=d)a=p;if(p.d>=d){b=p;break;}b=p;}
     const t=b.d>a.d?Math.max(0,Math.min(1,(d-a.d)/(b.d-a.d))):1;
     c.x=a.x+(b.x-a.x)*t;c.y=a.y+(b.y-a.y)*t;c.air=!(t<.5?a:b).grounded;
-    c.phase+=Math.max(0,d-this.lastD)*1.25;this.lastD=d;
+    c.urgency += (this.danger / 4 - c.urgency) * (1 - Math.exp(-dt * 5));
+    c.phase += Math.max(0, d - this.lastD) * (1.25 + .45 * c.urgency);
+    this.lastD = d;
     c.reach=c.mode==='captured'?1:c.mode==='catching'?Math.max(0,Math.min(1,(2.4-c.gap)/1.75)):0;
     if(c.mode==='catching'||c.mode==='captured'){c.y=Math.min(c.y,s.y);c.x+=(s.x-c.x)*c.reach;}
     // Replaying the runner's path handles ramps/roofs. Suppress only geometry
     // genuinely occluded by a passing vehicle, rather than draw through it.
-    c.visible=c.gap<9;
+    c.visible=c.gap<16;
     const gx=c.x-.55;
     for(const o of s.obs){
       if(d+PLAYER.halfD<o.d0||d-PLAYER.halfD>o.d1||Math.abs(gx-laneX(o.lane))>o.halfW+.3)continue;
@@ -69,7 +71,7 @@ export class ChaseState {
     }
   }
   sample(t:number){const a=this.previous,b=this.current,v=this.view;Object.assign(v,t<1?a:b);v.visible=a.visible&&b.visible;
-    for(const key of ['x','y','d','gap','phase','reach'] as const)v[key]=a[key]+(b[key]-a[key])*t;
+    for(const key of ['x','y','d','gap','phase','reach','urgency'] as const)v[key]=a[key]+(b[key]-a[key])*t;
     return v;
   }
 }

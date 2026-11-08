@@ -10,9 +10,12 @@ export class GuardView {
     this.root.visible=state.visible&&state.mode!=='hidden';
     if(!this.root.visible)return;
     const a=this.actor,stop=state.mode==='captured'?0:1,stride=Math.sin(state.phase)*stop;
-    a.officerLeftLeg.rotation.x=stride*.85;a.officerRightLeg.rotation.x=-stride*.85;
-    a.officerLeftArm.rotation.x=-stride*.8*(1-state.reach)+state.reach*1.15;
-    a.officerRightArm.rotation.x=stride*.8*(1-state.reach)+state.reach*1.15;
+    const swing = .75 + .3 * state.urgency;
+    a.officerLeftLeg.rotation.x = stride * swing;
+    a.officerRightLeg.rotation.x = -stride * swing;
+    a.officerGroup.rotation.x = -.08 * state.urgency - .16 * state.reach;
+    a.officerLeftArm.rotation.x=-stride*.8*(1-state.reach)-state.reach*1.35;
+    a.officerRightArm.rotation.x=stride*.8*(1-state.reach)-state.reach*1.35;
     if(state.air){a.officerLeftLeg.rotation.x=.55;a.officerRightLeg.rotation.x=-.3;}
     a.officerTorso.position.y=.98+Math.abs(Math.cos(state.phase))*.045*stop;
     a.officerHeadGroup.rotation.y=-stride*.06;

@@ -154,3 +154,41 @@ body { overflow: hidden; }
 #ui > .ciac-danger{position:fixed;top:calc(45px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:11;white-space:nowrap;border:1px solid #f0b564;background:rgba(62,31,25,.92);color:#fff3dc;border-radius:30px;padding:5px 12px;font-size:12px;font-weight:800;pointer-events:none;box-shadow:0 3px 12px rgba(0,0,0,.22)}
 #ui > .ciac-danger[data-danger='3'],#ui > .ciac-danger[data-danger='4']{background:#9b292b;border-color:#ffbdac}
 #ui > .ciac-danger[hidden]{display:none!important}
+
+#ui > :is(.ciac-feedback,.ciac-mission) {
+  position: fixed;
+  z-index: 11;
+  top: calc(73px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 4px 10px;
+  border-radius: 9px;
+  background: #102b41f2;
+  color: #e8f5ff;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+}
+#ui > .ciac-feedback[data-correct='true'] { color: #b7ffdc; border: 1px solid #6ecba7; }
+#ui > .ciac-feedback[data-correct='false'] { color: #ffdbd6; border: 1px solid #ed8779; }
+#ui > .ciac-dialog:not([hidden]) ~ .ciac-feedback { top: auto; bottom: calc(16px + env(safe-area-inset-bottom)); }
+.ciac-run-summary small { display: block; margin-top: 6px; color: #c4e8ff; }
+@media (orientation:landscape) and (max-height:520px) {
+  #ui > .ciac-danger { top: calc(55px + env(safe-area-inset-top)); left: 12px; transform: none; }
+  #ui > :is(.ciac-feedback,.ciac-mission) { top: calc(82px + env(safe-area-inset-top)); }
+}
+
+@media (orientation:portrait), (min-height:521px) {
+  #ui > .ciac-danger { top: calc(65px + env(safe-area-inset-top)); }
+  #ui > :is(.ciac-feedback,.ciac-mission) { top: calc(96px + env(safe-area-inset-top)); }
+  #ui > .ciac-dialog { top: calc(95px + env(safe-area-inset-top)); }
+}
+#s-over .panel {
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+#s-over .panel > * { flex-shrink: 0; }

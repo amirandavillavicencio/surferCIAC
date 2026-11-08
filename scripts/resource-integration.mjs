@@ -24,6 +24,18 @@ world=patch(world,'export class World {','export class World {\n  readonly guard
 world=patch(world,'    this.player = new PlayerView(core, s);','    this.player = new PlayerView(core, s);\n    this.guard = new GuardView(s);');
 world=patch(world,'  resetScenery() {','  resetScenery() {\n    this.guard.reset();');
 await writeFile('upstream/src/view/world.ts',world);
+let audio = await readFile('upstream/src/audio.ts', 'utf8');
+audio = "import {playGameplayCue, type GameplayCue} from './ciac/gameplay-audio';\n" + audio;
+audio = patch(audio, "if (this.ctx.state === 'suspended')", "if (this.ctx.state !== 'running' && this.ctx.state !== 'closed')");
+audio = patch(audio, '  jump(sup: boolean) {', `  gameplay(cue: GameplayCue, delay = 0) {
+    playGameplayCue(this.ctx?.state, this.muted, cue, (frequency, when) => {
+      this.tone(frequency, .13, 'triangle', .16, undefined, when);
+    }, delay);
+  }
+
+  jump(sup: boolean) {`);
+await writeFile('upstream/src/audio.ts', audio);
+
 let main=await readFile('upstream/src/main.ts','utf8');
 main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger,presentation.chase.hasShield(sim.d));");
 main=patch(main,'    penalize: (seconds: number) => sim.pace.penalize(seconds),',
@@ -32,6 +44,38 @@ main=patch(main,'    presentation.capture(sim, dt, events);',
   "    presentation.capture(sim, dt, events);\n    if(QUIZ && state==='play' && sim.alive && presentation.chase.current.mode==='captured')sim.caughtByGuard();");
 main=patch(main,'if (QUIZ) quiz.endRun();',"if (QUIZ) quiz.endRun(sim.d,score,ev.kind==='caught');");
 main=patch(main,'  let tutorialDone', '  sim.absorbStumble = () => QUIZ && presentation.chase.absorbStumble(sim.d);\n  let tutorialDone');
+main = "import {ShieldView} from './ciac/shield-view';\n" + main;
+main = patch(main, '  const quiz = new CIACQuiz({', '  const shieldView = new ShieldView(world.scene);\n  const quiz = new CIACQuiz({');
+main = patch(main, '    threat: (correct: boolean) => presentation.chase.answer(correct),', `    threat: (correct: boolean) => {
+      const before = presentation.chase.danger;
+      const after = presentation.chase.answer(correct);
+      if (after >= 3 && after > before) audio.gameplay('urgent', .24);
+      return after - before;
+    },
+    sound: (cue, delay) => audio.gameplay(cue, delay),`);
+main = patch(main, '  sim.absorbStumble = () => QUIZ && presentation.chase.absorbStumble(sim.d);', `  sim.absorbStumble = () => {
+    if (!QUIZ || !presentation.chase.absorbStumble(sim.d)) return false;
+    shieldView.hit();
+    audio.gameplay('absorbed');
+    return true;
+  };`);
+main = patch(main, '    quiz.reset(); raceFX.reset();', '    quiz.reset(); raceFX.reset(); shieldView.reset();');
+main = patch(main, '        audio.crash();', "        if (QUIZ && ev.kind === 'caught') audio.gameplay('caught');\n        else audio.crash();");
+main = patch(main, '    for (const ev of events) handle(ev);', `    if (QUIZ && state === 'play' && (sim.alive || events.some(event => event.type === 'crash'))) {
+      quiz.observeRun(sim.d, events.some(event => event.type === 'stumble'));
+    }
+    for (const ev of events) handle(ev);`);
+main = patch(main, '    presentation.capture(sim, dt, events);', `    const previousDanger = presentation.chase.danger;
+    presentation.capture(sim, dt, events);
+    if (QUIZ && sim.alive && presentation.chase.danger >= 3 && presentation.chase.danger > previousDanger) {
+      audio.gameplay('urgent');
+    }`);
+main = patch(main, '    if(QUIZ)quiz.setDanger(presentation.chase.danger,presentation.chase.hasShield(sim.d));', `    if (QUIZ) {
+      const shield = sim.alive && presentation.chase.hasShield(sim.d);
+      quiz.setDanger(presentation.chase.danger, shield);
+      quiz.presentFeedback(state === 'play' && sim.alive);
+      shieldView.update(shield, frame.sim.x, frame.sim.y, frame.dt);
+    }`);
 await writeFile('upstream/src/main.ts',main);
 let sim=await readFile('upstream/src/sim/sim.ts','utf8');
 sim=patch(sim,'  private stumble() {','  absorbStumble = () => false;\n\n  private stumble() {\n    if(this.absorbStumble())return;');

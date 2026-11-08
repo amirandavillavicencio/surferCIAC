@@ -2,6 +2,8 @@ import { QuizAnswerTrack } from './answer-track';
 import { QuizCourse, FIRST_GATE, GATE_SPACING, QUESTION_VISIBLE_DISTANCE, STRIP_LENGTH } from './course';
 import type { Scene } from 'three';
 import './game.css';
+import { MISSIONS, RunMissions } from './missions';
+import type { GameplayCue } from './gameplay-audio';
 
 type Question = { id: string; curso: string; tema: string; enunciado: string; breve?: string; opciones: string[] };
 type LaneAction = 'left' | 'right' | 'up' | 'down' | 'pause' | 'confirm' | string;
@@ -10,7 +12,8 @@ interface Hooks {
   scene: Scene; notice(message: string): void; course: QuizCourse;
   frontier(): number; penalize(seconds: number): void;
   reward?(shield:boolean, bonus:number):void;
-  threat?(correct:boolean):number;
+  threat(correct: boolean): number;
+  sound(cue: GameplayCue, delay?: number): void;
 }
 
 async function api(path: string, body?: object): Promise<any> {
@@ -23,9 +26,10 @@ async function api(path: string, body?: object): Promise<any> {
 }
 
 export class CIACQuiz {
-  private correctAnswers=0;
-  private streak=0;
-  private bestStreak=0;
+  private missions = new RunMissions();
+  private missionHUD: HTMLDivElement;
+  private feedback: HTMLDivElement;
+  private feedbackUntil = 0;
   private summary: HTMLElement;
   private phase: Phase = 'idle';
   private runSerial = 0;
@@ -104,6 +108,13 @@ export class CIACQuiz {
     this.dangerHUD.className='ciac-danger';
     this.dangerHUD.hidden=true;
     document.getElementById('ui')!.append(this.dangerHUD);
+    this.missionHUD = document.createElement('div');
+    this.missionHUD.className = 'ciac-mission';
+    this.feedback = document.createElement('div');
+    this.feedback.className = 'ciac-feedback';
+    this.feedback.setAttribute('role', 'status');
+    this.missionHUD.hidden = this.feedback.hidden = true;
+    document.getElementById('ui')!.append(this.missionHUD, this.feedback);
 
     this.resultForm = document.createElement('form');
     this.resultForm.className = 'ciac-result';
@@ -152,12 +163,31 @@ export class CIACQuiz {
     this.dangerHUD.setAttribute('data-danger',String(level));
   }
 
+  observeRun(distance: number, stumbled: boolean) {
+    this.missions.advance(distance, stumbled);
+  }
+
+  presentFeedback(playing: boolean) {
+    this.feedback.hidden = !playing || performance.now() >= this.feedbackUntil;
+    this.missionHUD.hidden = !playing || !this.dialog.hidden || !this.feedback.hidden;
+    if (this.missionHUD.hidden) return;
+    const progress = this.missions.progress;
+    const next = MISSIONS.findIndex((mission, index) => progress[index] < mission.goal);
+    const mission = MISSIONS[next];
+    const text = mission
+      ? `Misiones · ${next + 1}/${MISSIONS.length} · ${mission.label} ${progress[next]}/${mission.goal}`
+      : 'Misiones · 4/4 completadas';
+    if (this.missionHUD.textContent !== text) this.missionHUD.textContent = text;
+  }
+
   reset() {
     this.runSerial++;
     this.phase = 'idle';
     this.question = null;
     this.token = '';
-    this.correctAnswers=this.streak=this.bestStreak=0;
+    this.missions = new RunMissions();
+    this.feedbackUntil = 0;
+    this.feedback.hidden = this.missionHUD.hidden = true;
     this.summary.textContent='';
     this.dialog.hidden = true;
     this.setDanger(0);
@@ -258,31 +288,30 @@ export class CIACQuiz {
     try {
       const response = await api('answer', { token: this.token, lane });
       if (serial !== this.runSerial || (this.phase as Phase) === 'ended') return;
+      if (typeof response.correct !== 'boolean' || !Number.isSafeInteger(response.points) || response.points < 0) {
+        throw new Error('Respuesta del servidor incompleta');
+      }
       this.question = response.question;
       this.nextDistance = this.hooks.course.gateAtOrAfter(Math.max(
         gateDistance + GATE_SPACING, this.currentDistance + QUESTION_VISIBLE_DISTANCE
       ));
       this.phase = this.question ? 'ready' : 'complete';
-      this.hooks.threat?.(response.correct);
-      if (response.correct) {
-        this.correctAnswers++;
-        this.streak++;
-        this.bestStreak=Math.max(this.bestStreak,this.streak);
-        const shield=this.streak===3;
-        const bonus=this.streak===5?100:0;
-        this.hooks.reward?.(shield,bonus);
-        this.hooks.notice(shield?'3 aciertos seguidos · Escudo por 150 m':
-          bonus?'5 aciertos seguidos · +100 puntos de carrera':
-          '¡Correcto! · '+response.points+' puntos académicos');
-      } else {
-        this.streak=0;
-        this.hooks.penalize(Number(response.penaltySeconds) || 3);
-        this.hooks.notice('Incorrecto · 3 segundos corriendo más lento.');
+      const change = this.hooks.threat(response.correct);
+      const { earned, shield, bonus } = this.missions.answer(response.correct, response.points, change);
+      this.hooks.sound(response.correct ? 'correct' : 'wrong');
+      if (shield || bonus) {
+        this.hooks.reward?.(shield, bonus);
+        this.hooks.sound(shield ? 'shield' : 'bonus', .24);
       }
-      if (!this.question) {
-        this.hooks.course.stop(this.hooks.frontier());
-        this.hooks.notice('Completaste las preguntas. Sigue corriendo.');
-      }
+      if (!response.correct) this.hooks.penalize(Number(response.penaltySeconds) || 3);
+      const danger = change ? ` · Guardia ${change > 0 ? '+' : '−'}${Math.abs(change)}` : '';
+      const reward = shield ? ' · Escudo por 150 m' : bonus ? ' · +100 de carrera' : '';
+      this.feedback.dataset.correct = String(response.correct);
+      this.feedback.textContent = response.correct
+        ? `¡Correcto! · +${earned} académicos${danger}${reward}`
+        : `Incorrecto${danger} · Menor velocidad`;
+      this.feedbackUntil = performance.now() + 2300;
+      if (!this.question) this.hooks.course.stop(this.hooks.frontier());
     } catch (error) {
       if (serial !== this.runSerial) return;
       // Si no hay respuesta del servidor, no se inventan puntos.
@@ -294,7 +323,15 @@ export class CIACQuiz {
   }
 
   endRun(distance:number, score:number, caught:boolean) {
-    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.correctAnswers} aciertos · Mejor racha: ${this.bestStreak} · ${caught?'Te alcanzó el guardia':'Choque con un obstáculo'}`;
+    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el guardia':'Choque con un obstáculo'}`;
+    const progress = this.missions.progress;
+    const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
+    const missions = document.createElement('small');
+    missions.textContent = completed.length
+      ? 'Misiones completadas · ' + completed.map(mission => `${mission.goal} ${mission.label.toLowerCase()}`).join(' · ')
+      : 'Misiones completadas · 0/4';
+    this.summary.append(missions);
+    this.feedback.hidden = this.missionHUD.hidden = true;
     this.runSerial++;
     this.phase = 'ended';
     this.dangerHUD.hidden=true;
