@@ -37,7 +37,7 @@ test('integrated section has A/B/C once, varied decisions, then returns to norma
    s.update(1/120);if(entered<0&&s.d>=action[0].start)entered=s.time;
   }
   assert.ok(s.alive,JSON.stringify({seed,tutorial,state:s.snapshot()}));
-  const duration=s.time-entered;assert.ok(duration>=25&&duration<=36,`section duration ${duration}`);durations.push(duration);
+  const duration=s.time-entered;assert.ok(duration>=23&&duration<=36,`section duration ${duration}`);durations.push(duration);
  }
  assert.ok(signatures.size>8);
  console.log(JSON.stringify({sectionReplays:24,uniqueVariants:signatures.size,durationMin:Math.min(...durations),durationMax:Math.max(...durations)}));

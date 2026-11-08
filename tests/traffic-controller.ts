@@ -5,6 +5,11 @@ export function plansOf(s:Sim):Plan[]{return s.obs.filter(o=>o.planKind&&Math.ab
 export function driveTraffic(s:Sim,plans:Plan[]){
  const p=plans.find(p=>s.d>=p.start-40&&s.d<p.start+110);
  const move=(lane:number)=>{if(s.lane!==lane)s.lane<lane?s.right():s.left();};
+ const entry = s.obs.find(o => !o.planKind && (o.kind==='low'||o.kind==='overhead') &&
+   o.lane===1 && o.d0>s.d && o.d0-s.d<=s.speed*.22);
+ if(entry && s.grounded && !s.sliding && s.lane===1) {
+  if(entry.kind==='low')s.jump();else s.down();
+ }
  if(!p)return;
  const local=s.d-p.start;
  if(local<12){move(1);return;}

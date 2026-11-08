@@ -44,8 +44,8 @@ export class ChaseState {
     if(s.alive&&this.danger<4&&c.mode==='catching')c.mode='distant';
     if(this.danger>0&&c.mode==='intro')c.mode='distant';
     if(c.mode==='intro'||c.mode==='stumble'){this.timer=Math.max(0,this.timer-dt);if(this.timer===0)c.mode='distant';}
-    if(c.mode==='catching'){this.timer+=dt;if(c.gap<.76){c.mode='captured';}}
-    const target=c.mode==='distant'?[14,6.4,4.4,2.1,1.2][this.danger]
+    if(c.mode==='catching'){this.timer+=dt;if(this.timer>=.42&&c.gap<.76){c.mode='captured';}}
+    const target=c.mode==='distant'?[14,6.4,3.8,1.65,1.2][this.danger]
       :c.mode==='catching'||c.mode==='captured'?.65:c.mode==='stumble'?Math.max(2.1,8-this.danger*1.8):2.4;
     const change=(target-c.gap)*(1-Math.exp(-dt*(c.mode==='distant'?1.5:6)));
     // A falling-back guard still runs forward; it must not moonwalk backwards.
@@ -58,7 +58,9 @@ export class ChaseState {
     c.urgency += (this.danger / 4 - c.urgency) * (1 - Math.exp(-dt * 5));
     c.phase += Math.max(0, d - this.lastD) * (1.25 + .45 * c.urgency);
     this.lastD = d;
-    c.reach=c.mode==='captured'?1:c.mode==='catching'?Math.max(0,Math.min(1,(2.4-c.gap)/1.75)):0;
+    c.reach=c.mode==='captured'?1:c.mode==='catching'
+      ? Math.min(1,this.timer/.42)*Math.max(0,Math.min(1,(2.4-c.gap)/1.75))
+      : 0;
     if(c.mode==='catching'||c.mode==='captured'){c.y=Math.min(c.y,s.y);c.x+=(s.x-c.x)*c.reach;}
     // Replaying the runner's path handles ramps/roofs. Suppress only geometry
     // genuinely occluded by a passing vehicle, rather than draw through it.

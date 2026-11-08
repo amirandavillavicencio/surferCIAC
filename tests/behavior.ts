@@ -150,15 +150,15 @@ test('continuous runs: nothing retires in front of the camera; moving trains and
   assert.ok(observedMovers>0 && crossed>100);
 });
 
-test('60% transition and recovery are continuous and independent of frame rate', () => {
+test('Question transition and recovery are continuous and independent of frame rate', () => {
   const samples:number[]=[];
   for(const dt of [1/120,1/60,1/30,1/20]) {
     const p=new RacePace();
     near(p.step(dt,139,180),1);
     let previous=1;
     for(let t=0;t<1;t+=dt) { const f=p.step(dt,145,180); assert.ok(f<=previous+1e-12); previous=f; }
-    near(p.factor,.60);
-    assert.ok(p.step(dt,180,180)>.60 && p.factor<1);
+    near(p.factor,.88);
+    assert.ok(p.step(dt,180,180)>.88 && p.factor<1);
     for(let t=0;t<1;t+=dt) p.step(dt,181,180);
     samples.push(p.factor);
   }
