@@ -4,335 +4,335 @@
     "curso": "MAT070",
     "semestre": "Primer semestre",
     "tema": "Trigonometría",
-    "enunciado": "¿Cuánto vale sen²(x) + cos²(x)?",
+    "enunciado": "¿sen²x + cos²x depende de x?",
     "opciones": [
-      "0",
-      "1",
-      "2"
+      "Sí, siempre cambia",
+      "No, siempre vale 1",
+      "Solo si x es 0"
     ],
     "correcta": 1,
-    "breve": "sen²(x) + cos²(x) = ?"
+    "breve": "¿sen²x + cos²x depende de x?"
   },
   {
     "id": "q02",
     "curso": "MAT070",
     "semestre": "Primer semestre",
     "tema": "Derivadas",
-    "enunciado": "¿Cuál es la derivada de f(x) = x⁴?",
+    "enunciado": "¿Qué mide una derivada?",
     "opciones": [
-      "4x³",
-      "4x⁴",
-      "x³"
+      "Cambio instantáneo",
+      "Área acumulada",
+      "Distancia total"
     ],
     "correcta": 0,
-    "breve": "Deriva x⁴"
+    "breve": "¿Qué mide una derivada?"
   },
   {
     "id": "q03",
     "curso": "MAT070",
     "semestre": "Primer semestre",
     "tema": "Derivadas",
-    "enunciado": "¿Cuál es la derivada de cos(x)?",
+    "enunciado": "¿Qué indica derivada positiva?",
     "opciones": [
-      "sen(x)",
-      "cos(x)",
-      "−sen(x)"
+      "Función constante",
+      "Función decreciente",
+      "Función creciente"
     ],
     "correcta": 2,
-    "breve": "Deriva cos(x)"
+    "breve": "¿Qué indica derivada positiva?"
   },
   {
     "id": "q04",
     "curso": "MAT070",
     "semestre": "Primer semestre",
     "tema": "Límites",
-    "enunciado": "¿Cuánto vale lim(x→0) sen(3x)/(3x)?",
+    "enunciado": "¿Qué describe un límite?",
     "opciones": [
-      "0",
-      "1",
-      "3"
+      "La suma de valores",
+      "A qué valor se acerca",
+      "El área bajo la curva"
     ],
     "correcta": 1,
-    "breve": "lim(x→0) sen(3x)/(3x)"
+    "breve": "¿Qué describe un límite?"
   },
   {
     "id": "q05",
     "curso": "MAT060",
     "semestre": "Primer semestre",
     "tema": "Lógica",
-    "enunciado": "¿Cuál es la negación de (p ∧ q) según De Morgan?",
+    "enunciado": "¿Qué hace negar una proposición?",
     "opciones": [
-      "¬p ∨ ¬q",
-      "¬p ∧ ¬q",
-      "p ∨ q"
+      "Invierte su verdad",
+      "Une dos proposiciones",
+      "La hace siempre falsa"
     ],
     "correcta": 0,
-    "breve": "Niega (p ∧ q)"
+    "breve": "¿Qué hace negar una proposición?"
   },
   {
     "id": "q06",
     "curso": "MAT060",
     "semestre": "Primer semestre",
     "tema": "Sumatorias",
-    "enunciado": "¿Cuánto suma 1 + 2 + 3 + 4 + 5?",
+    "enunciado": "¿Para qué sirve una sumatoria?",
     "opciones": [
-      "10",
-      "20",
-      "15"
+      "Multiplicar términos",
+      "Calcular pendientes",
+      "Sumar términos"
     ],
     "correcta": 2,
-    "breve": "1 + 2 + 3 + 4 + 5 = ?"
+    "breve": "¿Para qué sirve una sumatoria?"
   },
   {
     "id": "q07",
     "curso": "MAT060",
     "semestre": "Primer semestre",
     "tema": "Números complejos",
-    "enunciado": "¿Cuál es el conjugado de z = 2 + 3i?",
+    "enunciado": "En a+bi, ¿qué expresa b?",
     "opciones": [
-      "−2 + 3i",
-      "2 − 3i",
-      "2 + 3i"
+      "La parte real",
+      "La parte imaginaria",
+      "El módulo"
     ],
     "correcta": 1,
-    "breve": "Conjugado de 2 + 3i"
+    "breve": "En a+bi, ¿qué expresa b?"
   },
   {
     "id": "q08",
     "curso": "MAT060",
     "semestre": "Primer semestre",
     "tema": "Geometría analítica",
-    "enunciado": "¿Cuál es la distancia entre (0,0) y (3,4)?",
+    "enunciado": "¿Qué expresa la pendiente de una recta?",
     "opciones": [
-      "5",
-      "7",
-      "12"
+      "Su inclinación",
+      "Su longitud",
+      "Su punto medio"
     ],
     "correcta": 0,
-    "breve": "Distancia: (0,0) a (3,4)"
+    "breve": "¿Qué expresa la pendiente de una recta?"
   },
   {
     "id": "q09",
     "curso": "FIS100",
     "semestre": "Primer semestre",
     "tema": "Vectores",
-    "enunciado": "Si un vector mide 10 y forma 60° con el eje X, ¿cuál es su componente x?",
+    "enunciado": "¿Qué distingue a un vector?",
     "opciones": [
-      "10",
-      "8,66",
-      "5"
+      "Solo su tamaño",
+      "Solo su origen",
+      "Módulo y dirección"
     ],
     "correcta": 2,
-    "breve": "Vector 10 a 60°: componente x"
+    "breve": "¿Qué distingue a un vector?"
   },
   {
     "id": "q10",
     "curso": "FIS100",
     "semestre": "Primer semestre",
     "tema": "Cinemática",
-    "enunciado": "Si v₀ = 2 m/s, a = 3 m/s² y t = 4 s, ¿cuánto vale v(t)?",
+    "enunciado": "¿Qué representa la aceleración?",
     "opciones": [
-      "14 m/s",
-      "12 m/s",
-      "6 m/s"
+      "Cambio de velocidad",
+      "Distancia recorrida",
+      "Posición inicial"
     ],
     "correcta": 0,
-    "breve": "v₀=2 m/s, a=3 m/s², t=4 s: v"
+    "breve": "¿Qué representa la aceleración?"
   },
   {
     "id": "q11",
     "curso": "FIS100",
     "semestre": "Primer semestre",
     "tema": "Cinemática",
-    "enunciado": "Desde el reposo y con a = 2 m/s², ¿qué distancia se recorre en 3 s?",
+    "enunciado": "¿Cómo es la velocidad en MRU?",
     "opciones": [
-      "6 m",
-      "9 m",
-      "18 m"
+      "Aumenta siempre",
+      "Constante",
+      "Disminuye siempre"
     ],
     "correcta": 1,
-    "breve": "Desde reposo: a=2, t=3 s: d"
+    "breve": "¿Cómo es la velocidad en MRU?"
   },
   {
     "id": "q12",
     "curso": "FIS100",
     "semestre": "Primer semestre",
     "tema": "Producto punto",
-    "enunciado": "¿Cuánto vale el producto punto de dos vectores perpendiculares?",
+    "enunciado": "Vectores perpendiculares: producto punto",
     "opciones": [
-      "1",
-      "0",
-      "−1"
+      "Es positivo",
+      "Es cero",
+      "Es negativo"
     ],
     "correcta": 1,
-    "breve": "Producto punto: vectores ⟂"
+    "breve": "Vectores perpendiculares: producto punto"
   },
   {
     "id": "q13",
     "curso": "MAT071",
     "semestre": "Segundo semestre",
     "tema": "Integrales",
-    "enunciado": "¿Cuánto vale la integral de x² desde 0 hasta 1?",
+    "enunciado": "¿Qué mide una integral definida?",
     "opciones": [
-      "1/2",
-      "1/3",
-      "1"
+      "Solo pendiente",
+      "Acumulación neta",
+      "Velocidad instantánea"
     ],
     "correcta": 1,
-    "breve": "∫₀¹ x² dx = ?"
+    "breve": "¿Qué mide una integral definida?"
   },
   {
     "id": "q14",
     "curso": "MAT071",
     "semestre": "Segundo semestre",
     "tema": "Integrales",
-    "enunciado": "¿Cuál es una primitiva de 2x?",
+    "enunciado": "¿Por qué una primitiva incluye +C?",
     "opciones": [
-      "2x² + C",
-      "2 + C",
-      "x² + C"
+      "Por límites de integración",
+      "Porque la derivada varía",
+      "Por constantes distintas"
     ],
     "correcta": 2,
-    "breve": "Primitiva de 2x"
+    "breve": "¿Por qué una primitiva incluye +C?"
   },
   {
     "id": "q15",
     "curso": "MAT071",
     "semestre": "Segundo semestre",
     "tema": "Teorema del valor medio",
-    "enunciado": "Si f(x) = x² entre a=1 y b=3, ¿cuánto vale (f(b)−f(a))/(b−a)?",
+    "enunciado": "¿Qué compara la tasa media?",
     "opciones": [
-      "4",
-      "2",
-      "8"
+      "Cambios de y y x",
+      "Solo el valor inicial",
+      "Solo el valor final"
     ],
     "correcta": 0,
-    "breve": "f(x)=x², [1,3]: tasa media"
+    "breve": "¿Qué compara la tasa media?"
   },
   {
     "id": "q16",
     "curso": "MAT071",
     "semestre": "Segundo semestre",
     "tema": "Teorema fundamental",
-    "enunciado": "¿Cuál es la derivada respecto de x de la integral de t² entre 0 y x?",
+    "enunciado": "¿Qué conecta el teorema fundamental?",
     "opciones": [
-      "2x",
-      "x³/3",
-      "x²"
+      "Vectores y matrices",
+      "Velocidad y masa",
+      "Derivadas e integrales"
     ],
     "correcta": 2,
-    "breve": "Deriva ∫₀ˣ t² dt"
+    "breve": "¿Qué conecta el teorema fundamental?"
   },
   {
     "id": "q17",
     "curso": "MAT061",
     "semestre": "Segundo semestre",
     "tema": "Matrices",
-    "enunciado": "¿Cuál es el determinante de una matriz diagonal con diagonal 2 y 3?",
+    "enunciado": "¿Cómo se organiza una matriz?",
     "opciones": [
-      "6",
-      "5",
-      "1"
+      "En filas y columnas",
+      "En una sola fila",
+      "Solo en diagonales"
     ],
     "correcta": 0,
-    "breve": "det diagonal (2, 3)"
+    "breve": "¿Cómo se organiza una matriz?"
   },
   {
     "id": "q18",
     "curso": "MAT061",
     "semestre": "Segundo semestre",
     "tema": "Determinantes",
-    "enunciado": "¿Qué identidad cumple el determinante de un producto AB?",
+    "enunciado": "¿Qué implica determinante cero?",
     "opciones": [
-      "det(A)+det(B)",
-      "det(A)·det(B)",
-      "det(A)/det(B)"
+      "Matriz identidad",
+      "No tiene inversa",
+      "Tiene más columnas"
     ],
     "correcta": 1,
-    "breve": "det(AB) = ?"
+    "breve": "¿Qué implica determinante cero?"
   },
   {
     "id": "q19",
     "curso": "MAT061",
     "semestre": "Segundo semestre",
     "tema": "Transformaciones lineales",
-    "enunciado": "Si dim(Ker T)=2 y dim(Im T)=3, ¿cuánto es dim(V)?",
+    "enunciado": "¿Qué es el núcleo de una transformación?",
     "opciones": [
-      "1",
-      "6",
-      "5"
+      "Su conjunto imagen",
+      "Sus autovalores",
+      "Vectores enviados a 0"
     ],
     "correcta": 2,
-    "breve": "dim Ker=2, dim Im=3: dim V"
+    "breve": "¿Qué es el núcleo de una transformación?"
   },
   {
     "id": "q20",
     "curso": "MAT061",
     "semestre": "Segundo semestre",
     "tema": "Valores propios",
-    "enunciado": "¿Qué ecuación define un vector propio v con valor propio λ?",
+    "enunciado": "Al aplicar A, un autovector...",
     "opciones": [
-      "A+v=λ",
-      "Av=λv",
-      "A=λ+v"
+      "Siempre se vuelve cero",
+      "Se escala por λ",
+      "Siempre gira 90°"
     ],
     "correcta": 1,
-    "breve": "Autovector v: ecuación con λ"
+    "breve": "Al aplicar A, un autovector..."
   },
   {
     "id": "q21",
     "curso": "FIS110",
     "semestre": "Segundo semestre",
     "tema": "Energía",
-    "enunciado": "¿Cuál es la energía cinética de m=2 kg con v=3 m/s?",
+    "enunciado": "¿De qué depende la energía cinética?",
     "opciones": [
-      "9 J",
-      "6 J",
-      "18 J"
+      "Masa y rapidez",
+      "Altura y gravedad",
+      "Solo temperatura"
     ],
     "correcta": 0,
-    "breve": "E cinética: m=2 kg, v=3 m/s"
+    "breve": "¿De qué depende la energía cinética?"
   },
   {
     "id": "q22",
     "curso": "FIS110",
     "semestre": "Segundo semestre",
     "tema": "Dinámica",
-    "enunciado": "¿Cuál es la fuerza neta para m=4 kg y a=3 m/s²?",
+    "enunciado": "¿Qué produce una fuerza neta?",
     "opciones": [
-      "7 N",
-      "12 N",
-      "1,33 N"
+      "Solo deformación",
+      "Aceleración",
+      "Masa nueva"
     ],
     "correcta": 1,
-    "breve": "Fuerza: m=4 kg, a=3 m/s²"
+    "breve": "¿Qué produce una fuerza neta?"
   },
   {
     "id": "q23",
     "curso": "FIS110",
     "semestre": "Segundo semestre",
     "tema": "Impulso",
-    "enunciado": "Si el momentum cambia de 2 a 7 kg·m/s, ¿cuál es el impulso?",
+    "enunciado": "¿Qué describe el impulso?",
     "opciones": [
-      "9 N·s",
-      "14 N·s",
-      "5 N·s"
+      "Cambio de altura",
+      "Energía almacenada",
+      "Cambio de momento lineal"
     ],
     "correcta": 2,
-    "breve": "Impulso: p cambia de 2 a 7"
+    "breve": "¿Qué describe el impulso?"
   },
   {
     "id": "q24",
     "curso": "FIS110",
     "semestre": "Segundo semestre",
     "tema": "Ley de Hooke",
-    "enunciado": "¿Cuál es la magnitud de la fuerza elástica si k=100 N/m y Δx=0,1 m?",
+    "enunciado": "Fuerza de resorte ideal: ¿de qué depende?",
     "opciones": [
-      "100 N",
-      "10 N",
-      "1 N"
+      "Solo del tiempo",
+      "De su deformación",
+      "Solo de su masa"
     ],
     "correcta": 1,
-    "breve": "F elástica: k=100, Δx=0,1 m"
+    "breve": "Fuerza de resorte ideal: ¿de qué depende?"
   }
 ]
