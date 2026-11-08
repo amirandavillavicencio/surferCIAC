@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { Sim } from '../upstream/src/sim/sim';
 import { decisionSection } from '../upstream/src/ciac/rhythm';
 import { solve } from '../upstream/src/sim/track';
-import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_AHEAD } from '../upstream/src/config';
+import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_AHEAD, OB } from '../upstream/src/config';
 import { QuizCourse } from '../upstream/src/ciac/course';
 import { RacePace } from '../upstream/src/ciac/pace';
 import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
@@ -461,9 +461,12 @@ test('oncoming trains replace only the third parked roof and stay outside academ
       assert.equal(mover.activation, start);
       assert.equal(mover.cars, 2);
       assert.ok(mover.trainSpeed! >= 56 && mover.trainSpeed! <= 68);
-      assert.ok(!section.specs.some(spec => spec.kind === 'train' && spec.lane === thirdLane));
+      assert.ok(!section.specs.some(spec => spec.kind === 'train' && spec.lane === thirdLane &&
+        Math.abs(spec.d0 - (section.ramp + OB.ramp.depth)) < 0.01),
+        'the specific third roof was replaced; other timed barriers remain');
     } else {
-      assert.ok(section.specs.some(spec => spec.kind === 'train' && spec.lane === thirdLane));
+      assert.ok(section.specs.some(spec => spec.kind === 'train' && spec.lane === thirdLane &&
+        Math.abs(spec.d0 - (section.ramp + OB.ramp.depth)) < 0.01));
     }
   }
 });
