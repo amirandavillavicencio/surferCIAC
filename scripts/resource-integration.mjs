@@ -37,7 +37,7 @@ audio = patch(audio, '  jump(sup: boolean) {', `  gameplay(cue: GameplayCue, del
 await writeFile('upstream/src/audio.ts', audio);
 
 let main=await readFile('upstream/src/main.ts','utf8');
-main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger,presentation.chase.hasShield(sim.d));");
+main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d,world.camera);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger,presentation.chase.hasShield(sim.d));");
 main=patch(main,'    penalize: (seconds: number) => sim.pace.penalize(seconds),',
   '    penalize: (seconds: number) => sim.pace.penalize(seconds),\n    threat: (correct: boolean) => presentation.chase.answer(correct),\n    reward: (shield: boolean, bonus: number) => {\n      if(shield)presentation.chase.grantShield(sim.d);\n      sim.score+=bonus;\n    },');
 main=patch(main,'    presentation.capture(sim, dt, events);',

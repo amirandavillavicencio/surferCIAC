@@ -192,3 +192,32 @@ body { overflow: hidden; }
   touch-action: pan-y;
 }
 #s-over .panel > * { flex-shrink: 0; }
+
+
+/* iPhone HUD: keep academic choices readable without covering the tracks.
+   The quiz starts below both the score and guard status. */
+@media (orientation:portrait) and (min-height:521px) {
+  #ui > .ciac-dialog {
+    top: calc(109px + env(safe-area-inset-top));
+    width: min(620px, calc(100vw - 20px));
+    padding: 13px 11px 11px;
+  }
+  #ui > .ciac-dialog .ciac-question {
+    font-size: clamp(18px, 4.7vw, 23px);
+    margin-bottom: 12px;
+  }
+  #ui > .ciac-dialog .ciac-lane {
+    font-size: clamp(13px, 3.65vw, 16px);
+    min-height: 76px;
+    line-height: 1.25;
+    padding: 9px 5px;
+  }
+  #ui > :is(.ciac-feedback,.ciac-mission) {
+    font-size: clamp(13px, 3.55vw, 14px);
+    padding: 6px 12px;
+    line-height: 1.25;
+    max-width: calc(100vw - 28px);
+  }
+  #ui > .ciac-danger { font-size: 13px; }
+  #ui > .ciac-dialog .ciac-message { font-size: 12px; }
+}
