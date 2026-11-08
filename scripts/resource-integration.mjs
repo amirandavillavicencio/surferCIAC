@@ -25,8 +25,16 @@ world=patch(world,'    this.player = new PlayerView(core, s);','    this.player 
 world=patch(world,'  resetScenery() {','  resetScenery() {\n    this.guard.reset();');
 await writeFile('upstream/src/view/world.ts',world);
 let main=await readFile('upstream/src/main.ts','utf8');
-main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d);");
+main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger);");
+main=patch(main,'    penalize: (seconds: number) => sim.pace.penalize(seconds),',
+  '    penalize: (seconds: number) => sim.pace.penalize(seconds),\n    threat: (correct: boolean) => presentation.chase.answer(correct),');
+main=patch(main,'    presentation.capture(sim, dt, events);',
+  "    presentation.capture(sim, dt, events);\n    if(QUIZ && state==='play' && sim.alive && presentation.chase.current.mode==='captured')sim.caughtByGuard();");
 await writeFile('upstream/src/main.ts',main);
+let sim=await readFile('upstream/src/sim/sim.ts','utf8');
+sim=patch(sim,"  private crash(kind: ObKind | 'caught', o?: Ob) {",
+  "  caughtByGuard() { if(this.alive) this.crash('caught'); }\n\n  private crash(kind: ObKind | 'caught', o?: Ob) {");
+await writeFile('upstream/src/sim/sim.ts',sim);
 await cp('third_party/kenney-train-kit', 'upstream/public/assets/kenney-train-kit', {
   recursive: true, filter: path => !path.endsWith('README.md')
 });

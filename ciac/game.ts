@@ -9,6 +9,7 @@ type Phase = 'idle' | 'ready' | 'question' | 'submitting' | 'complete' | 'ended'
 interface Hooks {
   scene: Scene; notice(message: string): void; course: QuizCourse;
   frontier(): number; penalize(seconds: number): void;
+  threat?(correct:boolean):number;
 }
 
 async function api(path: string, body?: object): Promise<any> {
@@ -31,6 +32,8 @@ export class CIACQuiz {
   private nextDistance = FIRST_GATE;
   private currentDistance = 0;
   private dialog: HTMLDivElement;
+  private dangerHUD: HTMLDivElement;
+  private lastDanger=-1;
   private title: HTMLElement;
   private choices: HTMLButtonElement[] = [];
   private message: HTMLElement;
@@ -92,6 +95,10 @@ export class CIACQuiz {
     }
     this.dialog.append(this.title, lanes, this.message);
     document.getElementById('ui')!.append(this.dialog);
+    this.dangerHUD=document.createElement('div');
+    this.dangerHUD.className='ciac-danger';
+    this.dangerHUD.hidden=true;
+    document.getElementById('ui')!.append(this.dangerHUD);
 
     this.resultForm = document.createElement('form');
     this.resultForm.className = 'ciac-result';
@@ -128,12 +135,21 @@ export class CIACQuiz {
       this.currentDistance < this.nextDistance;
   }
 
+  setDanger(level:number) {
+    if(level===this.lastDanger)return;
+    this.lastDanger=level;
+    this.dangerHUD.hidden=level===0;
+    this.dangerHUD.textContent='Guardia cerca · '+level+'/4';
+    this.dangerHUD.setAttribute('data-danger',String(level));
+  }
+
   reset() {
     this.runSerial++;
     this.phase = 'idle';
     this.question = null;
     this.token = '';
     this.dialog.hidden = true;
+    this.setDanger(0);
     this.resultForm.hidden = true;
     this.formStatus.textContent = '';
     this.playerName.disabled = false;
@@ -236,6 +252,7 @@ export class CIACQuiz {
         gateDistance + GATE_SPACING, this.currentDistance + QUESTION_VISIBLE_DISTANCE
       ));
       this.phase = this.question ? 'ready' : 'complete';
+      if(this.hooks.threat)this.setDanger(this.hooks.threat(response.correct));
       if (response.correct) {
         this.hooks.notice('¡Correcto! · ' + response.points + ' puntos académicos');
       } else {
@@ -259,6 +276,7 @@ export class CIACQuiz {
   endRun() {
     this.runSerial++;
     this.phase = 'ended';
+    this.dangerHUD.hidden=true;
     this.answerTrack.hide();
     this.dialog.hidden = true;
     this.resultForm.hidden = !this.token;

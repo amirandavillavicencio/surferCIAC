@@ -47,7 +47,7 @@ export function trafficKind(index: number, start: number): TrafficKind {
   // caller supplies a seeded index; difficulty never increases vehicle speed.
   const kinds: TrafficKind[] = start < 1000
     ? ['pass','dodge','roof-traffic','recovery','transfer']
-    : ['pass','double','transfer','recovery','dodge','roof-traffic'];
+    : ['pass','double','roof-traffic','recovery','double','recovery','transfer','dodge','double','recovery'];
   return kinds[((index % kinds.length)+kinds.length)%kinds.length];
 }
 export function trafficEncounter(start: number, from: number, kind: TrafficKind, variant = 0): Spec[] {
