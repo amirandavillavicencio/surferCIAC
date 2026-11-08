@@ -1,4 +1,5 @@
 """Record an unmodified seeded race with explicit controls and live Pages API."""
+import base64
 import json
 import os
 import subprocess
@@ -65,7 +66,7 @@ with sync_playwright() as playwright:
     print(metadata, flush=True)
     assert [metadata["width"], metadata["height"]] == [390, 844]
 
-    start_time = time.monotonic()
+    cdp = page.context.new_cdp_session(page)
     advance = """({draw, dt}) => {
       const r = window.__run, s = r.sim, e = window.evidence;
       const inputs = [];
@@ -94,8 +95,9 @@ with sync_playwright() as playwright:
     observed = set()
     ranges = []
     for start, end, filename in segments:
+        skip_start, skip_frame = time.monotonic(), frame
         while frame < start * fps:
-            target = start_time + frame / fps
+            target = skip_start + (frame - skip_frame) / fps
             if target > time.monotonic():
                 page.wait_for_timeout((target - time.monotonic()) * 1000)
             state = page.evaluate(advance, {"draw": False, "dt": 1 / fps})
@@ -110,14 +112,19 @@ with sync_playwright() as playwright:
             str(out / filename),
         ], stdin=subprocess.PIPE)
         try:
+            capture_start, capture_frame = time.monotonic(), frame
             while frame < end * fps:
+                target = capture_start + (frame - capture_frame) / fps
+                if target > time.monotonic():
+                    page.wait_for_timeout((target - time.monotonic()) * 1000)
                 state = page.evaluate(advance, {"draw": True, "dt": 1 / fps})
                 assert state["alive"], state
                 controls.extend(state["inputs"])
                 if state["shown"]:
                     assert state["choices"] == 3
                     observed.add(state["question"])
-                encoder.stdin.write(page.screenshot(type="jpeg", quality=78, timeout=20000))
+                capture = cdp.send("Page.captureScreenshot", {"format": "jpeg", "quality": 78, "fromSurface": True})
+                encoder.stdin.write(base64.b64decode(capture["data"]))
                 frame += 1
         finally:
             encoder.stdin.close()
