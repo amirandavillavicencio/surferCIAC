@@ -4,6 +4,9 @@ import type { Scene } from 'three';
 import './game.css';
 import { MISSIONS, RunMissions } from './missions';
 import type { GameplayCue } from './gameplay-audio';
+import { powerForCorrectAnswer, ACADEMIC_POWER_LABELS } from './academic-powerups';
+import { POWER_TIME } from '../config';
+import type { PowerKind } from '../sim/types';
 
 type Question = { id: string; curso: string; tema: string; enunciado: string; breve?: string; opciones: string[] };
 type LaneAction = 'left' | 'right' | 'up' | 'down' | 'pause' | 'confirm' | string;
@@ -12,6 +15,7 @@ interface Hooks {
   scene: Scene; notice(message: string): void; course: QuizCourse;
   frontier(): number; penalize(seconds: number): void;
   reward?(shield:boolean, bonus:number):void;
+  grantPower(kind: PowerKind): void;
   threat(correct: boolean): number;
   sound(cue: GameplayCue, delay?: number): void;
 }
@@ -298,6 +302,9 @@ export class CIACQuiz {
       this.phase = this.question ? 'ready' : 'complete';
       const change = this.hooks.threat(response.correct);
       const { earned, shield, bonus } = this.missions.answer(response.correct, response.points, change);
+      // Se concede exclusivamente después de recibir el acierto validado por la API.
+      const power = response.correct ? powerForCorrectAnswer(this.missions.correct) : null;
+      if (power) this.hooks.grantPower(power);
       this.hooks.sound(response.correct ? 'correct' : 'wrong');
       if (shield || bonus) {
         this.hooks.reward?.(shield, bonus);
@@ -306,9 +313,10 @@ export class CIACQuiz {
       if (!response.correct) this.hooks.penalize(Number(response.penaltySeconds) || 3);
       const danger = change ? ` · Guardia ${change > 0 ? '+' : '−'}${Math.abs(change)}` : '';
       const reward = shield ? ' · Escudo por 150 m' : bonus ? ' · +100 de carrera' : '';
+      const powerText = power ? ` · ${ACADEMIC_POWER_LABELS[power]} ${POWER_TIME[power]} s` : '';
       this.feedback.dataset.correct = String(response.correct);
       this.feedback.textContent = response.correct
-        ? `¡Correcto! · +${earned} académicos${danger}${reward}`
+        ? `¡Correcto! · +${earned} académicos${danger}${powerText}${reward}`
         : `Incorrecto${danger} · Menor velocidad`;
       this.feedbackUntil = performance.now() + 2300;
       if (!this.question) this.hooks.course.stop(this.hooks.frontier());

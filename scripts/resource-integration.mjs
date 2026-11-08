@@ -37,9 +37,10 @@ audio = patch(audio, '  jump(sup: boolean) {', `  gameplay(cue: GameplayCue, del
 await writeFile('upstream/src/audio.ts', audio);
 
 let main=await readFile('upstream/src/main.ts','utf8');
+main="import {POWER_TIME} from './config';\n"+main;
 main=patch(main,"    world.sync(frame.sim,frame.dt,state==='start');", "    world.sync(frame.sim,frame.dt,state==='start');\n    world.guard.update(frame.guard,frame.sim.d,world.camera);\n    if(QUIZ)quiz.setDanger(presentation.chase.danger,presentation.chase.hasShield(sim.d));");
 main=patch(main,'    penalize: (seconds: number) => sim.pace.penalize(seconds),',
-  '    penalize: (seconds: number) => sim.pace.penalize(seconds),\n    threat: (correct: boolean) => presentation.chase.answer(correct),\n    reward: (shield: boolean, bonus: number) => {\n      if(shield)presentation.chase.grantShield(sim.d);\n      sim.score+=bonus;\n    },');
+  '    penalize: (seconds: number) => sim.pace.penalize(seconds),\n    grantPower: (kind) => {\n      sim.power[kind] = POWER_TIME[kind];\n      sim.events.push({type: "power", kind, x: sim.x, y: sim.y});\n    },\n    threat: (correct: boolean) => presentation.chase.answer(correct),\n    reward: (shield: boolean, bonus: number) => {\n      if(shield)presentation.chase.grantShield(sim.d);\n      sim.score+=bonus;\n    },');
 main=patch(main,'    presentation.capture(sim, dt, events);',
   "    presentation.capture(sim, dt, events);\n    if(QUIZ && state==='play' && sim.alive && presentation.chase.current.mode==='captured')sim.caughtByGuard();");
 main=patch(main,'if (QUIZ) quiz.endRun();',"if (QUIZ) quiz.endRun(sim.d,score,ev.kind==='caught');");
@@ -78,6 +79,9 @@ main = patch(main, '    if(QUIZ)quiz.setDanger(presentation.chase.danger,present
     }`);
 await writeFile('upstream/src/main.ts',main);
 let sim=await readFile('upstream/src/sim/sim.ts','utf8');
+// Conservar la lógica y el consumo del RNG del generador, pero sin premios en el suelo.
+sim=patch(sim,'      power: (kind, lane, d, y) => this.addPower(kind, lane, d, y),',
+  '      power: () => {},');
 sim=patch(sim,'  private stumble() {','  absorbStumble = () => false;\n\n  private stumble() {\n    if(this.absorbStumble())return;');
 sim=patch(sim,"  private crash(kind: ObKind | 'caught', o?: Ob) {",
   "  caughtByGuard() { if(this.alive) this.crash('caught'); }\n\n  private crash(kind: ObKind | 'caught', o?: Ob) {");
