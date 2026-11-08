@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Sim } from '../upstream/src/sim/sim';
-import { RaceDirector } from '../ciac/rhythm';
+import { RaceDirector } from '../upstream/src/ciac/rhythm';
 
 test('the opening barrier requires action and leaves two real ways through', () => {
   for (const seed of [1, 2]) {
