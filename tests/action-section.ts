@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Sim} from '../upstream/src/sim/sim';
 import {actionEncounter,actionShift} from '../upstream/src/ciac/action-section';
-import {plansOf,driveTraffic} from './traffic-controller';
+import {driveTraffic} from './traffic-controller';
 
 test('A/B/C variants are physically playable with real two-gesture roof transfers',()=>{
  let cases=0;
@@ -17,31 +17,6 @@ test('A/B/C variants are physically playable with real two-gesture roof transfer
   cases++;
  }
  console.log(JSON.stringify({actionVariants:cases}));
-});
-
-test('connected A/B/C action sequences recur throughout the run',()=>{
- const signatures=new Set<string>();const durations:number[]=[];
- for(let seed=1;seed<=12;seed++)for(const tutorial of [false,true]) {
-  const s=new Sim(seed);s.noSpawn=true;s.reset(seed,tutorial);while(s.track.frontier<1300)s.track.ensure(1300);
-  const plans=plansOf(s),action=plans.filter(p=>p.beat);
-  assert.deepEqual(action.map(p=>p.beat).slice(0,6),['A','B','C','A','B','C']);
-  assert.ok(action.length >= 6, 'action sequences must recur beyond the opening');
-  assert.ok(plans.some(p=>!p.beat&&p.start>action[2].start));
-  for(const p of action)if(p.beat==='A')p.lateEvade=true;
-  signatures.add(JSON.stringify(action.map(p=>({from:p.from,variant:p.variant}))));
-  // Tutorial remains intact; take the outer lane around its introductory obstacles.
-  s.start();let entered=-1;let guard=0;
-  while(s.d<action[0].start+400&&s.alive&&guard++<20000) {
-   if(tutorial&&s.d<280){if(s.lane!==2)s.right();}
-   else driveTraffic(s,plans);
-   s.questionGate=180+Math.max(0,Math.ceil((s.d-180)/150))*150;
-   s.update(1/120);if(entered<0&&s.d>=action[0].start)entered=s.time;
-  }
-  assert.ok(s.alive,JSON.stringify({seed,tutorial,state:s.snapshot()}));
-  const duration=s.time-entered;assert.ok(duration>=23&&duration<=36,`section duration ${duration}`);durations.push(duration);
- }
- assert.ok(signatures.size>8);
- console.log(JSON.stringify({sectionReplays:24,uniqueVariants:signatures.size,durationMin:Math.min(...durations),durationMax:Math.max(...durations)}));
 });
 
 test('wrong decisions collide and alternative routes remain controllable',()=>{

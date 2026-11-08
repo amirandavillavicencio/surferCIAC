@@ -72,71 +72,64 @@ await copyFile('ciac/encounters.ts','upstream/src/ciac/encounters.ts');
 await copyFile('ciac/action-section.ts','upstream/src/ciac/action-section.ts');
 await copyFile('ciac/rhythm.ts','upstream/src/ciac/rhythm.ts');
 let track=await readFile('upstream/src/sim/track.ts','utf8');
-track="import { RaceDirector, connectEncounter, rhythmBarrier } from '../ciac/rhythm';\nimport { ACTION_BEATS, actionEncounter, actionRoute } from '../ciac/action-section';\nimport { trafficEncounter, trafficRoute } from '../ciac/encounters';\n"+track;
-const a=track.indexOf('  private genChunk() {');
-const b=track.indexOf('  private buildRows(',a);
-if(a<0||b<0)throw Error('Missing generator');
+track="import { decisionSection } from '../ciac/rhythm';\nimport { decisionRow } from '../ciac/action-section';\n"+track;
 track=track.replace(/type Pattern = [^\n]+\n/, '');
-track=track.replace('export class Track {', 'export class Track {\n  actionSectionStart = -1;\n  private readonly director = new RaceDirector();');
-track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.director.reset();\n    this.actionSectionStart = -1;');
-track=patch(track,'    if (tutorial) this.tutorialChunk();',`    if (tutorial) this.tutorialChunk();
-    else {
-      this.sink.ob(rhythmBarrier(1, 24, 'low'));
-      this.sink.ob(rhythmBarrier(seed % 2 === 0 ? 0 : 2, 24, 'low'));
+track=track.replace('  lastPreferLane = 1;', '  lastPreferLane = 1;\n  private teach = false;');
+track=patch(track,'    if (tutorial) this.tutorialChunk();',`    this.teach = tutorial;
+    for (const row of [
+      decisionRow(17, 1, seed % 2 === 0 ? 2 : 0),
+      decisionRow(30, 1, seed % 2 === 0 ? 3 : 1),
+    ]) for (const spec of row) {
+      if (tutorial && spec.lane === 1) spec.hint = spec.kind === 'low' ? 'jump' : 'slide';
+      this.sink.ob(spec);
     }`);
-const generatorStart=track.indexOf('  private genChunk() {');
-const generatorEnd=track.indexOf('  private buildRows(',generatorStart);
-track=track.slice(0,generatorStart)+`  private genChunk() {
+const begin=track.indexOf('  private tutorialChunk() {');
+const end=track.indexOf('  private layCoins(',begin);
+if(begin<0||end<0)throw Error('Missing track anchors');
+track=track.slice(0,begin)+`  private genChunk() {
     const start = this.frontier;
-    const end = 190 + Math.floor((start - 40) / 150) * 150;
-    let from = this.rng.chance(.5) ? 0 : 2;
-    if (this.busy[from] > start+8) from=2-from;
-    let kind = this.director.choose(this.chunks, start, this.rng.int(0, 2), this.busy[1] > start+40);
-    if(this.actionSectionStart<0 && end-start>100)this.actionSectionStart=start;
-    const sectionIndex=(start-this.actionSectionStart)/150;
-    // Repeat the tested three-beat action sequence after a varied encounter.
-    const cycleIndex = sectionIndex % (ACTION_BEATS.length + 1);
-    const beat = sectionIndex >= 0 && Number.isInteger(sectionIndex) &&
-      cycleIndex < ACTION_BEATS.length ? ACTION_BEATS[cycleIndex] : undefined;
-    if(beat)kind=beat==='A'?'dodge':beat==='B'?'transfer':'double';
-    this.director.remember(kind);
-    const variant = this.rng.int(0, 19);
-    // Assemble before filtering, so rejected destinations take their ramps.
-    let specs = this.course.prepareSpecs((beat ? actionEncounter(start,from,beat,variant) : trafficEncounter(start, from, kind, variant))
-      .filter(s => s.d1 < end - 5 && (s.kind === 'mtrain' || s.d0 >= this.busy[s.lane])));
-    const connectors = connectEncounter(start, from, kind, variant)
-      .filter(s => s.d1 < end - 5 && s.d0 >= this.busy[s.lane] && this.course.allowsObstacle(s) &&
-        !specs.some(train => train.kind === 'mtrain' && train.lane === s.lane && s.d1 >= train.d0));
-    const connected = [...specs, ...connectors];
-    if ([0, 1, 2].every(lane => solve(connected, start, end, [lane], speedAt).endLanes.length === 3)) specs = connected;
-    let res = solve(specs, start, end, this.reach, speedAt, true, from);
-    if (!res.ok) {
-      this.failures++;
-      // Keep a guaranteed escape lane; don't replace the entire encounter with air.
-      specs = specs.filter(s => s.lane !== from);
-      res = solve(specs, start, end, this.reach, speedAt, true, from);
-      if (!res.ok) throw new Error('Encounter has no escape at '+start);
+    const end = start + 150;
+    const rampLane = this.rng.int(0, 2);
+    const landingLane = (rampLane + this.rng.int(1, 2)) % 3;
+    const variant = this.rng.int(0, 35);
+    const section = decisionSection(start, rampLane, landingLane, variant);
+    const specs = section.specs;
+    if (specs.some(spec => !this.course.allowsObstacle(spec))) {
+      throw new Error('Decision section overlaps the question at ' + start);
     }
-    for (const s of specs) this.sink.ob({...s,planKind:s.d0===start+8 && s.lane!==from ? undefined : kind,actionVariant:variant});
-    // Coins describe the intended physical action sequence. Do not draw a roof
-    // trajectory when a short/tutorial chunk could not retain both roofs.
-    for (let d=start+3; d<end-4; d+=2.1) {
-      if (!this.course.allowsPickup(d)) continue;
-      const pt=trafficRoute(start,from,kind,d,speedAt(start+36),variant);
-      if(beat){const reward=actionRoute(start,from,beat,variant,d,speedAt(start+36));this.sink.coin(reward.lane,d,reward.y);continue;}
-      const sliding=kind!=='double';
-      this.sink.coin(pt.lane,d,sliding && d>start+78 && d<start+86 ? .45 : pt.y+.85);
+    for (const spec of specs) {
+      if (this.teach && this.chunks === 0 && spec.kind === 'ramp') spec.hint = 'ramp';
+      this.sink.ob(spec);
     }
-    if (res.path && this.nextPower >= start && this.nextPower < end) this.placePower(res.path,specs,start,end);
-    else if (this.nextPower < start) this.nextPower=start+200;
-    for (const spec of specs) this.busy[spec.lane]=Math.max(this.busy[spec.lane], spec.kind==='mtrain' ? start+218+trainLength(spec.cars||1)+4 : spec.d1+4);
-    this.reach=res.endLanes;
-    this.frontier=end;
+    // Coins show the approach and roof landing. Keep the transfer gap clear.
+    const roofStart = section.ramp + OB.ramp.depth;
+    const landingRoof = specs.find(spec => spec.kind === 'train' && spec.lane === landingLane &&
+      spec.d0 >= roofStart && spec.d0 <= roofStart + 2)!;
+    for (let d = start; d < section.exit; d += 2.1) {
+      if (!this.course.allowsPickup(d) || [section.entry, section.middle].some(row => Math.abs(d - row) <= 3)) continue;
+      if (d < section.ramp - 6) {
+        const lane = d < section.entry + 5 ? section.entryLane : rampLane;
+        this.sink.coin(lane, d, .85);
+      } else if (d < roofStart + 2) {
+        const rise = Math.max(0, Math.min(1, (d - section.ramp) / OB.ramp.depth));
+        this.sink.coin(rampLane, d, rise * OB.train.yt + .85);
+      } else if (d >= roofStart + 11 && d < landingRoof.d1) {
+        this.sink.coin(landingLane, d, OB.train.yt + .85);
+      }
+    }
+    if (this.nextPower >= start && this.nextPower < end) {
+      const path = Array.from({length: Math.ceil((end - start) / STEP) + 1}, (_, i) => {
+        const d = start + i * STEP;
+        return {lane: d < roofStart ? rampLane : landingLane, top: d >= roofStart && d < landingRoof.d1};
+      });
+      this.placePower(path, specs, start, end);
+    } else if (this.nextPower < start) this.nextPower = start + 200;
+    this.frontier = end;
     this.chunks++;
   }
 
-`+track.slice(track.indexOf('  /** Coins along',generatorEnd));
-track=track.replace('PLAYER, levelAt,','PLAYER,');
+`+track.slice(end);
+track=patch(track,'PLAYER, levelAt, speedAt, trainLength,','PLAYER,');
 await writeFile('upstream/src/sim/track.ts',track);
 let player=await readFile('upstream/src/view/player.ts','utf8');
 player=patch(player,"import { applyCampusRunner } from '../ciac/campus-runner';","import { applyCampusRunner, correctCampusContact } from '../ciac/campus-runner';");

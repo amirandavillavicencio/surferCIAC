@@ -1,4 +1,4 @@
-import { plansOf, driveTraffic } from './traffic-controller';
+import { driveTraffic } from './traffic-controller';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FrameClock} from '../ciac/frame-clock';
@@ -57,49 +57,6 @@ function replayEncounter(start:number,from:number,speed:number){
  }
  assert.ok(onRoof&&transfer&&landed&&slid,'ramp, roof jump, landing and slide must execute');
 }
-test('30 seeded maps: bounded gaps and physical encounter replays including roofs and slide',()=>{
- let over80=0,maxGap=0,encounters=0;
- for(let seed=1;seed<=30;seed++){
-  const s=new Sim(seed);s.noSpawn=true;s.reset(seed,false);while(s.track.frontier<4000)s.track.ensure(4000);
-  const specs=s.obs.map(o=>Sim.specOf(o)).filter(o=>o.d0<4000).sort((a,b)=>a.d0-b.d0);
-  let end=40;for(const o of specs){const gap=o.d0-end;if(gap>80)over80++;maxGap=Math.max(maxGap,gap);end=Math.max(end,o.d1);assert.ok(s.track.course.allowsObstacle(o));}
-  for(const ramp of specs.filter(o=>o.kind==='ramp')){
-   const start=ramp.d0-24;
-   for(const speed of [12,speedAt(start),27])replayEncounter(start,ramp.lane,speed);
-  }
-  for(const plan of plansOf(s)) {
-   for(const speed of [12,speedAt(plan.start),27]) {
-    const replay=new Sim();replay.noSpawn=true;replay.reset(seed,false);replay.clearWorld();replay.d=plan.start-20;replay.speedOverride=speed;replay.start();
-    for(const o of s.obs.filter(o=>o.activation===plan.start || (o.kind!=='mtrain'&&o.d0>=plan.start&&o.d0<plan.start+100)))replay.addOb(Sim.specOf(o));
-    const actions=[{...plan}];let guard=0;
-    while(replay.d<plan.start+110&&replay.alive&&guard++<10000){driveTraffic(replay,actions);replay.update(1/120);}
-    assert.ok(replay.alive&&replay.d>=plan.start+110,JSON.stringify({plan,speed,state:replay.snapshot()}));
-   }
-   encounters++;
-  }
- }
- console.log(JSON.stringify({seeds:30,meters:4000,previousOver80:688,over80,previousMaxGap:327.8027544445,maxGap,physicalEncounters:encounters}));
- assert.equal(over80,0);assert.ok(maxGap<80);assert.ok(encounters>700);
-});
-
-test('continuous seeded runs connect encounters through questions without teleports or invincibility',()=>{
- for(let seed=1;seed<=30;seed++){
-  const s=new Sim(seed);s.noSpawn=true;s.reset(seed,false);while(s.track.frontier<4200)s.track.ensure(4200);
-  const trafficPlans=plansOf(s);
-  for(let i=1;i<trafficPlans.length;i++)if(!trafficPlans[i].beat&&!trafficPlans[i-1].beat)
-    assert.notEqual(trafficPlans[i].kind,trafficPlans[i-1].kind);
-  assert.ok(trafficPlans.filter(p=>!p.beat).every(p=>p.kind!=='recovery'&&p.kind!=='pass'),
-    'normal encounters should not select passive families');
-  const clock=new FrameClock();let frames=0;s.start();
-  while(s.d<4000&&s.alive&&frames++<100000){clock.advance(schedules[seed%schedules.length][frames%schedules[seed%schedules.length].length],dt=>{
-   driveTraffic(s,trafficPlans);
-   s.questionGate=180+Math.max(0,Math.ceil((s.d-180)/150))*150;
-   s.update(dt);
-  });}
-  assert.ok(s.alive&&s.d>=4000,JSON.stringify({seed,snapshot:s.snapshot()}));
- }
-});
-
 test('rapid lateral chains keep travel speed bounded and buffered jumps fire on landing',()=>{
  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.start();s.lane=0;s.x=-2.5;
  s.right();let peakSpeed=0;

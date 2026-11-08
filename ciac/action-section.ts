@@ -75,3 +75,35 @@ export function actionRoute(start:number,from:number,beat:ActionBeat,variant:num
   }
   return {lane,y:y+(sliding?.45:.85)};
 }
+
+// A row has no standing ground route. The open-looking routes require either
+// a jump or a slide. Short trains close the remaining approaches.
+export function decisionRow(distance: number, preferredLane: number, variant: number, trains = true): Spec[] {
+  const preferred = variant % 2 ? 'overhead' : 'low';
+  const alternative = preferred === 'low' ? 'overhead' : 'low';
+  return [0, 1, 2].map(lane => {
+    const offset = (lane - preferredLane + 3) % 3;
+    if (trains && (offset === 1 || (offset === 2 && variant % 3 === 0))) {
+      return {kind: 'train', lane, d0: distance, d1: distance + trainLength(1), cars: 1};
+    }
+    const kind = offset === 0 ? preferred : alternative;
+    return {kind, lane, d0: distance, d1: distance + OB[kind].depth};
+  });
+}
+
+export function roofSection(rampStart: number, rampLane: number, landingLane: number, variant: number, short: boolean): Spec[] {
+  const roofStart = rampStart + OB.ramp.depth;
+  const sourceCars = 1 + variant % 2;
+  const sourceEnd = roofStart + trainLength(sourceCars);
+  const blockedAt = sourceEnd + 9;
+  const train = (lane: number, d0: number, cars: number): Spec =>
+    ({kind: 'train', lane, d0, d1: d0 + trainLength(cars), cars});
+
+  return [
+    {kind: 'ramp', lane: rampLane, d0: rampStart, d1: roofStart},
+    train(rampLane, roofStart, sourceCars),
+    train(landingLane, roofStart + variant % 3, short ? 3 : 3 + variant % 2),
+    train(3 - rampLane - landingLane, roofStart, 3),
+    train(rampLane, blockedAt, 1),
+  ];
+}

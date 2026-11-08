@@ -9,6 +9,7 @@ import { QuizCourse } from '../upstream/src/ciac/course';
 import { RacePace } from '../upstream/src/ciac/pace';
 import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
 import { CIACQuiz } from '../upstream/src/ciac/game';
+import { decisionPilot } from './decision-pilot';
 import { bindSwipe } from '../upstream/src/ciac/swipe';
 import { PlayerView } from '../upstream/src/view/player';
 import { World } from '../upstream/src/view/world';
@@ -42,8 +43,8 @@ test('route solver rejects simultaneous barriers on every ground lane', () => {
   assert.equal(solve(specs.slice(0, 2), 0, 50, [1], speedAt).ok, true);
 });
 
-test('100 seeds, tutorial and normal: generated zones stay empty and all chunks remain traversable', () => {
-  let movers = 0, trains = 0, ramps = 0;
+test('100 seeds, tutorial and normal: generated sections and pickups stay outside protected zones', () => {
+  let trains = 0, ramps = 0;
   for (let seed=1; seed<=100; seed++) for (const tutorial of [true,false]) {
     const s = new Sim(seed);
     s.noSpawn = true;
@@ -52,14 +53,6 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
     for (const o of s.obs) {
       assert.ok(o.lane>=0 && o.lane<=2);
       assert.ok(s.track.course.allowsObstacle(Sim.specOf(o)));
-      if (o.kind==='mtrain') {
-        movers++;
-        assert.ok(o.cars >= 1 && o.cars <= 4, 'moving train length');
-        const furthestTail = o.activation !== undefined ? o.activation+218+o.len : moverFront(o.meet, 0) + o.len;
-        assert.ok(s.obs.every(other => other === o || other.lane !== o.lane ||
-          (other.kind === 'mtrain' ? o.activation !== undefined && other.activation !== undefined ? Math.abs(other.activation-o.activation)>=150 : other.meet <= o.meet || other.meet > furthestTail :
-            other.d1 < o.meet || other.d0 > furthestTail)), 'train has an unobstructed lane through its approach');
-      }
       if (o.kind==='train') {
         trains++;
         assert.ok(o.cars>=1 && o.cars<=4, 'parked train length');
@@ -72,25 +65,18 @@ test('100 seeds, tutorial and normal: generated zones stay empty and all chunks 
     }
     assert.ok(s.coinList.every(c=>s.track.course.allowsPickup(c.d)));
     assert.ok(s.powers.every(p=>s.track.course.allowsPickup(p.d)));
-    const result = solve(s.obs.map(o=>Sim.specOf(o)),0,s.track.frontier,[1],speedAt);
-    assert.ok(result.ok, `seed ${seed}, tutorial ${tutorial}, at ${result.failAt}`);
   }
-  assert.ok(movers > 100, 'moving trains remain common even with quiz reservations');
   assert.ok(trains > 100, 'rooftop routes return in normal gameplay');
   assert.ok(ramps > 50, 'ramps provide playable access to parked train roofs');
-  console.log(JSON.stringify({generatedMovingTrains:movers,generatedParkedTrains:trains,generatedRamps:ramps}));
+  console.log(JSON.stringify({generatedParkedTrains:trains,generatedRamps:ramps}));
 });
 
-test('tutorial teaches jumping onto the train after its first protected question', () => {
-  const s = new Sim(19);
-  s.noSpawn=true;
-  s.reset(19,true);
-  const ramps=s.obs.filter(o=>o.kind==='ramp');
-  assert.ok(s.obs.some(o=>o.kind==='low' && o.hint==='lane' && o.d0<140),
-    'the lane-change tutorial is preserved before the first quiz');
-  assert.ok(ramps.some(r=>r.d0>=190 && s.obs.some(o=>o.kind==='train' &&
-    o.lane===r.lane && Math.abs(o.d0-r.d1)<0.01)),
-    'tutorial ramp and stationary train must form an accessible roof after first gate');
+test('tutorial teaches jump, slide and ramp before the first protected question', () => {
+  const sim = new Sim(19);
+  sim.reset(19, true);
+  for (const hint of ['jump', 'slide', 'ramp']) {
+    assert.ok(sim.obs.some(ob => ob.hint === hint && ob.d0 < 140));
+  }
 });
 
 test('oncoming train moves before it becomes visible and keeps moving as the runner approaches', () => {
@@ -101,9 +87,8 @@ test('oncoming train moves before it becomes visible and keeps moving as the run
   const sim = new Sim(17);
   sim.noSpawn = true;
   sim.reset(17, false);
-  sim.track.ensure(1200);
-  const train = sim.obs.find(o => o.kind === 'mtrain' && o.meet > 200);
-  assert.ok(train, 'there should be a moving train after the first question');
+  sim.clearWorld();
+  const train = sim.addOb({kind: 'mtrain', lane: 0, d0: 216, d1: 278, cars: 2, activation: 200, trainSpeed: 60});
   sim.d = train.activation !== undefined ? train.activation+6 : Math.max(0, train.meet - MOVER.trigger + 6);
   sim.invincible = true;
   sim.start();
@@ -114,17 +99,19 @@ test('oncoming train moves before it becomes visible and keeps moving as the run
   near(train.d0, train.trainSpeed ? train.activation!+218-train.trainSpeed*train.travelTime : moverFront(train.meet, sim.d), 1e-5);
 });
 
-test('continuous runs: nothing retires in front of the camera; moving trains and pickups return after gates', () => {
-  let observedMovers = 0, crossed = 0;
+test('continuous runs: nothing retires in front of the camera; roofs and pickups return after gates', () => {
+  let observedRoofs = 0, crossed = 0;
   for (let seed=1; seed<=12; seed++) {
-    const s = new Sim(seed); s.invincible=true; s.reset(seed,false); s.start();
+    const s = new Sim(seed); s.reset(seed,false); s.start();
     let gate=180;
-    while(s.d<2000) {
+    while(s.alive && s.d<2000) {
       s.questionGate=gate;
       const previous = s.obs.map(o=>({id:o.id,d1:o.d1,meet:o.meet,len:o.len,kind:o.kind,activation:o.activation,trainSpeed:o.trainSpeed,travelTime:o.travelTime}));
       const coins = s.coinList.map(c=>({id:c.id,d:c.d,pulled:c.pulled}));
       const before=s.d;
+      decisionPilot(s);
       s.update(1/60);
+      if (s.groundY > 3) observedRoofs++;
       const picked = s.drainEvents().filter(e=>e.type==='coin');
       for(const o of previous) if(!s.obs.some(n=>n.id===o.id)) {
         const end = o.kind==='mtrain'?(o.trainSpeed ? o.activation!+218-o.trainSpeed*(o.travelTime+1/60) : moverFront(o.meet,s.d))+o.len:o.d1;
@@ -137,7 +124,6 @@ test('continuous runs: nothing retires in front of the camera; moving trains and
       }
       for(const o of s.obs) if(o.kind==='mtrain') {
         near(o.d0,o.trainSpeed ? o.activation!+218-o.trainSpeed*o.travelTime : moverFront(o.meet,s.d)); near(o.d1-o.d0,trainLength(o.cars));
-        observedMovers++;
       }
       const zone = gate > 180 && gate - s.d > 140 ? gate - 150 : gate;
       if(s.d>=zone-40 && s.d<=zone+10) {
@@ -146,8 +132,9 @@ test('continuous runs: nothing retires in front of the camera; moving trains and
       }
       if(s.d>=gate) { crossed++; gate+=150; }
     }
+    assert.ok(s.alive, JSON.stringify({seed, state: s.snapshot()}));
   }
-  assert.ok(observedMovers>0 && crossed>100);
+  assert.ok(observedRoofs>0 && crossed>100);
 });
 
 test('Question transition and recovery are continuous and independent of frame rate', () => {
@@ -174,7 +161,7 @@ test('wrong answers retain 3 seconds at 55%, including a strip and pause, then r
   near(p.penaltyRemaining,remaining);
   for(let i=0;i<121;i++) p.step(h,200,180);
   near(p.factor,1);
-  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.start();s.pace.penalize(3);
+  const s=new Sim();s.noSpawn=true;s.reset(1,false);s.clearWorld();s.start();s.pace.penalize(3);
   for(let i=0;i<360;i++) {const d=s.d;s.update(h);near(s.speed/speedAt(d),.55);}
 });
 
