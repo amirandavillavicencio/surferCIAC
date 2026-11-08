@@ -113,7 +113,7 @@ player=patch(player,'    this.squash *= Math.exp(-dt*16);', '    this.squash *= 
 player=patch(player,'    this.mixer.update(dt);\n    // Pose phase', '    this.mixer.time=mixerTime;\n    this.mixer.update(dt);\n    // Pose phase');
 await writeFile('upstream/src/view/player.ts',player);
 let world=await readFile('upstream/src/view/world.ts','utf8');
-world=patch(world,'(sim.groundY - this.camSupport) * (1 - Math.exp(-dt * 6))','(sim.groundY - this.camSupport) * (1 - Math.exp(-dt * 10))');
-world=patch(world,'(target - this.camY) * (1 - Math.exp(-dt * 5))','(target - this.camY) * (1 - Math.exp(-dt * 8))');
+world=patch(world,'(sim.groundY - this.camSupport) * (1 - Math.exp(-dt * 6))','(sim.groundY - this.camSupport) * (1 - Math.exp(-dt * (sim.groundY > this.camSupport ? 8 : 5)))');
+world=patch(world,'(target - this.camY) * (1 - Math.exp(-dt * 5))','(target - this.camY) * (1 - Math.exp(-dt * (target > this.camY ? 8 : 5.5)))');
 world=patch(world,'(sim.x * 0.66 - this.camX) * (1 - Math.exp(-dt * 10))','(sim.x * 0.66 - this.camX) * (1 - Math.exp(-dt * 14))');
 await writeFile('upstream/src/view/world.ts',world);

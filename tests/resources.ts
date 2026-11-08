@@ -7,6 +7,7 @@ import {fitTrainModel} from '../upstream/src/ciac/rail-art';
 import {CAR_LEN, OB} from '../upstream/src/config';
 import {readFileSync} from 'node:fs';
 import {GLTFLoader} from '../upstream/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import {GuardView, guardVisualScale} from '../upstream/src/ciac/guard-view';
 import * as THREE from '../upstream/node_modules/three';
 
 test('chase observes real stumbles/capture and never turns an academic slowdown into defeat',()=>{
@@ -77,4 +78,25 @@ test('Kenney train meshes fit the collision envelope and have a walkable coach r
    }
   }
  }
+});
+
+
+test('guard rendering stays small near the camera without changing pursuit state',()=>{
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(76,390/844,.3,260);
+  camera.position.set(0,4.25,7.8);
+  const guard=new GuardView(scene);
+  const sim=new Sim();sim.noSpawn=true;sim.reset(1,false);sim.clearWorld();sim.start();
+  const chase=new ChaseState();sim.update(1/120);chase.observe(sim,1/120,sim.drainEvents());
+  const before={mode:chase.current.mode,gap:chase.current.gap,danger:chase.danger};
+  // In the iPhone video the guard walked into the camera around a 6.4 m gap.
+  guard.update({...chase.current,mode:'distant',visible:true,d:sim.d-6.4},sim.d,camera);
+  assert.ok(guard.root.scale.x<.1,'the near-lens guard must not fill the viewport');
+  guard.update({...chase.current,mode:'intro',visible:true,d:sim.d-2.4},sim.d,camera);
+  assert.equal(guard.root.scale.x,1,'the normal runner chase remains legible');
+  guard.update({...chase.current,mode:'distant',visible:true,d:sim.d-7.8},sim.d,camera);
+  assert.equal(guard.root.visible,false,'a guard at the camera lens is hidden');
+  for(let depth=1.25;depth<=10;depth+=.1)
+    assert.ok(guardVisualScale(depth)/depth<=.25,'projected guard size must be bounded');
+  assert.deepEqual({mode:chase.current.mode,gap:chase.current.gap,danger:chase.danger},before);
 });
