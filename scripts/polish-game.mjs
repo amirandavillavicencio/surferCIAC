@@ -71,69 +71,59 @@ await writeFile('upstream/src/view/world.ts',world);
 await copyFile('ciac/encounters.ts','upstream/src/ciac/encounters.ts');
 await copyFile('ciac/action-section.ts','upstream/src/ciac/action-section.ts');
 await copyFile('ciac/rhythm.ts','upstream/src/ciac/rhythm.ts');
+await copyFile('ciac/sequence.ts','upstream/src/ciac/sequence.ts');
 let track=await readFile('upstream/src/sim/track.ts','utf8');
-track="import { RaceDirector, connectEncounter, rhythmBarrier } from '../ciac/rhythm';\nimport { ACTION_BEATS, actionEncounter, actionRoute } from '../ciac/action-section';\nimport { trafficEncounter, trafficRoute } from '../ciac/encounters';\n"+track;
-const a=track.indexOf('  private genChunk() {');
-const b=track.indexOf('  private buildRows(',a);
-if(a<0||b<0)throw Error('Missing generator');
+track="import { raceSequence } from '../ciac/sequence';\nimport { rhythmBarrier } from '../ciac/rhythm';\n"+track;
 track=track.replace(/type Pattern = [^\n]+\n/, '');
-track=track.replace('export class Track {', 'export class Track {\n  actionSectionStart = -1;\n  private readonly director = new RaceDirector();');
-track=track.replace('    this.chunks = 0;', '    this.chunks = 0;\n    this.director.reset();\n    this.actionSectionStart = -1;');
 track=patch(track,'    if (tutorial) this.tutorialChunk();',`    if (tutorial) this.tutorialChunk();
     else {
       this.sink.ob(rhythmBarrier(1, 24, 'low'));
       this.sink.ob(rhythmBarrier(seed % 2 === 0 ? 0 : 2, 24, 'low'));
     }`);
 const generatorStart=track.indexOf('  private genChunk() {');
-const generatorEnd=track.indexOf('  private buildRows(',generatorStart);
+const generatorEnd=track.indexOf('  /** Coins along',generatorStart);
+if(generatorStart<0||generatorEnd<0)throw Error('Missing generator');
 track=track.slice(0,generatorStart)+`  private genChunk() {
     const start = this.frontier;
     const end = 190 + Math.floor((start - 40) / 150) * 150;
-    let from = this.rng.chance(.5) ? 0 : 2;
-    if (this.busy[from] > start+8) from=2-from;
-    let kind = this.director.choose(this.chunks, start, this.rng.int(0, 2), this.busy[1] > start+40);
-    if(this.actionSectionStart<0 && end-start>100)this.actionSectionStart=start;
-    const sectionIndex=(start-this.actionSectionStart)/150;
-    const beat=sectionIndex>=0 && sectionIndex<3 && Number.isInteger(sectionIndex) ? ACTION_BEATS[sectionIndex] : undefined;
-    if(beat)kind=beat==='A'?'dodge':beat==='B'?'transfer':'double';
-    this.director.remember(kind);
-    const variant = this.rng.int(0, 19);
-    // Assemble before filtering, so rejected destinations take their ramps.
-    let specs = this.course.prepareSpecs((beat ? actionEncounter(start,from,beat,variant) : trafficEncounter(start, from, kind, variant))
-      .filter(s => s.d1 < end - 5 && (s.kind === 'mtrain' || s.d0 >= this.busy[s.lane])));
-    const connectors = connectEncounter(start, from, kind, variant)
-      .filter(s => s.d1 < end - 5 && s.d0 >= this.busy[s.lane] && this.course.allowsObstacle(s) &&
-        !specs.some(train => train.kind === 'mtrain' && train.lane === s.lane && s.d1 >= train.d0));
-    const connected = [...specs, ...connectors];
-    if ([0, 1, 2].every(lane => solve(connected, start, end, [lane], speedAt).endLanes.length === 3)) specs = connected;
-    let res = solve(specs, start, end, this.reach, speedAt, true, from);
-    if (!res.ok) {
-      this.failures++;
-      // Keep a guaranteed escape lane; don't replace the entire encounter with air.
-      specs = specs.filter(s => s.lane !== from);
-      res = solve(specs, start, end, this.reach, speedAt, true, from);
-      if (!res.ok) throw new Error('Encounter has no escape at '+start);
+    const from = this.rng.int(0, 2);
+    const target = (from + this.rng.int(1, 2)) % 3;
+    const railway = this.chunks % 4 !== 2;
+    const variant = this.rng.int(0, 11);
+    const sequence = raceSequence(start, from, target, railway, variant);
+    // A partial tutorial interval can admit some rows. Keep each row and
+    // railway assembly atomic so filtering never opens a single empty lane.
+    const specs = end - start === 150
+      ? sequence
+      : [];
+    if (specs.some(s => !this.course.allowsObstacle(s))) {
+      throw new Error('Sequence crosses an academic reservation at ' + start);
     }
-    for (const s of specs) this.sink.ob({...s,planKind:s.d0===start+8 && s.lane!==from ? undefined : kind,actionVariant:variant});
-    // Coins describe the intended physical action sequence. Do not draw a roof
-    // trajectory when a short/tutorial chunk could not retain both roofs.
-    for (let d=start+3; d<end-4; d+=2.1) {
-      if (!this.course.allowsPickup(d)) continue;
-      const pt=trafficRoute(start,from,kind,d,speedAt(start+36),variant);
-      if(beat){const reward=actionRoute(start,from,beat,variant,d,speedAt(start+36));this.sink.coin(reward.lane,d,reward.y);continue;}
-      const sliding=kind!=='double';
-      this.sink.coin(pt.lane,d,sliding && d>start+78 && d<start+86 ? .45 : pt.y+.85);
+    for (const spec of specs) this.sink.ob({ ...spec,
+      planKind: spec.d0 === start + 8 && spec.lane === from ? (railway ? 'railway' : 'evasion') : undefined,
+    });
+    for (let d = start + 3; d < start + 84; d += 2.1) {
+      if (!this.course.allowsPickup(d) || specs.some(s => (s.kind === 'low' || s.kind === 'overhead') && d > s.d0 - 2 && d < s.d1 + 2)) continue;
+      const lane = railway && d > start + 42 + Math.floor(variant / 4) % 3 ? target : from;
+      const roof = specs.find(s => s.kind === 'train' && s.lane === lane && d >= s.d0 && d <= s.d1);
+      this.sink.coin(lane, d, roof ? 4.25 : .85);
     }
-    if (res.path && this.nextPower >= start && this.nextPower < end) this.placePower(res.path,specs,start,end);
-    else if (this.nextPower < start) this.nextPower=start+200;
-    for (const spec of specs) this.busy[spec.lane]=Math.max(this.busy[spec.lane], spec.kind==='mtrain' ? start+218+trainLength(spec.cars||1)+4 : spec.d1+4);
-    this.reach=res.endLanes;
-    this.frontier=end;
+    if (this.nextPower >= start && this.nextPower < end) {
+      const d = start + 18;
+      if (specs.length && this.course.allowsPickup(d)) {
+        this.sink.power(this.rng.pick(['magnet', 'shoes', 'double']), from, d, .85);
+        this.nextPower = d + this.rng.range(380, 650);
+      } else this.nextPower = end;
+    }
+    this.frontier = end;
     this.chunks++;
   }
 
-`+track.slice(track.indexOf('  /** Coins along',generatorEnd));
-track=track.replace('PLAYER, levelAt,','PLAYER,');
+`+track.slice(generatorEnd);
+const oldPowerPlacement = track.indexOf('  private placePower(');
+if (oldPowerPlacement < 0) throw Error('Missing power placement');
+track = track.slice(0, oldPowerPlacement) + '}\n';
+track=track.replace('PLAYER, levelAt,','PLAYER,').replace('CAR_LEN, CAR_GAP, ', '');
 await writeFile('upstream/src/sim/track.ts',track);
 let player=await readFile('upstream/src/view/player.ts','utf8');
 player=patch(player,"import { applyCampusRunner } from '../ciac/campus-runner';","import { applyCampusRunner, correctCampusContact } from '../ciac/campus-runner';");

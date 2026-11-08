@@ -4,6 +4,6 @@
 export const TRAIN_SPAWN_AHEAD = 218;
 export const TRAIN_MIN_SPEED = 52;
 export const TRAIN_MAX_SPEED = 68;
-export function timedFront(activation: number, speed: number, elapsed: number) {
-  return activation + TRAIN_SPAWN_AHEAD - speed * elapsed;
+export function timedFront(activation: number, speed: number, elapsed: number, approach = TRAIN_SPAWN_AHEAD) {
+  return activation + approach - speed * elapsed;
 }

@@ -63,14 +63,10 @@ test('30 seeded maps: bounded gaps and physical encounter replays including roof
   const s=new Sim(seed);s.noSpawn=true;s.reset(seed,false);while(s.track.frontier<4000)s.track.ensure(4000);
   const specs=s.obs.map(o=>Sim.specOf(o)).filter(o=>o.d0<4000).sort((a,b)=>a.d0-b.d0);
   let end=40;for(const o of specs){const gap=o.d0-end;if(gap>80)over80++;maxGap=Math.max(maxGap,gap);end=Math.max(end,o.d1);assert.ok(s.track.course.allowsObstacle(o));}
-  for(const ramp of specs.filter(o=>o.kind==='ramp')){
-   const start=ramp.d0-24;
-   for(const speed of [12,speedAt(start),27])replayEncounter(start,ramp.lane,speed);
-  }
   for(const plan of plansOf(s)) {
    for(const speed of [12,speedAt(plan.start),27]) {
     const replay=new Sim();replay.noSpawn=true;replay.reset(seed,false);replay.clearWorld();replay.d=plan.start-20;replay.speedOverride=speed;replay.start();
-    for(const o of s.obs.filter(o=>o.activation===plan.start || (o.kind!=='mtrain'&&o.d0>=plan.start&&o.d0<plan.start+100)))replay.addOb(Sim.specOf(o));
+    for(const o of s.obs.filter(o=>(o.activation !== undefined && o.activation >= plan.start && o.activation < plan.start + 100) || (o.kind!=='mtrain'&&o.d0>=plan.start&&o.d0<plan.start+100)))replay.addOb(Sim.specOf(o));
     const actions=[{...plan}];let guard=0;
     while(replay.d<plan.start+110&&replay.alive&&guard++<10000){driveTraffic(replay,actions);replay.update(1/120);}
     assert.ok(replay.alive&&replay.d>=plan.start+110,JSON.stringify({plan,speed,state:replay.snapshot()}));
@@ -86,7 +82,6 @@ test('continuous seeded runs connect encounters through questions without telepo
  for(let seed=1;seed<=30;seed++){
   const s=new Sim(seed);s.noSpawn=true;s.reset(seed,false);while(s.track.frontier<4200)s.track.ensure(4200);
   const trafficPlans=plansOf(s);
-  for(let i=1;i<trafficPlans.length;i++){assert.notEqual(trafficPlans[i].kind,trafficPlans[i-1].kind);if(!trafficPlans[i].beat&&!trafficPlans[i-1].beat&&['double','transfer'].includes(trafficPlans[i-1].kind))assert.equal(trafficPlans[i].kind,'recovery');}
   const clock=new FrameClock();let frames=0;s.start();
   while(s.d<4000&&s.alive&&frames++<100000){clock.advance(schedules[seed%schedules.length][frames%schedules[seed%schedules.length].length],dt=>{
    driveTraffic(s,trafficPlans);

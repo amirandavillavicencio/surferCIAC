@@ -19,28 +19,19 @@ test('A/B/C variants are physically playable with real two-gesture roof transfer
  console.log(JSON.stringify({actionVariants:cases}));
 });
 
-test('integrated section has A/B/C once, varied decisions, then returns to normal generation',()=>{
- const signatures=new Set<string>();const durations:number[]=[];
- for(let seed=1;seed<=12;seed++)for(const tutorial of [false,true]) {
-  const s=new Sim(seed);s.noSpawn=true;s.reset(seed,tutorial);while(s.track.frontier<1300)s.track.ensure(1300);
-  const plans=plansOf(s),action=plans.filter(p=>p.beat);
-  assert.deepEqual(action.map(p=>p.beat),['A','B','C']);assert.equal(action.length,3);
-  assert.ok(plans.some(p=>!p.beat&&p.start>action[2].start));
-  for(const p of action)if(p.beat==='A')p.lateEvade=true;
-  signatures.add(JSON.stringify(action.map(p=>({from:p.from,variant:p.variant}))));
-  // Tutorial remains intact; take the outer lane around its introductory obstacles.
-  s.start();let entered=-1;let guard=0;
-  while(s.d<action[0].start+400&&s.alive&&guard++<20000) {
-   if(tutorial&&s.d<280){if(s.lane!==2)s.right();}
-   else driveTraffic(s,plans);
-   s.questionGate=180+Math.max(0,Math.ceil((s.d-180)/150))*150;
-   s.update(1/120);if(entered<0&&s.d>=action[0].start)entered=s.time;
-  }
-  assert.ok(s.alive,JSON.stringify({seed,tutorial,state:s.snapshot()}));
-  const duration=s.time-entered;assert.ok(duration>=23&&duration<=36,`section duration ${duration}`);durations.push(duration);
+test('normal generation varies connected roof and ground sequences after either start', () => {
+ const signatures = new Set<string>();
+ for (let seed = 1; seed <= 12; seed++) for (const tutorial of [false, true]) {
+  const sim = new Sim(seed);
+  sim.noSpawn = true;
+  sim.reset(seed, tutorial);
+  sim.track.ensure(1300);
+  const plans = plansOf(sim);
+  assert.ok(plans.some(p => p.kind === 'railway'));
+  assert.ok(plans.some(p => p.kind === 'evasion'));
+  signatures.add(plans.map(p => p.from).join(''));
  }
- assert.ok(signatures.size>8);
- console.log(JSON.stringify({sectionReplays:24,uniqueVariants:signatures.size,durationMin:Math.min(...durations),durationMax:Math.max(...durations)}));
+ assert.ok(signatures.size > 8);
 });
 
 test('wrong decisions collide and alternative routes remain controllable',()=>{
