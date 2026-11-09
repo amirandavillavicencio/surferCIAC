@@ -124,12 +124,10 @@ export class CIACQuiz {
     this.resultForm.className = 'ciac-result';
     this.resultForm.hidden = true;
     const resultTitle = document.createElement('strong');
-    resultTitle.textContent = 'Publica tu puntaje en el ranking';
+    resultTitle.textContent = 'Guarda tu puntaje para el ranking';
     this.playerName = document.createElement('input');
     this.playerName.type = 'text';
     this.playerName.required = true;
-    this.playerName.minLength = 2;
-    this.playerName.maxLength = 24;
     this.playerName.setAttribute('autocomplete', 'nickname');
     this.playerName.placeholder = 'Tu nombre en el ranking';
     this.playerName.setAttribute('aria-label', 'Nombre público');
@@ -353,10 +351,10 @@ export class CIACQuiz {
     const button = this.resultForm.querySelector<HTMLButtonElement>('button[type=submit]')!;
     if (!this.token) return;
     button.disabled = true;
-    this.formStatus.textContent = 'Validando nombre…';
+    this.formStatus.textContent = 'Guardando puntaje…';
     try {
       const result = await api('finish', {token: this.token, name: this.playerName.value});
-      this.formStatus.textContent = 'Puntaje guardado: ' + result.points;
+      this.formStatus.textContent = 'Puntaje guardado: ' + result.points + ' · Pendiente de publicación diaria';
       button.hidden = true;
       this.playerName.disabled = true;
       void this.refreshRanking();
