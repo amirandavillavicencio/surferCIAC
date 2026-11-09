@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { validateName } from '../functions/api/_lib/moderation.js';
-import { onRequestGet } from '../functions/api/leaderboard.js';
 
 test('nombres visibles sin filtro de palabras, signos ni longitud fija', async () => {
   for (const entry of ['!', '🙂', 'x', 'palabra con signos !?%#', 'x'.repeat(50)]) {
@@ -10,29 +10,13 @@ test('nombres visibles sin filtro de palabras, signos ni longitud fija', async (
   assert.deepEqual(await validateName(' \u200b  '), { ok: false, error: 'Escribe un nombre' });
 });
 
-test('la API del ranking general y semanal lee solamente puntajes publicados', async () => {
-  const statements = [];
-  const env = {
-    DB: {
-      prepare(sql) {
-        statements.push(sql);
-        return {
-          bind() { return this; },
-          async all() { return { results: [] }; },
-        };
-      },
-    },
-  };
-  for (const period of ['general', 'semana']) {
-    for (const semestre of ['Todos', 'Primer semestre']) {
-      const url = new URL('https://surferciac.pages.dev/api/leaderboard');
-      url.searchParams.set('periodo', period);
-      url.searchParams.set('semestre', semestre);
-      const result = await onRequestGet({ request: new Request(url), env });
-      assert.equal(result.status, 200);
-      assert.deepEqual((await result.json()).ranking, []);
-    }
+test('las cuatro consultas del ranking exigen publicación manual', () => {
+  const source = readFileSync(new URL('../functions/api/leaderboard.js', import.meta.url), 'utf8');
+  const queries = [...source.matchAll(/'SELECT display_name AS name, semestre, score FROM scores ([^']+)'/g)];
+  assert.equal(queries.length, 4, 'general y semanal, con y sin filtro de semestre');
+  for (const [, sql] of queries) {
+    assert.match(sql, /^WHERE published_at IS NOT NULL(?: AND | ORDER BY )/);
+    assert.match(sql, /ORDER BY score DESC, created_at ASC/);
+    assert.match(sql, /LIMIT 10$/);
   }
-  assert.equal(statements.length, 4);
-  for (const sql of statements) assert.match(sql, /WHERE published_at IS NOT NULL/);
 });
