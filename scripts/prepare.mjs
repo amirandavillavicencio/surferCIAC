@@ -150,8 +150,19 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   let ui = await readFile(uiPath, 'utf8');
   const menuTitle = '          <h1 data-k="title"></h1>';
   if (ui.split(menuTitle).length !== 2) throw new Error('No se encontró el título único del menú');
-  ui = ui.replace(menuTitle,
-    '          <img class="ciac-brand-logo" src="/assets/ciac-logo.png" alt="CIAC" />\n' + menuTitle);
+  const menuEnd = '            <button class="chip" id="btn-mute2"></button>\n          </div>';
+  if (ui.split(menuEnd).length !== 2) throw new Error('No se encontró el cierre del menú');
+  ui = ui.replace(menuTitle, `          <div class="ciac-start-actions">
+          <header class="ciac-start-brand">
+            <img class="ciac-brand-logo" src="/assets/ciac-logo.png" alt="CIAC" />
+            ${menuTitle.trim()}
+          </header>`)
+    .replace(menuEnd, menuEnd + '\n          </div>')
+    .replace('<div><small data-k="best"></small><b id="best">0</b></div>',
+      '<div hidden><small>Récord personal</small><b id="best"></b></div>');
+  const setBest = '    this.el.best.textContent = String(best);';
+  if (ui.split(setBest).length !== 2) throw new Error('No se encontró el récord personal del menú');
+  ui = ui.replace(setBest, setBest + '\n    this.el.best.parentElement!.hidden = !Number.isFinite(best) || best <= 0;');
   const focusPause = "    if (s === 'pause') this.el['btn-resume'].focus({ preventScroll: true });";
   if (ui.split(focusPause).length !== 2) throw new Error('Foco original de pausa cambió');
   await writeFile(uiPath, ui.replace(focusPause, focusPause + `

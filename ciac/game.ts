@@ -54,14 +54,15 @@ export class CIACQuiz {
   private resultForm: HTMLFormElement;
   private playerName: HTMLInputElement;
   private formStatus: HTMLElement;
-  private ranking: HTMLElement;
+  private rankingContent: HTMLElement;
 
   constructor(hooks: Hooks) {
     this.hooks = hooks;
     this.answerTrack = new QuizAnswerTrack(hooks.scene);
     const startPanel = document.querySelector<HTMLElement>('#s-start .panel');
+    const actions = startPanel?.querySelector('.ciac-start-actions');
     const overPanel = document.querySelector<HTMLElement>('#s-over .panel');
-    if (!startPanel || !overPanel) throw new Error('No se encontró la interfaz del motor SUBWAY-SURFERS');
+    if (!startPanel || !actions || !overPanel) throw new Error('No se encontró la interfaz del motor SUBWAY-SURFERS');
 
     const label = document.createElement('label');
     label.className = 'ciac-course';
@@ -75,16 +76,21 @@ export class CIACQuiz {
       this.select.append(option);
     }
     label.append(this.select);
-    startPanel.insertBefore(label, document.getElementById('btn-play'));
+    actions.insertBefore(label, document.getElementById('btn-play'));
 
-    const prize = document.createElement('p');
-    prize.className = 'ciac-prize';
-    prize.textContent = 'El ganador de la semana se lleva un kit de premio.';
-    startPanel.insertBefore(prize, document.getElementById('btn-play'));
-
-    this.ranking = document.createElement('div');
-    this.ranking.className = 'ciac-ranking';
-    startPanel.append(this.ranking);
+    const ranking = document.createElement('section');
+    ranking.className = 'ciac-ranking';
+    ranking.setAttribute('aria-labelledby', 'ciac-ranking-title');
+    const heading = document.createElement('h2');
+    heading.id = 'ciac-ranking-title';
+    heading.textContent = 'Ranking semanal';
+    const rankingContent = document.createElement('div');
+    rankingContent.className = 'ciac-ranking-content';
+    rankingContent.setAttribute('aria-live', 'polite');
+    rankingContent.textContent = 'Cargando puntajes…';
+    ranking.append(heading, rankingContent);
+    this.rankingContent = rankingContent;
+    startPanel.append(ranking);
     void this.refreshRanking();
 
     this.dialog = document.createElement('div');
@@ -367,36 +373,57 @@ export class CIACQuiz {
   private async refreshRanking() {
     try {
       const result = await api('leaderboard?periodo=semana');
-      this.ranking.replaceChildren();
-      const heading = document.createElement('strong');
-      heading.textContent = 'Ranking semanal';
-      this.ranking.append(heading);
+      const content = document.createDocumentFragment();
       if (result.semana) {
         const period = document.createElement('small');
-        const shortDate = (date: string) => date.split('-').reverse().join('/');
-        period.textContent = shortDate(result.semana.desde) + ' al ' + shortDate(result.semana.hasta) + ' · Chile';
-        this.ranking.append(period);
+        const shortDate = (date: string) => date.split('-').reverse().slice(0, 2).join('/');
+        period.textContent = shortDate(result.semana.desde) + ' al ' + shortDate(result.semana.hasta);
+        content.append(period);
       }
+
       const rows = (result.ranking as Array<{name:string;score:number}>).slice(0,5);
       if (rows.length === 0) {
-        const empty = document.createElement('small');
-        empty.textContent = 'Todavía no hay puntajes publicados';
-        this.ranking.append(empty);
+        const empty = document.createElement('p');
+        empty.textContent = 'Todavía no hay puntajes publicados.';
+        content.append(empty);
+      } else {
+        const list = document.createElement('ol');
+        list.className = 'ciac-ranking-list';
+        list.setAttribute('role', 'list');
+        for (const [index, row] of rows.entries()) {
+          const line = document.createElement('li');
+          const position = document.createElement('span');
+          position.className = 'ciac-ranking-position';
+          position.setAttribute('aria-label', 'Puesto ' + (index + 1));
+          position.textContent = String(index + 1);
+          const name = document.createElement('span');
+          name.className = 'ciac-ranking-name';
+          name.textContent = row.name;
+          const score = document.createElement('b');
+          score.textContent = row.score.toLocaleString('es-CL');
+          line.append(position, name, score);
+          list.append(line);
+        }
+        content.append(list);
       }
-      for (const [index, row] of rows.entries()) {
-        const line = document.createElement('div');
-        const name = document.createElement('span');
-        name.textContent = String(index + 1) + '. ' + row.name;
-        const score = document.createElement('b');
-        score.textContent = String(row.score);
-        line.append(name, score);
-        this.ranking.append(line);
-      }
+
       const notice = document.createElement('small');
-      notice.textContent = 'El primer lugar es provisional hasta revisar los puntajes.';
-      this.ranking.append(notice);
+      notice.textContent = 'El primer lugar es provisional. Premio: un kit.';
+      content.append(notice);
+      if (typeof result.ultimaPublicacion === 'number' && Number.isFinite(new Date(result.ultimaPublicacion).getTime())) {
+        const date = new Date(result.ultimaPublicacion);
+        const time = document.createElement('time');
+        time.dateTime = date.toISOString();
+        time.textContent = new Intl.DateTimeFormat('es-CL', {
+          dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Santiago'
+        }).format(date);
+        const updated = document.createElement('small');
+        updated.append('Última publicación: ', time);
+        content.append(updated);
+      }
+      this.rankingContent.replaceChildren(content);
     } catch {
-      this.ranking.textContent = 'Ranking no disponible';
+      this.rankingContent.textContent = 'Ranking no disponible';
     }
   }
 }

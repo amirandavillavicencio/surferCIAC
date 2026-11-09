@@ -14,11 +14,15 @@ export async function onRequestGet({ request, env }) {
     const sql = semestre === 'Todos'
       ? 'SELECT display_name AS name, semestre, score FROM scores WHERE published_at IS NOT NULL AND created_at >= ? AND created_at < ? ORDER BY score DESC, created_at ASC, run_token ASC LIMIT 10'
       : 'SELECT display_name AS name, semestre, score FROM scores WHERE published_at IS NOT NULL AND created_at >= ? AND created_at < ? AND semestre=? ORDER BY score DESC, created_at ASC, run_token ASC LIMIT 10';
-    const query = env.DB.prepare(sql);
-    const r = semestre === 'Todos'
-      ? await query.bind(semana.inicio, semana.finExclusivo).all()
-      : await query.bind(semana.inicio, semana.finExclusivo, semestre).all();
-    return json({ranking:r.results||[], semana:{
+    const publicationSql = `SELECT MAX(published_at) AS ultimaPublicacion FROM scores
+      WHERE published_at IS NOT NULL AND created_at >= ? AND created_at < ?${semestre === 'Todos' ? '' : ' AND semestre=?'}`;
+    const bindings = [semana.inicio, semana.finExclusivo];
+    if (semestre !== 'Todos') bindings.push(semestre);
+    const [ranking, publication] = await env.DB.batch([
+      env.DB.prepare(sql).bind(...bindings),
+      env.DB.prepare(publicationSql).bind(...bindings)
+    ]);
+    return json({ranking:ranking.results||[], ultimaPublicacion:publication.results[0]?.ultimaPublicacion ?? null, semana:{
       desde:semana.desde, hasta:semana.hasta, zonaHoraria:semana.zonaHoraria
     }, premio:'Kit de premio', ganadorConfirmado:false});
   }
