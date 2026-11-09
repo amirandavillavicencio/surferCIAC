@@ -8,7 +8,7 @@ execFileSync(process.execPath, ['scripts/prepare.mjs'], {stdio:'inherit'});
 const directory = await mkdtemp(join(tmpdir(), 'surfer-ciac-'));
 try {
   const outfile = join(directory, 'behavior.mjs');
-  await build({stdin:{contents:"import './tests/behavior.ts'; import './tests/polish.ts'; import './tests/action-section.ts'; import './tests/presentation.ts'; import './tests/resources.ts'; import './tests/academic-chase.ts'; import './tests/rhythm.ts';",resolveDir:process.cwd(),sourcefile:'game-tests.ts'}, outfile, bundle:true, platform:'node',
+  await build({stdin:{contents:"import './tests/behavior.ts'; import './tests/polish.ts'; import './tests/action-section.ts'; import './tests/presentation.ts'; import './tests/resources.ts'; import './tests/academic-chase.ts'; import './tests/rhythm.ts'; import './tests/keyboard-input.ts';",resolveDir:process.cwd(),sourcefile:'game-tests.ts'}, outfile, bundle:true, platform:'node',
     format:'esm', mainFields:['module','main'], loader:{'.css':'empty'}, logLevel:'warning'});
   execFileSync(process.execPath, ['--test', outfile], {stdio:'inherit'});
 } finally {
