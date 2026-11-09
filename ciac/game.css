@@ -402,3 +402,127 @@ body { overflow: hidden; }
   #s-start .ciac-brand-logo { width: 44px; }
   #s-start .tag { display: none; }
 }
+
+/* Cierre compacto para Safari de iPhone: datos sin repetir y acciones visibles. */
+#s-over {
+  padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+}
+#s-over .panel {
+  width: min(390px, 100%);
+  gap: 7px;
+  padding: 14px;
+  border-radius: 19px;
+}
+#s-over .panel h2 {
+  font-size: clamp(23px, 6vw, 28px);
+  line-height: 1.1;
+}
+#s-over .badge {
+  padding: 3px 12px;
+  font-size: 13px;
+}
+#s-over .result { gap: 6px; }
+#s-over .result div { padding: 5px 6px; border-radius: 10px; }
+#s-over .result small { font-size: 11px; }
+#s-over .result b { font-size: 19px; line-height: 1.2; }
+#s-over .ciac-run-summary {
+  margin: 1px 0 2px;
+  font-size: 12px;
+  line-height: 1.3;
+}
+#s-over .ciac-run-summary small {
+  margin-top: 3px;
+  font-size: 11px;
+}
+#s-over #btn-again {
+  min-height: 46px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 19px;
+}
+#s-over .ciac-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 114px;
+  gap: 6px;
+  padding: 7px 0;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  text-align: left;
+}
+#s-over .ciac-result[hidden] { display: none !important; }
+#s-over .ciac-result > strong {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  line-height: 1.2;
+}
+#s-over .ciac-result input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  font-size: 16px;
+}
+#s-over .ciac-result button {
+  min-height: 42px;
+  padding: 6px 4px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+#s-over .ciac-result span {
+  grid-column: 1 / -1;
+  font-size: 11px;
+}
+#s-over .ciac-result span:empty { display: none; }
+
+/* El CIAC se presenta como ayuda, sin competir con «Volver a jugar». */
+#s-over .ciac-over-invite {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .2);
+  text-align: center;
+}
+#s-over .ciac-over-invite strong {
+  font-size: 13px;
+  line-height: 1.2;
+}
+#s-over .ciac-over-invite p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #d6e3ef;
+}
+#s-over .ciac-over-secondary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px;
+  gap: 7px;
+}
+#s-over .ciac-schedules-link,
+#s-over #btn-home2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, .4);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .065);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: center;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+#s-over .ciac-schedules-link:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+@media (orientation: landscape) and (max-height: 540px) {
+  #s-over .panel { width: min(500px, 100%); padding: 9px 13px; gap: 5px; }
+  #s-over .result div { padding: 3px 6px; }
+  #s-over .ciac-result { padding: 4px 0; }
+  #s-over .ciac-over-invite { padding-top: 4px; }
+}

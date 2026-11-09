@@ -148,7 +148,32 @@ export class CIACQuiz {
     this.resultForm.addEventListener('pointerdown', (event) => event.stopPropagation());
     this.summary=document.createElement('p');
     this.summary.className='ciac-run-summary';
-    overPanel.append(this.summary,this.resultForm);
+
+    const invitation = document.createElement('section');
+    invitation.className = 'ciac-over-invite';
+    const invitationTitle = document.createElement('strong');
+    invitationTitle.textContent = '¿Te gustaría reforzar algún ramo?';
+    const invitationText = document.createElement('p');
+    invitationText.textContent = 'En el CIAC tienes apoyo para tus materias.';
+    const schedules = document.createElement('a');
+    schedules.className = 'ciac-schedules-link';
+    schedules.href = 'https://dispositivos-ciac.pages.dev/';
+    schedules.target = '_blank';
+    schedules.rel = 'noopener noreferrer';
+    schedules.textContent = 'Ver horarios del CIAC';
+    schedules.addEventListener('pointerdown', (event) => event.stopPropagation());
+    schedules.addEventListener('click', (event) => event.stopPropagation());
+    const secondaryActions = document.createElement('div');
+    secondaryActions.className = 'ciac-over-secondary';
+    const homeButton = overPanel.querySelector('#btn-home2');
+    const replayButton = overPanel.querySelector('#btn-again');
+    if (!replayButton || !homeButton) throw new Error('No se encontraron los botones del cierre');
+    secondaryActions.append(schedules, homeButton);
+    invitation.append(invitationTitle, invitationText, secondaryActions);
+
+    overPanel.insertBefore(this.summary, replayButton);
+    overPanel.insertBefore(this.resultForm, replayButton);
+    overPanel.append(invitation);
   }
 
   get activeGate() {
@@ -334,8 +359,8 @@ export class CIACQuiz {
     }
   }
 
-  endRun(distance:number, score:number, caught:boolean) {
-    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
+  endRun(_distance:number, _score:number, caught:boolean) {
+    this.summary.textContent=`${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
     const progress = this.missions.progress;
     const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
     const missions = document.createElement('small');
