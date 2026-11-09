@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bank, questionFor, questionLimit } from '../functions/api/_lib/shared.js';
+import { readFileSync } from 'node:fs';
+
+// La API empaqueta JSON; para probar la lógica real en Node se inserta el
+// mismo banco, sin depender de atributos de importación JSON del navegador.
+const questions = JSON.parse(readFileSync(new URL('../data/questions.json', import.meta.url), 'utf8'));
+const source = readFileSync(new URL('../functions/api/_lib/shared.js', import.meta.url), 'utf8');
+const jsonImport = "import questions from '../../../data/questions.json';";
+assert.ok(source.includes(jsonImport));
+const tested = source.replace(jsonImport, 'const questions = ' + JSON.stringify(questions) + ';');
+const { bank, questionFor, questionLimit } = await import(
+  'data:text/javascript,' + encodeURIComponent(tested)
+);
 
 const courses = ['MAT060', 'MAT061', 'MAT070', 'MAT071', 'FIS100', 'FIS110'];
 const modes = [
