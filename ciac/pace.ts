@@ -1,6 +1,10 @@
 import { speedAt } from '../config';
 import { QUESTION_VISIBLE_DISTANCE } from './course';
 
+// Velocidad objetivo (m/s) al leer y elegir la respuesta.
+
+const QUESTION_READING_SPEED = 6;
+
 export class RacePace {
   factor = 1;
   penaltyRemaining = 0;
@@ -26,7 +30,7 @@ export class RacePace {
       this.elapsed = 0;
       return this.factor;
     }
-    const target = distance >= gate - QUESTION_VISIBLE_DISTANCE && distance < gate ? Math.min(.88, 15 / speedAt(gate)) : 1;
+    const target = distance >= gate - QUESTION_VISIBLE_DISTANCE && distance < gate ? Math.min(.88, QUESTION_READING_SPEED / speedAt(gate)) : 1;
     if (target !== this.target) {
       this.from = this.factor;
       this.target = target;
