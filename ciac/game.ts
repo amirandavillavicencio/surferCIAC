@@ -359,7 +359,7 @@ export class CIACQuiz {
     }
   }
 
-  endRun(distance:number, score:number, caught:boolean) {
+  endRun(_distance:number, _score:number, caught:boolean) {
     this.summary.textContent=`${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
     const progress = this.missions.progress;
     const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
