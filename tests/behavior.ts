@@ -9,7 +9,7 @@ import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_
 import { QuizCourse, QUESTION_VISIBLE_DISTANCE } from '../upstream/src/ciac/course';
 import { RacePace } from '../upstream/src/ciac/pace';
 import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
-import { CIACQuiz } from '../upstream/src/ciac/game';
+import { CIACQuiz, STATIC_RANKING } from '../upstream/src/ciac/game';
 import { decisionPilot } from './decision-pilot';
 import { bindSwipe } from '../upstream/src/ciac/swipe';
 import { PlayerView } from '../upstream/src/view/player';
@@ -216,9 +216,38 @@ function dom() {
   const elements=new Map<string,ElementAdapter>();
   const get=(key:string)=>{if(!elements.has(key))elements.set(key,new ElementAdapter());return elements.get(key)!;};
   (globalThis as any).Element=ElementAdapter;
-  (globalThis as any).document={querySelector:get,getElementById:get,createElement:()=>new ElementAdapter(),addEventListener(){}};
+  (globalThis as any).document={querySelector:get,getElementById:get,createElement:()=>new ElementAdapter(),createDocumentFragment:()=>new ElementAdapter(),addEventListener(){}};
   (globalThis as any).window={addEventListener(){}};
 }
+
+test('static ranking displays the same ten fictional records without touching D1', () => {
+  assert.deepEqual(STATIC_RANKING.map(row => [row.name, row.score]), [
+    ['Emilia Rojas', 500],
+    ['Matías Araya', 500],
+    ['Antonia Mella', 400],
+    ['Diego Carrasco', 400],
+    ['Javiera Tapia', 300],
+    ['Benjamín Soto', 300],
+    ['Catalina Muñoz', 200],
+    ['Vicente Fuentes', 200],
+    ['Florencia Olivares', 100],
+    ['Tomás Pizarro', 100],
+  ]);
+  assert.equal(new Set(STATIC_RANKING.map(row => row.name)).size, 10);
+  dom();
+  (globalThis as any).fetch=async()=>{throw new Error('No ranking API should be requested');};
+  const quiz = new CIACQuiz({
+    scene:new THREE.Scene(), course:new QuizCourse(), frontier:()=>0, notice(){},
+    penalize(){}, threat(){return 0;}, sound(){}, grantPower(){}
+  });
+  const content = (quiz as any).rankingContent.children[0];
+  assert.match(content.children[0].textContent, /Puntajes ficticios/);
+  const list = content.children[1];
+  assert.equal(list.children.length, 10);
+  assert.equal(list.children[0].children[1].textContent, 'Emilia Rojas');
+  assert.equal(list.children[9].children[2].textContent, '100');
+  assert.match(content.children[2].textContent, /manualmente/);
+});
 
 test('short iPhone-width swipes: four directions, one action per gesture, diagonals and rapid reversals', () => {
   dom(); const target=new ElementAdapter(), actions:string[]=[]; let prevented=0;
