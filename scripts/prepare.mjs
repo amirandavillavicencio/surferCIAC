@@ -136,7 +136,15 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   const input = await readFile(inputPath, 'utf8');
   const swipe = input.indexOf('  // A swipe is read');
   if (swipe < 0) throw new Error('Controles originales cambiaron');
-  await writeFile(inputPath, "import { bindSwipe } from './ciac/swipe';\n" + input.slice(0, swipe) + '  bindSwipe(target, on, canSwipe);\n}\n');
+  // Mientras se escribe el nombre del ranking, el teclado no mueve al corredor.
+  const keyAnchor = '    const a = keys[e.code];';
+  const keyboard = input.slice(0, swipe);
+  if (keyboard.split(keyAnchor).length !== 2) throw new Error('Teclado original cambió');
+  const safeKeyboard = keyboard.replace(keyAnchor,
+    "    if (e.target instanceof HTMLElement &&\n" +
+    "        (e.target.isContentEditable || e.target.closest('input, textarea, select'))) return;\n" +
+    keyAnchor);
+  await writeFile(inputPath, "import { bindSwipe } from './ciac/swipe';\n" + safeKeyboard + '  bindSwipe(target, on, canSwipe);\n}\n');
 
   const uiPath = 'upstream/src/ui.ts';
   let ui = await readFile(uiPath, 'utf8');
