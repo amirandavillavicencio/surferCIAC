@@ -152,9 +152,9 @@ export class CIACQuiz {
     const invitation = document.createElement('section');
     invitation.className = 'ciac-over-invite';
     const invitationTitle = document.createElement('strong');
-    invitationTitle.textContent = '¿Quieres mejorar tus conocimientos?';
+    invitationTitle.textContent = '¿Te gustaría reforzar algún ramo?';
     const invitationText = document.createElement('p');
-    invitationText.textContent = 'Ven al CIAC. Aquí puedes revisar los horarios de apoyo.';
+    invitationText.textContent = 'En el CIAC tienes apoyo para tus materias.';
     const schedules = document.createElement('a');
     schedules.className = 'ciac-schedules-link';
     schedules.href = 'https://dispositivos-ciac.pages.dev/';
@@ -163,13 +163,17 @@ export class CIACQuiz {
     schedules.textContent = 'Ver horarios del CIAC';
     schedules.addEventListener('pointerdown', (event) => event.stopPropagation());
     schedules.addEventListener('click', (event) => event.stopPropagation());
-    invitation.append(invitationTitle, invitationText, schedules);
-
+    const secondaryActions = document.createElement('div');
+    secondaryActions.className = 'ciac-over-secondary';
+    const homeButton = overPanel.querySelector('#btn-home2');
     const replayButton = overPanel.querySelector('#btn-again');
-    if (!replayButton) throw new Error('No se encontró el botón de nueva partida');
+    if (!replayButton || !homeButton) throw new Error('No se encontraron los botones del cierre');
+    secondaryActions.append(schedules, homeButton);
+    invitation.append(invitationTitle, invitationText, secondaryActions);
+
     overPanel.insertBefore(this.summary, replayButton);
-    overPanel.insertBefore(invitation, replayButton);
-    overPanel.append(this.resultForm);
+    overPanel.insertBefore(this.resultForm, replayButton);
+    overPanel.append(invitation);
   }
 
   get activeGate() {
@@ -356,7 +360,7 @@ export class CIACQuiz {
   }
 
   endRun(distance:number, score:number, caught:boolean) {
-    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
+    this.summary.textContent=`${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
     const progress = this.missions.progress;
     const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
     const missions = document.createElement('small');
