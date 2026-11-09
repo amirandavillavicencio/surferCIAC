@@ -598,5 +598,245 @@
     "correcta": 1,
     "breve": "¿Derivada de cos(x)?",
     "explicacion": "La derivada de cos(x) es −sen(x)."
+  },
+  {
+    "id": "q41",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuándo es verdadera p ∧ q?",
+    "opciones": [
+      "Si ambas son verdaderas",
+      "Si una es falsa",
+      "Si ambas son falsas"
+    ],
+    "correcta": 0,
+    "breve": "¿Cuándo es verdadera p ∧ q?",
+    "explicacion": "La conjunción p ∧ q exige que las dos proposiciones sean verdaderas."
+  },
+  {
+    "id": "q42",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuándo es verdadera p ∨ q?",
+    "opciones": [
+      "Solo si ambas son falsas",
+      "Si al menos una es verdadera",
+      "Solo si p es verdadera"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo es verdadera p ∨ q?",
+    "explicacion": "La disyunción inclusiva p ∨ q es verdadera si una o ambas proposiciones son verdaderas."
+  },
+  {
+    "id": "q43",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuándo es falsa p → q?",
+    "opciones": [
+      "p falsa y q verdadera",
+      "p y q falsas",
+      "p verdadera y q falsa"
+    ],
+    "correcta": 2,
+    "breve": "¿Cuándo es falsa p → q?",
+    "explicacion": "Una implicación solo es falsa cuando el antecedente es verdadero y el consecuente es falso."
+  },
+  {
+    "id": "q44",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "Contrapositiva de p → q",
+    "opciones": [
+      "¬q → ¬p",
+      "q → p",
+      "¬p → ¬q"
+    ],
+    "correcta": 0,
+    "breve": "Contrapositiva de p → q",
+    "explicacion": "La contrapositiva invierte y niega ambos extremos: ¬q → ¬p."
+  },
+  {
+    "id": "q45",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sumatorias",
+    "enunciado": "¿Cuánto suma 1+2+3+4?",
+    "opciones": [
+      "9",
+      "10",
+      "12"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto suma 1+2+3+4?",
+    "explicacion": "Los cuatro primeros enteros positivos suman 10."
+  },
+  {
+    "id": "q46",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sucesiones",
+    "enunciado": "En 3,7,11,15, ¿cuál es la diferencia?",
+    "opciones": [
+      "3",
+      "4",
+      "7"
+    ],
+    "correcta": 1,
+    "breve": "En 3,7,11,15, ¿cuál es la diferencia?",
+    "explicacion": "Cada término supera al anterior en cuatro unidades."
+  },
+  {
+    "id": "q47",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sucesiones",
+    "enunciado": "En 2,6,18,54, ¿cuál es la razón?",
+    "opciones": [
+      "2",
+      "3",
+      "6"
+    ],
+    "correcta": 1,
+    "breve": "En 2,6,18,54, ¿cuál es la razón?",
+    "explicacion": "Cada término se obtiene multiplicando el anterior por 3."
+  },
+  {
+    "id": "q48",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Cuánto vale i²?",
+    "opciones": [
+      "1",
+      "−1",
+      "0"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale i²?",
+    "explicacion": "La unidad imaginaria i se define de modo que i² = −1."
+  },
+  {
+    "id": "q49",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Módulo de 3+4i?",
+    "opciones": [
+      "5",
+      "7",
+      "12"
+    ],
+    "correcta": 0,
+    "breve": "¿Módulo de 3+4i?",
+    "explicacion": "El módulo de a+bi es √(a²+b²); para 3+4i da 5."
+  },
+  {
+    "id": "q50",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Conjugado de 2+3i?",
+    "opciones": [
+      "−2−3i",
+      "2−3i",
+      "3+2i"
+    ],
+    "correcta": 1,
+    "breve": "¿Conjugado de 2+3i?",
+    "explicacion": "El conjugado conserva la parte real y cambia el signo de la imaginaria."
+  },
+  {
+    "id": "q51",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Valor absoluto",
+    "enunciado": "¿Cuánto vale |−5|?",
+    "opciones": [
+      "−5",
+      "0",
+      "5"
+    ],
+    "correcta": 2,
+    "breve": "¿Cuánto vale |−5|?",
+    "explicacion": "El valor absoluto es la distancia al cero, siempre no negativa."
+  },
+  {
+    "id": "q52",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Ecuaciones",
+    "enunciado": "¿Soluciones de x²−9=0?",
+    "opciones": [
+      "Solo 3",
+      "−3 y 3",
+      "0 y 9"
+    ],
+    "correcta": 1,
+    "breve": "¿Soluciones de x²−9=0?",
+    "explicacion": "La igualdad x²=9 se cumple para x=3 y x=−3."
+  },
+  {
+    "id": "q53",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Rectas",
+    "enunciado": "¿Pendiente entre (0,1) y (2,5)?",
+    "opciones": [
+      "2",
+      "3",
+      "4"
+    ],
+    "correcta": 0,
+    "breve": "¿Pendiente entre (0,1) y (2,5)?",
+    "explicacion": "La pendiente es (5−1)/(2−0), que vale 2."
+  },
+  {
+    "id": "q54",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Rectas",
+    "enunciado": "En y=2x+3, ¿intercepto vertical?",
+    "opciones": [
+      "2",
+      "3",
+      "5"
+    ],
+    "correcta": 1,
+    "breve": "En y=2x+3, ¿intercepto vertical?",
+    "explicacion": "En la ecuación y=mx+b, el término b es la intersección con el eje vertical."
+  },
+  {
+    "id": "q55",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Distancia",
+    "enunciado": "¿Distancia de (0,0) a (3,4)?",
+    "opciones": [
+      "4",
+      "5",
+      "7"
+    ],
+    "correcta": 1,
+    "breve": "¿Distancia de (0,0) a (3,4)?",
+    "explicacion": "La distancia euclidiana es √(3²+4²), igual a 5."
+  },
+  {
+    "id": "q56",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Funciones",
+    "enunciado": "¿Qué valor excluye 1/(x−2)?",
+    "opciones": [
+      "2",
+      "0",
+      "−2"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué valor excluye 1/(x−2)?",
+    "explicacion": "El denominador no puede ser cero, por lo que x=2 queda fuera del dominio."
   }
 ]
