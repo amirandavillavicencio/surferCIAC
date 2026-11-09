@@ -7,7 +7,7 @@ const questions = JSON.parse(readFileSync(new URL('../data/questions.json', impo
 
 test('las 120 preguntas tienen una explicación breve', () => {
   assert.equal(questions.length, 120);
-  assert.equal(Object.keys(EXPLANATIONS).length, questions.length);
+  assert.equal(Object.keys(EXPLANATIONS).length, 24, 'Se conservan las explicaciones originales como respaldo');
   for (const q of questions) {
     const correction = correctionFor(q);
     assert.ok(correction, 'Sin explicación: ' + q.id);
