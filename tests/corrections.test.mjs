@@ -5,8 +5,8 @@ import { correctionFor, EXPLANATIONS } from '../functions/api/_lib/corrections.j
 
 const questions = JSON.parse(readFileSync(new URL('../data/questions.json', import.meta.url), 'utf8'));
 
-test('las 24 preguntas tienen una explicación breve', () => {
-  assert.equal(questions.length, 24);
+test('las 120 preguntas tienen una explicación breve', () => {
+  assert.equal(questions.length, 120);
   assert.equal(Object.keys(EXPLANATIONS).length, questions.length);
   for (const q of questions) {
     const correction = correctionFor(q);
