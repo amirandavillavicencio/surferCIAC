@@ -319,10 +319,24 @@ export class CIACQuiz {
       const reward = shield ? ' · Escudo por 150 m' : bonus ? ' · +100 de carrera' : '';
       const powerText = power ? ` · ${ACADEMIC_POWER_LABELS[power]} ${POWER_TIME[power]} s` : '';
       this.feedback.dataset.correct = String(response.correct);
-      this.feedback.textContent = response.correct
-        ? `¡Correcto! · +${earned} académicos${danger}${powerText}${reward}`
-        : `Incorrecto${danger} · Menor velocidad`;
-      this.feedbackUntil = performance.now() + 2300;
+      if (response.correct) {
+        this.feedback.textContent = `¡Correcto! · +${earned} académicos${danger}${powerText}${reward}`;
+      } else {
+        const correction = response.correction as { letra?: string; texto?: string; explicacion?: string } | null;
+        if (correction && typeof correction.letra === 'string' &&
+            typeof correction.texto === 'string' && typeof correction.explicacion === 'string') {
+          const status = document.createElement('small');
+          status.textContent = `Incorrecto${danger} · Menor velocidad`;
+          const answer = document.createElement('strong');
+          answer.textContent = `Correcta: ${correction.letra} · ${correction.texto}`;
+          const reason = document.createElement('span');
+          reason.textContent = `¿Por qué? ${correction.explicacion}`;
+          this.feedback.replaceChildren(status, answer, reason);
+        } else {
+          this.feedback.textContent = `Incorrecto${danger} · Menor velocidad`;
+        }
+      }
+      this.feedbackUntil = performance.now() + (response.correct ? 2300 : 6000);
       if (!this.question) this.hooks.course.stop(this.hooks.frontier());
     } catch (error) {
       if (serial !== this.runSerial) return;
