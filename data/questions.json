@@ -1078,5 +1078,245 @@
     "correcta": 0,
     "breve": "¿Área con signo bajo velocidad-tiempo?",
     "explicacion": "La integral de velocidad respecto del tiempo entrega el desplazamiento."
+  },
+  {
+    "id": "q73",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de 2x?",
+    "opciones": [
+      "2x²+C",
+      "x²+C",
+      "x+C"
+    ],
+    "correcta": 1,
+    "breve": "¿Integral indefinida de 2x?",
+    "explicacion": "La derivada de x² es 2x; se agrega C como constante de integración."
+  },
+  {
+    "id": "q74",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de 1?",
+    "opciones": [
+      "x+C",
+      "1+C",
+      "x²+C"
+    ],
+    "correcta": 0,
+    "breve": "¿Integral indefinida de 1?",
+    "explicacion": "Como la derivada de x es 1, su primitiva es x+C."
+  },
+  {
+    "id": "q75",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de cos(x)?",
+    "opciones": [
+      "−sen(x)+C",
+      "sen(x)+C",
+      "cos(x)+C"
+    ],
+    "correcta": 1,
+    "breve": "¿Integral indefinida de cos(x)?",
+    "explicacion": "La derivada de sen(x) es cos(x), por eso es su primitiva."
+  },
+  {
+    "id": "q76",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de eˣ?",
+    "opciones": [
+      "eˣ+C",
+      "x·eˣ+C",
+      "ln(x)+C"
+    ],
+    "correcta": 0,
+    "breve": "¿Integral indefinida de eˣ?",
+    "explicacion": "La función eˣ coincide con su derivada, de modo que su primitiva es eˣ+C."
+  },
+  {
+    "id": "q77",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "¿Cuánto vale ∫₀¹ x dx?",
+    "opciones": [
+      "1",
+      "1/2",
+      "2"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale ∫₀¹ x dx?",
+    "explicacion": "Una primitiva es x²/2; al evaluar entre 0 y 1 se obtiene 1/2."
+  },
+  {
+    "id": "q78",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "¿Cuánto vale ∫₀² 2 dx?",
+    "opciones": [
+      "2",
+      "4",
+      "8"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale ∫₀² 2 dx?",
+    "explicacion": "La integral de una constante en un intervalo vale constante por longitud: 2·2=4."
+  },
+  {
+    "id": "q79",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Teorema fundamental",
+    "enunciado": "Derivada de ∫₀ˣ t² dt",
+    "opciones": [
+      "x²",
+      "2x",
+      "x³"
+    ],
+    "correcta": 0,
+    "breve": "Derivada de ∫₀ˣ t² dt",
+    "explicacion": "Por el teorema fundamental, la derivada de la integral acumulada es x²."
+  },
+  {
+    "id": "q80",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Qué representa una integral indefinida?",
+    "opciones": [
+      "Un número fijo",
+      "Una familia de primitivas",
+      "Solo un área positiva"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué representa una integral indefinida?",
+    "explicacion": "Una integral indefinida representa todas las primitivas que difieren en una constante."
+  },
+  {
+    "id": "q81",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "Si f(x)>0 entre a y b, a<b, ¿integral?",
+    "opciones": [
+      "Positiva",
+      "Negativa",
+      "Siempre cero"
+    ],
+    "correcta": 0,
+    "breve": "Si f(x)>0 entre a y b, a<b, ¿integral?",
+    "explicacion": "Una función positiva en todo el intervalo aporta área positiva a su integral."
+  },
+  {
+    "id": "q82",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "¿Qué hace invertir los límites de integración?",
+    "opciones": [
+      "Mantiene el signo",
+      "Cambia el signo",
+      "Duplica el valor"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué hace invertir los límites de integración?",
+    "explicacion": "Al intercambiar los límites de una integral definida se invierte su signo."
+  },
+  {
+    "id": "q83",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Regla de potencias",
+    "enunciado": "¿Integral de xⁿ, n≠−1?",
+    "opciones": [
+      "xⁿ/n+C",
+      "xⁿ⁺¹/(n+1)+C",
+      "n·xⁿ⁻¹+C"
+    ],
+    "correcta": 1,
+    "breve": "¿Integral de xⁿ, n≠−1?",
+    "explicacion": "Se aumenta el exponente en uno y se divide por el nuevo exponente."
+  },
+  {
+    "id": "q84",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Logaritmos",
+    "enunciado": "¿Integral de 1/x, x≠0?",
+    "opciones": [
+      "ln|x|+C",
+      "1/x²+C",
+      "x²/2+C"
+    ],
+    "correcta": 0,
+    "breve": "¿Integral de 1/x, x≠0?",
+    "explicacion": "La derivada de ln|x| es 1/x cuando x es distinto de cero."
+  },
+  {
+    "id": "q85",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Sustitución",
+    "enunciado": "¿Para qué sirve el cambio u=g(x)?",
+    "opciones": [
+      "Simplificar integrales compuestas",
+      "Cambiar su resultado",
+      "Eliminar los límites"
+    ],
+    "correcta": 0,
+    "breve": "¿Para qué sirve el cambio u=g(x)?",
+    "explicacion": "La sustitución transforma una integral compuesta en otra más simple."
+  },
+  {
+    "id": "q86",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integración por partes",
+    "enunciado": "¿Cuál es ∫u dv?",
+    "opciones": [
+      "uv+∫v du",
+      "uv−∫v du",
+      "u·v+C sin integral"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuál es ∫u dv?",
+    "explicacion": "La fórmula por partes se obtiene de integrar la regla del producto."
+  },
+  {
+    "id": "q87",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Derivada de x³/3?",
+    "opciones": [
+      "x²",
+      "x³",
+      "3x²"
+    ],
+    "correcta": 0,
+    "breve": "¿Derivada de x³/3?",
+    "explicacion": "La derivada de x³/3 es (3x²)/3, igual a x²."
+  },
+  {
+    "id": "q88",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Simetría",
+    "enunciado": "¿Cuánto vale ∫₋₁¹ x dx?",
+    "opciones": [
+      "−1",
+      "0",
+      "1"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale ∫₋₁¹ x dx?",
+    "explicacion": "La función x es impar; su integral en un intervalo simétrico vale cero."
   }
 ]
