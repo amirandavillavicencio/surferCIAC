@@ -1,6 +1,6 @@
 import {readFile,writeFile,copyFile,mkdir,cp} from 'node:fs/promises';
 const patch=(s,a,b)=>{if(s.split(a).length!==2)throw Error('Resources anchor: '+a);return s.replace(a,b);};
-for(const name of ['officer-model','chase','guard-view'])await copyFile(`ciac/${name}.ts`,`upstream/src/ciac/${name}.ts`);
+for(const name of ['chase','guard-view'])await copyFile(`ciac/${name}.ts`,`upstream/src/ciac/${name}.ts`);
 await mkdir('upstream/public/licenses',{recursive:true});
 await copyFile('third_party/saurabh-sprint/LICENSE','upstream/public/licenses/saurabh-sprint-LICENSE.txt');
 let config=await readFile('upstream/src/config.ts','utf8');
@@ -21,7 +21,7 @@ await writeFile('upstream/src/ciac/presentation.ts',presentation);
 let world=await readFile('upstream/src/view/world.ts','utf8');
 world="import {GuardView} from '../ciac/guard-view';\n"+world;
 world=patch(world,'export class World {','export class World {\n  readonly guard:GuardView;');
-world=patch(world,'    this.player = new PlayerView(core, s);','    this.player = new PlayerView(core, s);\n    this.guard = new GuardView(s);');
+world=patch(world,'    this.player = new PlayerView(core, s);','    this.player = new PlayerView(core, s);\n    this.guard = new GuardView(s, certamen.scene);');
 world=patch(world,'  resetScenery() {','  resetScenery() {\n    this.guard.reset();');
 await writeFile('upstream/src/view/world.ts',world);
 let audio = await readFile('upstream/src/audio.ts', 'utf8');

@@ -17,7 +17,7 @@ with sync_playwright() as p:
  page.evaluate('''()=>{const r=__run;r.start({noSpawn:true});r.clear();r.clock.reset();for(let i=0;i<600;i++)r.frame(1/60);r.render();}''')
  distant=page.evaluate('({...__run.presentation.chase.current})');assert distant['mode']=='distant' and distant['gap']>9
  page.screenshot(path=str(OUT/'guard-distant.png'))
- first=page.evaluate('''()=>{const r=__run,s=r.sim;r.place('train',2,-2,4);r.input('right');for(let i=0;i<140;i++)r.frame(1/120);r.render();return {state:r.state(),guard:{...r.presentation.chase.current},leftLeg:r.world.guard.actor.officerLeftLeg.rotation.x};}''')
+ first=page.evaluate('''()=>{const r=__run,s=r.sim;r.place('train',2,-2,4);r.input('right');for(let i=0;i<48;i++)r.frame(1/120);r.render();return {state:r.state(),guard:{...r.presentation.chase.current},leftLeg:r.world.guard.root.getObjectByName('Thigh_L').rotation.x};}''')
  assert first['state']['alive'] and first['guard']['mode']=='stumble',first
  page.screenshot(path=str(OUT/'guard-stumble.png'))
  caught=page.evaluate('''()=>{const r=__run;r.input('right');for(let i=0;i<125;i++)r.frame(1/120);r.render();return {state:r.state(),guard:{...r.presentation.chase.current}};}''')
