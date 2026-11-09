@@ -10,11 +10,11 @@ export function decisionSection(start: number, rampLane: number, landingLane: nu
   const exit = start + 85;
   const entryLane = roofFirst ? rampLane : (rampLane + 1 + variant % 2) % 3;
 
-  // In half of the eligible sections, an oncoming train replaces the parked train
+  // In three quarters of eligible sections, an oncoming train replaces the parked train
   // that formerly blocked the third lane. Both playable roof routes, ramps,
   // mandatory action rows and the protected academic corridor stay intact.
   const roofs = roofSection(ramp, rampLane, landingLane, variant, roofFirst);
-  if (start >= 190 && variant % 2 === 0) {
+  if (start >= 190 && variant % 4 !== 3) {
     const thirdLane = 3 - rampLane - landingLane;
     const index = roofs.findIndex(spec => spec.kind === 'train' && spec.lane === thirdLane);
     if (index < 0) throw new Error('Missing third-lane blocking train');
