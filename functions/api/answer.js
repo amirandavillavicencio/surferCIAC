@@ -1,4 +1,5 @@
 import { questionFor, publicQuestion, json, bodyOf } from './_lib/shared.js';
+import { correctionFor } from './_lib/corrections.js';
 
 export async function onRequestPost({ request, env }) {
   if (!env.DB) return json({error:'Falta configurar DB'},503);
@@ -21,5 +22,6 @@ export async function onRequestPost({ request, env }) {
     'UPDATE runs SET asked=?, correct=?, current_id=?, next_answer_at=?, status=? WHERE token=? AND status=? AND current_id=? AND asked=?'
   ).bind(run.asked+1,run.correct+(correct?1:0),next?.id??null,now+3500,nextStatus,run.token,'active',run.current_id,run.asked).run();
   if (result.meta?.changes !== 1) return json({error:'Respuesta duplicada'},409);
-  return json({correct,points:(run.correct+(correct?1:0))*100,question:publicQuestion(next),penaltySeconds:correct?0:3});
+  return json({correct,points:(run.correct+(correct?1:0))*100,question:publicQuestion(next),penaltySeconds:correct?0:3,
+    correction: correct ? null : correctionFor(current)});
 }
