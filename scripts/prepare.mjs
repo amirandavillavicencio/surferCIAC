@@ -143,7 +143,7 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
 const menuTitle = '          <h1 data-k="title"></h1>';
 if (ui.split(menuTitle).length !== 2) throw new Error('No se encontró el título único del menú');
 ui = ui.replace(menuTitle,
-  '          <img class="ciac-brand-logo" src="/assets/ciac-logo.png" alt="CIAC" />\\n' + menuTitle);
+  '          <img class="ciac-brand-logo" src="/assets/ciac-logo.png" alt="CIAC" />\n' + menuTitle);
   const focusPause = "    if (s === 'pause') this.el['btn-resume'].focus({ preventScroll: true });";
   if (ui.split(focusPause).length !== 2) throw new Error('Foco original de pausa cambió');
   await writeFile(uiPath, ui.replace(focusPause, focusPause + `
