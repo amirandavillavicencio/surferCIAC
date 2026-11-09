@@ -4,9 +4,13 @@ export const SEMESTRES = ['Primer semestre', 'Segundo semestre', 'Todos'];
 export function bank(semestre) {
   return semestre === 'Todos' ? questions : questions.filter(q => q.semestre === semestre);
 }
+// La cantidad de preguntas por partida no aumenta al crecer el banco.
+export function questionLimit(semestre) {
+  return semestre === 'Todos' ? 24 : 12;
+}
 export function questionFor(semestre, asked, offset) {
   const list = bank(semestre);
-  if (asked >= list.length) return null;
+  if (asked < 0 || asked >= questionLimit(semestre)) return null;
   return list[(offset + asked) % list.length];
 }
 export function publicQuestion(q) {
