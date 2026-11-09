@@ -52,12 +52,12 @@ test('when reading slots are disabled the generator fills them with playable dec
   }
 });
 
-test('oncoming trains occupy 75% of eligible sections while tutorial stays clear', () => {
+test('oncoming trains occupy five out of six eligible sections while tutorial stays clear', () => {
   const variants = Array.from({ length: 36 }, (_, variant) => variant);
   const moving = variants.filter(variant =>
     decisionSection(300, 0, 1, variant).specs.some(spec => spec.kind === 'mtrain')
   );
-  assert.equal(moving.length, 27);
+  assert.equal(moving.length, 30);
   assert.ok(variants.every(variant =>
     decisionSection(150, 0, 1, variant).specs.every(spec => spec.kind !== 'mtrain')
   ));
