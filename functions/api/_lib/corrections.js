@@ -28,7 +28,7 @@ export const EXPLANATIONS = Object.freeze({
 
 export function correctionFor(question) {
   if (!question || !Array.isArray(question.opciones) || !Number.isInteger(question.correcta)) return null;
-  const explanation = EXPLANATIONS[question.id];
+  const explanation = question.explicacion || EXPLANATIONS[question.id];
   const answer = question.opciones[question.correcta];
   if (!explanation || typeof answer !== 'string' || !['A', 'B', 'C'][question.correcta]) return null;
   return { letra: ['A', 'B', 'C'][question.correcta], texto: answer, explicacion: explanation };

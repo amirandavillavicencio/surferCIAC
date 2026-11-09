@@ -11,7 +11,8 @@
       "Solo si x es 0"
     ],
     "correcta": 1,
-    "breve": "¿sen²x + cos²x depende de x?"
+    "breve": "¿sen²x + cos²x depende de x?",
+    "explicacion": "Es una identidad trigonométrica: sen²x + cos²x = 1 para cualquier x real."
   },
   {
     "id": "q02",
@@ -25,7 +26,8 @@
       "Distancia total"
     ],
     "correcta": 0,
-    "breve": "¿Qué mide una derivada?"
+    "breve": "¿Qué mide una derivada?",
+    "explicacion": "La derivada mide la tasa de cambio de una función en un instante."
   },
   {
     "id": "q03",
@@ -39,7 +41,8 @@
       "Función creciente"
     ],
     "correcta": 2,
-    "breve": "¿Qué indica derivada positiva?"
+    "breve": "¿Qué indica derivada positiva?",
+    "explicacion": "Si la derivada es positiva en un intervalo, la función crece allí."
   },
   {
     "id": "q04",
@@ -53,7 +56,8 @@
       "El área bajo la curva"
     ],
     "correcta": 1,
-    "breve": "¿Qué describe un límite?"
+    "breve": "¿Qué describe un límite?",
+    "explicacion": "Un límite indica el valor al que se aproxima una función al acercarse a un punto."
   },
   {
     "id": "q05",
@@ -67,7 +71,8 @@
       "La hace siempre falsa"
     ],
     "correcta": 0,
-    "breve": "¿Qué hace negar una proposición?"
+    "breve": "¿Qué hace negar una proposición?",
+    "explicacion": "La negación cambia verdadero por falso y falso por verdadero."
   },
   {
     "id": "q06",
@@ -81,7 +86,8 @@
       "Sumar términos"
     ],
     "correcta": 2,
-    "breve": "¿Para qué sirve una sumatoria?"
+    "breve": "¿Para qué sirve una sumatoria?",
+    "explicacion": "La notación Σ representa la suma de los términos indicados."
   },
   {
     "id": "q07",
@@ -95,7 +101,8 @@
       "El módulo"
     ],
     "correcta": 1,
-    "breve": "En a+bi, ¿qué expresa b?"
+    "breve": "En a+bi, ¿qué expresa b?",
+    "explicacion": "En a + bi, b es la parte imaginaria y a es la parte real."
   },
   {
     "id": "q08",
@@ -109,7 +116,8 @@
       "Su punto medio"
     ],
     "correcta": 0,
-    "breve": "¿Qué expresa la pendiente de una recta?"
+    "breve": "¿Qué expresa la pendiente de una recta?",
+    "explicacion": "La pendiente es el cambio vertical dividido por el horizontal (Δy/Δx)."
   },
   {
     "id": "q09",
@@ -123,7 +131,8 @@
       "Módulo y dirección"
     ],
     "correcta": 2,
-    "breve": "¿Qué distingue a un vector?"
+    "breve": "¿Qué distingue a un vector?",
+    "explicacion": "Un vector tiene módulo y dirección; un escalar solo tiene magnitud."
   },
   {
     "id": "q10",
@@ -137,7 +146,8 @@
       "Posición inicial"
     ],
     "correcta": 0,
-    "breve": "¿Qué representa la aceleración?"
+    "breve": "¿Qué representa la aceleración?",
+    "explicacion": "La aceleración mide cuánto cambia la velocidad por unidad de tiempo."
   },
   {
     "id": "q11",
@@ -151,7 +161,8 @@
       "Disminuye siempre"
     ],
     "correcta": 1,
-    "breve": "¿Cómo es la velocidad en MRU?"
+    "breve": "¿Cómo es la velocidad en MRU?",
+    "explicacion": "En movimiento rectilíneo uniforme, la velocidad se mantiene constante."
   },
   {
     "id": "q12",
@@ -165,7 +176,8 @@
       "Es negativo"
     ],
     "correcta": 1,
-    "breve": "Vectores perpendiculares: producto punto"
+    "breve": "Vectores perpendiculares: producto punto",
+    "explicacion": "El producto punto incluye cos 90°, que vale 0."
   },
   {
     "id": "q13",
@@ -179,7 +191,8 @@
       "Velocidad instantánea"
     ],
     "correcta": 1,
-    "breve": "¿Qué mide una integral definida?"
+    "breve": "¿Qué mide una integral definida?",
+    "explicacion": "Una integral definida suma aportes con signo dentro de un intervalo."
   },
   {
     "id": "q14",
@@ -193,7 +206,8 @@
       "Por constantes distintas"
     ],
     "correcta": 2,
-    "breve": "¿Por qué una primitiva incluye +C?"
+    "breve": "¿Por qué una primitiva incluye +C?",
+    "explicacion": "La derivada de una constante es 0, por eso las primitivas incluyen +C."
   },
   {
     "id": "q15",
@@ -207,7 +221,8 @@
       "Solo el valor final"
     ],
     "correcta": 0,
-    "breve": "¿Qué compara la tasa media?"
+    "breve": "¿Qué compara la tasa media?",
+    "explicacion": "La tasa media es Δy/Δx: compara ambos cambios."
   },
   {
     "id": "q16",
@@ -221,7 +236,8 @@
       "Derivadas e integrales"
     ],
     "correcta": 2,
-    "breve": "¿Qué conecta el teorema fundamental?"
+    "breve": "¿Qué conecta el teorema fundamental?",
+    "explicacion": "El teorema fundamental relaciona derivación e integración."
   },
   {
     "id": "q17",
@@ -235,7 +251,8 @@
       "Solo en diagonales"
     ],
     "correcta": 0,
-    "breve": "¿Cómo se organiza una matriz?"
+    "breve": "¿Cómo se organiza una matriz?",
+    "explicacion": "Una matriz ordena elementos en filas horizontales y columnas verticales."
   },
   {
     "id": "q18",
@@ -249,7 +266,8 @@
       "Tiene más columnas"
     ],
     "correcta": 1,
-    "breve": "¿Qué implica determinante cero?"
+    "breve": "¿Qué implica determinante cero?",
+    "explicacion": "Si el determinante de una matriz cuadrada es 0, no tiene inversa."
   },
   {
     "id": "q19",
@@ -263,7 +281,8 @@
       "Vectores enviados a 0"
     ],
     "correcta": 2,
-    "breve": "¿Qué es el núcleo de una transformación?"
+    "breve": "¿Qué es el núcleo de una transformación?",
+    "explicacion": "El núcleo reúne los vectores que se transforman en el vector cero."
   },
   {
     "id": "q20",
@@ -277,7 +296,8 @@
       "Siempre gira 90°"
     ],
     "correcta": 1,
-    "breve": "Al aplicar A, un autovector..."
+    "breve": "Al aplicar A, un autovector...",
+    "explicacion": "Un autovector v cumple Av = λv: se multiplica por su autovalor."
   },
   {
     "id": "q21",
@@ -291,7 +311,8 @@
       "Solo temperatura"
     ],
     "correcta": 0,
-    "breve": "¿De qué depende la energía cinética?"
+    "breve": "¿De qué depende la energía cinética?",
+    "explicacion": "La energía cinética es ½mv²: depende de la masa y de la rapidez."
   },
   {
     "id": "q22",
@@ -305,7 +326,8 @@
       "Masa nueva"
     ],
     "correcta": 1,
-    "breve": "¿Qué produce una fuerza neta?"
+    "breve": "¿Qué produce una fuerza neta?",
+    "explicacion": "Por la segunda ley de Newton, la fuerza neta produce aceleración (F = ma)."
   },
   {
     "id": "q23",
@@ -319,7 +341,8 @@
       "Cambio de momento lineal"
     ],
     "correcta": 2,
-    "breve": "¿Qué describe el impulso?"
+    "breve": "¿Qué describe el impulso?",
+    "explicacion": "El impulso equivale al cambio de momento lineal (J = Δp)."
   },
   {
     "id": "q24",
@@ -333,6 +356,1447 @@
       "Solo de su masa"
     ],
     "correcta": 1,
-    "breve": "Fuerza de resorte ideal: ¿de qué depende?"
+    "breve": "Fuerza de resorte ideal: ¿de qué depende?",
+    "explicacion": "Por la ley de Hooke, la fuerza depende de cuánto se deforma el resorte (F = −kx)."
+  },
+  {
+    "id": "q25",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Límites",
+    "enunciado": "¿Cuánto vale lim(x→2) x²?",
+    "opciones": [
+      "2",
+      "4",
+      "8"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale lim(x→2) x²?",
+    "explicacion": "Al acercarse x a 2, x² se acerca a 4 porque el polinomio es continuo."
+  },
+  {
+    "id": "q41",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuándo es verdadera p ∧ q?",
+    "opciones": [
+      "Si ambas son verdaderas",
+      "Si una es falsa",
+      "Si ambas son falsas"
+    ],
+    "correcta": 0,
+    "breve": "¿Cuándo es verdadera p ∧ q?",
+    "explicacion": "La conjunción p ∧ q exige que las dos proposiciones sean verdaderas."
+  },
+  {
+    "id": "q57",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Magnitudes",
+    "enunciado": "¿Cuál es una magnitud escalar?",
+    "opciones": [
+      "Velocidad",
+      "Masa",
+      "Desplazamiento"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuál es una magnitud escalar?",
+    "explicacion": "La masa tiene magnitud sin dirección; velocidad y desplazamiento son vectores."
+  },
+  {
+    "id": "q73",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de 2x?",
+    "opciones": [
+      "2x²+C",
+      "x²+C",
+      "x+C"
+    ],
+    "correcta": 1,
+    "breve": "¿Integral indefinida de 2x?",
+    "explicacion": "La derivada de x² es 2x; se agrega C como constante de integración."
+  },
+  {
+    "id": "q89",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matrices",
+    "enunciado": "Una matriz 2×3 tiene…",
+    "opciones": [
+      "2 filas y 3 columnas",
+      "3 filas y 2 columnas",
+      "6 filas"
+    ],
+    "correcta": 0,
+    "breve": "Una matriz 2×3 tiene…",
+    "explicacion": "En una matriz m×n, m indica filas y n indica columnas."
+  },
+  {
+    "id": "q105",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Segunda ley de Newton",
+    "enunciado": "Con m=2 kg y a=3 m/s², ¿fuerza neta?",
+    "opciones": [
+      "3 N",
+      "5 N",
+      "6 N"
+    ],
+    "correcta": 2,
+    "breve": "Con m=2 kg y a=3 m/s², ¿fuerza neta?",
+    "explicacion": "La segunda ley de Newton es F=ma, por lo que 2·3=6 N."
+  },
+  {
+    "id": "q26",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Límites",
+    "enunciado": "¿Cuánto vale lim(x→0) sen(x)/x?",
+    "opciones": [
+      "0",
+      "1",
+      "No existe"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale lim(x→0) sen(x)/x?",
+    "explicacion": "El límite notable de sen(x)/x cuando x tiende a 0 es 1, con x en radianes."
+  },
+  {
+    "id": "q42",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuándo es verdadera p ∨ q?",
+    "opciones": [
+      "Solo si ambas son falsas",
+      "Si al menos una es verdadera",
+      "Solo si p es verdadera"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo es verdadera p ∨ q?",
+    "explicacion": "La disyunción inclusiva p ∨ q es verdadera si una o ambas proposiciones son verdaderas."
+  },
+  {
+    "id": "q58",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "¿Módulo del vector (3,4)?",
+    "opciones": [
+      "5",
+      "7",
+      "12"
+    ],
+    "correcta": 0,
+    "breve": "¿Módulo del vector (3,4)?",
+    "explicacion": "En el plano, el módulo se calcula con √(3²+4²), que vale 5."
+  },
+  {
+    "id": "q74",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de 1?",
+    "opciones": [
+      "x+C",
+      "1+C",
+      "x²+C"
+    ],
+    "correcta": 0,
+    "breve": "¿Integral indefinida de 1?",
+    "explicacion": "Como la derivada de x es 1, su primitiva es x+C."
+  },
+  {
+    "id": "q90",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matrices",
+    "enunciado": "¿Cuándo se pueden sumar dos matrices?",
+    "opciones": [
+      "Si tienen igual tamaño",
+      "Si ambas son cuadradas",
+      "Si tienen igual determinante"
+    ],
+    "correcta": 0,
+    "breve": "¿Cuándo se pueden sumar dos matrices?",
+    "explicacion": "La suma de matrices requiere el mismo número de filas y columnas."
+  },
+  {
+    "id": "q106",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Unidades",
+    "enunciado": "¿Qué equivale a un newton?",
+    "opciones": [
+      "kg·m/s²",
+      "kg/s",
+      "J/s"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué equivale a un newton?",
+    "explicacion": "Un newton es la fuerza que acelera 1 kg a 1 m/s²."
+  },
+  {
+    "id": "q27",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de f(x)=x²?",
+    "opciones": [
+      "x",
+      "2x",
+      "x³"
+    ],
+    "correcta": 1,
+    "breve": "¿Derivada de f(x)=x²?",
+    "explicacion": "La regla de la potencia da (x²)' = 2x."
+  },
+  {
+    "id": "q43",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "¿Cuándo es falsa p → q?",
+    "opciones": [
+      "p falsa y q verdadera",
+      "p y q falsas",
+      "p verdadera y q falsa"
+    ],
+    "correcta": 2,
+    "breve": "¿Cuándo es falsa p → q?",
+    "explicacion": "Una implicación solo es falsa cuando el antecedente es verdadero y el consecuente es falso."
+  },
+  {
+    "id": "q59",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Desplazamiento",
+    "enunciado": "¿Cómo se calcula el desplazamiento?",
+    "opciones": [
+      "Posición final menos inicial",
+      "Distancia total",
+      "Rapidez por masa"
+    ],
+    "correcta": 0,
+    "breve": "¿Cómo se calcula el desplazamiento?",
+    "explicacion": "El desplazamiento es el cambio de posición entre el inicio y el final."
+  },
+  {
+    "id": "q75",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de cos(x)?",
+    "opciones": [
+      "−sen(x)+C",
+      "sen(x)+C",
+      "cos(x)+C"
+    ],
+    "correcta": 1,
+    "breve": "¿Integral indefinida de cos(x)?",
+    "explicacion": "La derivada de sen(x) es cos(x), por eso es su primitiva."
+  },
+  {
+    "id": "q91",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Producto matricial",
+    "enunciado": "(2×3) · (3×4) tiene tamaño…",
+    "opciones": [
+      "2×4",
+      "3×3",
+      "4×2"
+    ],
+    "correcta": 0,
+    "breve": "(2×3) · (3×4) tiene tamaño…",
+    "explicacion": "Se igualan las dimensiones interiores y el resultado conserva las exteriores."
+  },
+  {
+    "id": "q107",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Trabajo",
+    "enunciado": "Fuerza paralela de 10 N por 2 m: ¿trabajo?",
+    "opciones": [
+      "5 J",
+      "20 J",
+      "12 J"
+    ],
+    "correcta": 1,
+    "breve": "Fuerza paralela de 10 N por 2 m: ¿trabajo?",
+    "explicacion": "El trabajo de una fuerza constante paralela al movimiento es F·d."
+  },
+  {
+    "id": "q28",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de una constante?",
+    "opciones": [
+      "0",
+      "1",
+      "La constante"
+    ],
+    "correcta": 0,
+    "breve": "¿Derivada de una constante?",
+    "explicacion": "Una constante no cambia cuando varía x, así que su derivada es cero."
+  },
+  {
+    "id": "q44",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Lógica",
+    "enunciado": "Contrapositiva de p → q",
+    "opciones": [
+      "¬q → ¬p",
+      "q → p",
+      "¬p → ¬q"
+    ],
+    "correcta": 0,
+    "breve": "Contrapositiva de p → q",
+    "explicacion": "La contrapositiva invierte y niega ambos extremos: ¬q → ¬p."
+  },
+  {
+    "id": "q60",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Cinemática",
+    "enunciado": "¿Velocidad media en una dimensión?",
+    "opciones": [
+      "Tiempo/posición",
+      "Desplazamiento/tiempo",
+      "Rapidez/masa"
+    ],
+    "correcta": 1,
+    "breve": "¿Velocidad media en una dimensión?",
+    "explicacion": "La velocidad media es el desplazamiento dividido por el intervalo de tiempo."
+  },
+  {
+    "id": "q76",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Integral indefinida de eˣ?",
+    "opciones": [
+      "eˣ+C",
+      "x·eˣ+C",
+      "ln(x)+C"
+    ],
+    "correcta": 0,
+    "breve": "¿Integral indefinida de eˣ?",
+    "explicacion": "La función eˣ coincide con su derivada, de modo que su primitiva es eˣ+C."
+  },
+  {
+    "id": "q92",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matriz identidad",
+    "enunciado": "¿Qué vale A·I, con dimensiones compatibles?",
+    "opciones": [
+      "0",
+      "A",
+      "I"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué vale A·I, con dimensiones compatibles?",
+    "explicacion": "La matriz identidad actúa como el uno en la multiplicación matricial."
+  },
+  {
+    "id": "q108",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Energía cinética",
+    "enunciado": "m=2 kg, v=3 m/s: ¿energía cinética?",
+    "opciones": [
+      "9 J",
+      "6 J",
+      "18 J"
+    ],
+    "correcta": 0,
+    "breve": "m=2 kg, v=3 m/s: ¿energía cinética?",
+    "explicacion": "La energía cinética vale ½mv² = ½·2·3² = 9 J."
+  },
+  {
+    "id": "q29",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de sen(x)?",
+    "opciones": [
+      "−sen(x)",
+      "cos(x)",
+      "1"
+    ],
+    "correcta": 1,
+    "breve": "¿Derivada de sen(x)?",
+    "explicacion": "La derivada de la función seno respecto de x es coseno."
+  },
+  {
+    "id": "q45",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sumatorias",
+    "enunciado": "¿Cuánto suma 1+2+3+4?",
+    "opciones": [
+      "9",
+      "10",
+      "12"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto suma 1+2+3+4?",
+    "explicacion": "Los cuatro primeros enteros positivos suman 10."
+  },
+  {
+    "id": "q61",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Aceleración",
+    "enunciado": "De 5 a 15 m/s en 2 s: ¿aceleración media?",
+    "opciones": [
+      "5 m/s²",
+      "10 m/s²",
+      "20 m/s²"
+    ],
+    "correcta": 0,
+    "breve": "De 5 a 15 m/s en 2 s: ¿aceleración media?",
+    "explicacion": "La aceleración media es (15−5)/2 = 5 m/s²."
+  },
+  {
+    "id": "q77",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "¿Cuánto vale ∫₀¹ x dx?",
+    "opciones": [
+      "1",
+      "1/2",
+      "2"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale ∫₀¹ x dx?",
+    "explicacion": "Una primitiva es x²/2; al evaluar entre 0 y 1 se obtiene 1/2."
+  },
+  {
+    "id": "q93",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "Determinante de [a b; c d]",
+    "opciones": [
+      "ad−bc",
+      "ab−cd",
+      "ac+bd"
+    ],
+    "correcta": 0,
+    "breve": "Determinante de [a b; c d]",
+    "explicacion": "Para una matriz 2×2 se multiplica la diagonal principal y se resta la secundaria."
+  },
+  {
+    "id": "q109",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Energía potencial",
+    "enunciado": "Cerca de la Tierra, energía potencial gravitatoria",
+    "opciones": [
+      "mgh",
+      "½mv²",
+      "ma"
+    ],
+    "correcta": 0,
+    "breve": "Cerca de la Tierra, energía potencial gravitatoria",
+    "explicacion": "La energía potencial gravitatoria respecto de una referencia es U=mgh."
+  },
+  {
+    "id": "q30",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de eˣ?",
+    "opciones": [
+      "eˣ",
+      "x·eˣ",
+      "1/x"
+    ],
+    "correcta": 0,
+    "breve": "¿Derivada de eˣ?",
+    "explicacion": "La función exponencial eˣ es igual a su propia derivada."
+  },
+  {
+    "id": "q46",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sucesiones",
+    "enunciado": "En 3,7,11,15, ¿cuál es la diferencia?",
+    "opciones": [
+      "3",
+      "4",
+      "7"
+    ],
+    "correcta": 1,
+    "breve": "En 3,7,11,15, ¿cuál es la diferencia?",
+    "explicacion": "Cada término supera al anterior en cuatro unidades."
+  },
+  {
+    "id": "q62",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "MRU",
+    "enunciado": "A 4 m/s durante 3 s, ¿cuánto avanza?",
+    "opciones": [
+      "7 m",
+      "12 m",
+      "16 m"
+    ],
+    "correcta": 1,
+    "breve": "A 4 m/s durante 3 s, ¿cuánto avanza?",
+    "explicacion": "En MRU, el desplazamiento es velocidad por tiempo: 4·3=12 m."
+  },
+  {
+    "id": "q78",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "¿Cuánto vale ∫₀² 2 dx?",
+    "opciones": [
+      "2",
+      "4",
+      "8"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale ∫₀² 2 dx?",
+    "explicacion": "La integral de una constante en un intervalo vale constante por longitud: 2·2=4."
+  },
+  {
+    "id": "q94",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "Determinante de [1 2; 3 4]",
+    "opciones": [
+      "2",
+      "−2",
+      "10"
+    ],
+    "correcta": 1,
+    "breve": "Determinante de [1 2; 3 4]",
+    "explicacion": "El determinante es 1·4−2·3=−2."
+  },
+  {
+    "id": "q110",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Potencia",
+    "enunciado": "¿Cómo se define potencia media?",
+    "opciones": [
+      "Trabajo/tiempo",
+      "Fuerza/masa",
+      "Distancia/tiempo"
+    ],
+    "correcta": 0,
+    "breve": "¿Cómo se define potencia media?",
+    "explicacion": "La potencia media es el trabajo realizado dividido por el tiempo empleado."
+  },
+  {
+    "id": "q31",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de ln(x), x>0?",
+    "opciones": [
+      "ln(x)",
+      "x",
+      "1/x"
+    ],
+    "correcta": 2,
+    "breve": "¿Derivada de ln(x), x>0?",
+    "explicacion": "La derivada de ln(x) es 1/x para valores positivos de x."
+  },
+  {
+    "id": "q47",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Sucesiones",
+    "enunciado": "En 2,6,18,54, ¿cuál es la razón?",
+    "opciones": [
+      "2",
+      "3",
+      "6"
+    ],
+    "correcta": 1,
+    "breve": "En 2,6,18,54, ¿cuál es la razón?",
+    "explicacion": "Cada término se obtiene multiplicando el anterior por 3."
+  },
+  {
+    "id": "q63",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Caída libre",
+    "enunciado": "Sin roce del aire, ¿hacia dónde apunta g?",
+    "opciones": [
+      "Hacia arriba",
+      "Horizontal",
+      "Hacia abajo"
+    ],
+    "correcta": 2,
+    "breve": "Sin roce del aire, ¿hacia dónde apunta g?",
+    "explicacion": "Cerca de la superficie terrestre, la aceleración gravitatoria apunta hacia abajo."
+  },
+  {
+    "id": "q79",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Teorema fundamental",
+    "enunciado": "Derivada de ∫₀ˣ t² dt",
+    "opciones": [
+      "x²",
+      "2x",
+      "x³"
+    ],
+    "correcta": 0,
+    "breve": "Derivada de ∫₀ˣ t² dt",
+    "explicacion": "Por el teorema fundamental, la derivada de la integral acumulada es x²."
+  },
+  {
+    "id": "q95",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Inversa",
+    "enunciado": "¿Cuándo es invertible una matriz cuadrada?",
+    "opciones": [
+      "Si det=0",
+      "Si det≠0",
+      "Si tiene ceros"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo es invertible una matriz cuadrada?",
+    "explicacion": "Una matriz cuadrada tiene inversa exactamente cuando su determinante no es cero."
+  },
+  {
+    "id": "q111",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Momento lineal",
+    "enunciado": "¿Expresión del momento lineal?",
+    "opciones": [
+      "mv",
+      "ma",
+      "½mv²"
+    ],
+    "correcta": 0,
+    "breve": "¿Expresión del momento lineal?",
+    "explicacion": "El momento lineal de una partícula es el producto de su masa y velocidad."
+  },
+  {
+    "id": "q32",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Regla de la cadena",
+    "enunciado": "¿Derivada de (x²+1)³?",
+    "opciones": [
+      "3(x²+1)²",
+      "6x(x²+1)²",
+      "x⁶"
+    ],
+    "correcta": 1,
+    "breve": "¿Derivada de (x²+1)³?",
+    "explicacion": "Por regla de la cadena se deriva la potencia y luego el interior, cuya derivada es 2x."
+  },
+  {
+    "id": "q48",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Cuánto vale i²?",
+    "opciones": [
+      "1",
+      "−1",
+      "0"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale i²?",
+    "explicacion": "La unidad imaginaria i se define de modo que i² = −1."
+  },
+  {
+    "id": "q64",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Lanzamiento vertical",
+    "enunciado": "En el punto más alto, ¿velocidad vertical?",
+    "opciones": [
+      "Cero",
+      "Máxima hacia arriba",
+      "Máxima hacia abajo"
+    ],
+    "correcta": 0,
+    "breve": "En el punto más alto, ¿velocidad vertical?",
+    "explicacion": "En el punto máximo de un lanzamiento vertical, la velocidad instantánea es cero."
+  },
+  {
+    "id": "q80",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Qué representa una integral indefinida?",
+    "opciones": [
+      "Un número fijo",
+      "Una familia de primitivas",
+      "Solo un área positiva"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué representa una integral indefinida?",
+    "explicacion": "Una integral indefinida representa todas las primitivas que difieren en una constante."
+  },
+  {
+    "id": "q96",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "Determinante de matriz triangular",
+    "opciones": [
+      "Suma de sus filas",
+      "Producto de diagonal",
+      "Número de columnas"
+    ],
+    "correcta": 1,
+    "breve": "Determinante de matriz triangular",
+    "explicacion": "En una matriz triangular, el determinante es el producto de sus entradas diagonales."
+  },
+  {
+    "id": "q112",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Colisiones",
+    "enunciado": "En un sistema aislado, ¿qué se conserva?",
+    "opciones": [
+      "Velocidad de cada cuerpo",
+      "Momento total",
+      "Energía cinética siempre"
+    ],
+    "correcta": 1,
+    "breve": "En un sistema aislado, ¿qué se conserva?",
+    "explicacion": "Sin fuerza externa neta, el momento lineal total se conserva."
+  },
+  {
+    "id": "q33",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Regla del producto",
+    "enunciado": "¿Derivada de x·sen(x)?",
+    "opciones": [
+      "cos(x)",
+      "x·cos(x)",
+      "sen(x)+x·cos(x)"
+    ],
+    "correcta": 2,
+    "breve": "¿Derivada de x·sen(x)?",
+    "explicacion": "La regla del producto dice (uv)' = u'v + uv'."
+  },
+  {
+    "id": "q49",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Módulo de 3+4i?",
+    "opciones": [
+      "5",
+      "7",
+      "12"
+    ],
+    "correcta": 0,
+    "breve": "¿Módulo de 3+4i?",
+    "explicacion": "El módulo de a+bi es √(a²+b²); para 3+4i da 5."
+  },
+  {
+    "id": "q65",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Producto punto",
+    "enunciado": "¿Producto punto de vectores perpendiculares?",
+    "opciones": [
+      "1",
+      "0",
+      "−1"
+    ],
+    "correcta": 1,
+    "breve": "¿Producto punto de vectores perpendiculares?",
+    "explicacion": "El producto punto incluye el coseno del ángulo, y cos(90°)=0."
+  },
+  {
+    "id": "q81",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "Si f(x)>0 entre a y b, a<b, ¿integral?",
+    "opciones": [
+      "Positiva",
+      "Negativa",
+      "Siempre cero"
+    ],
+    "correcta": 0,
+    "breve": "Si f(x)>0 entre a y b, a<b, ¿integral?",
+    "explicacion": "Una función positiva en todo el intervalo aporta área positiva a su integral."
+  },
+  {
+    "id": "q97",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Autovectores",
+    "enunciado": "¿Puede ser cero un autovector?",
+    "opciones": [
+      "Sí, siempre",
+      "No",
+      "Solo si λ=0"
+    ],
+    "correcta": 1,
+    "breve": "¿Puede ser cero un autovector?",
+    "explicacion": "Por definición, un autovector debe ser distinto del vector cero."
+  },
+  {
+    "id": "q113",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Impulso",
+    "enunciado": "Con fuerza constante, ¿impulso?",
+    "opciones": [
+      "F·Δt",
+      "F/Δt",
+      "F·m"
+    ],
+    "correcta": 0,
+    "breve": "Con fuerza constante, ¿impulso?",
+    "explicacion": "El impulso de una fuerza constante es su producto por la duración de aplicación."
+  },
+  {
+    "id": "q34",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Logaritmos",
+    "enunciado": "¿Dominio real de ln(x)?",
+    "opciones": [
+      "x>0",
+      "x≥0",
+      "Todos los reales"
+    ],
+    "correcta": 0,
+    "breve": "¿Dominio real de ln(x)?",
+    "explicacion": "El logaritmo natural de números reales solo está definido para x positivo."
+  },
+  {
+    "id": "q50",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Números complejos",
+    "enunciado": "¿Conjugado de 2+3i?",
+    "opciones": [
+      "−2−3i",
+      "2−3i",
+      "3+2i"
+    ],
+    "correcta": 1,
+    "breve": "¿Conjugado de 2+3i?",
+    "explicacion": "El conjugado conserva la parte real y cambia el signo de la imaginaria."
+  },
+  {
+    "id": "q66",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "¿Ángulo entre vectores paralelos del mismo sentido?",
+    "opciones": [
+      "0°",
+      "90°",
+      "180°"
+    ],
+    "correcta": 0,
+    "breve": "¿Ángulo entre vectores paralelos del mismo sentido?",
+    "explicacion": "Dos vectores paralelos que apuntan en el mismo sentido forman un ángulo de 0°."
+  },
+  {
+    "id": "q82",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integral definida",
+    "enunciado": "¿Qué hace invertir los límites de integración?",
+    "opciones": [
+      "Mantiene el signo",
+      "Cambia el signo",
+      "Duplica el valor"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué hace invertir los límites de integración?",
+    "explicacion": "Al intercambiar los límites de una integral definida se invierte su signo."
+  },
+  {
+    "id": "q98",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Sistemas lineales",
+    "enunciado": "¿Qué solución siempre tiene Ax=0?",
+    "opciones": [
+      "x=0",
+      "x=1 en cada entrada",
+      "Ninguna"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué solución siempre tiene Ax=0?",
+    "explicacion": "Todo sistema homogéneo tiene como solución al vector cero."
+  },
+  {
+    "id": "q114",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Rozamiento",
+    "enunciado": "¿Hacia dónde apunta el roce cinético?",
+    "opciones": [
+      "En el deslizamiento",
+      "Opuesto al deslizamiento",
+      "Siempre hacia arriba"
+    ],
+    "correcta": 1,
+    "breve": "¿Hacia dónde apunta el roce cinético?",
+    "explicacion": "La fuerza de roce cinético se opone al movimiento relativo de las superficies."
+  },
+  {
+    "id": "q35",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Continuidad",
+    "enunciado": "¿Cuándo es continua f en a?",
+    "opciones": [
+      "Si f(a)=0",
+      "Si lim(x→a)f(x)=f(a)",
+      "Si f'(a)=0"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo es continua f en a?",
+    "explicacion": "La continuidad exige que el límite en a exista y coincida con el valor f(a)."
+  },
+  {
+    "id": "q51",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Valor absoluto",
+    "enunciado": "¿Cuánto vale |−5|?",
+    "opciones": [
+      "−5",
+      "0",
+      "5"
+    ],
+    "correcta": 2,
+    "breve": "¿Cuánto vale |−5|?",
+    "explicacion": "El valor absoluto es la distancia al cero, siempre no negativa."
+  },
+  {
+    "id": "q67",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "¿Suma de dos vectores iguales y opuestos?",
+    "opciones": [
+      "Cero",
+      "El doble de uno",
+      "Siempre positiva"
+    ],
+    "correcta": 0,
+    "breve": "¿Suma de dos vectores iguales y opuestos?",
+    "explicacion": "Los vectores de igual módulo y direcciones opuestas se cancelan."
+  },
+  {
+    "id": "q83",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Regla de potencias",
+    "enunciado": "¿Integral de xⁿ, n≠−1?",
+    "opciones": [
+      "xⁿ/n+C",
+      "xⁿ⁺¹/(n+1)+C",
+      "n·xⁿ⁻¹+C"
+    ],
+    "correcta": 1,
+    "breve": "¿Integral de xⁿ, n≠−1?",
+    "explicacion": "Se aumenta el exponente en uno y se divide por el nuevo exponente."
+  },
+  {
+    "id": "q99",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Independencia lineal",
+    "enunciado": "¿Cuándo son independientes varios vectores?",
+    "opciones": [
+      "Cuando suman cero",
+      "Solo con combinación trivial nula",
+      "Cuando todos son iguales"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo son independientes varios vectores?",
+    "explicacion": "La independencia exige que la combinación lineal cero tenga solo coeficientes cero."
+  },
+  {
+    "id": "q115",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Equilibrio",
+    "enunciado": "Si fuerza neta es cero, ¿aceleración?",
+    "opciones": [
+      "Cero",
+      "Constante distinta de cero",
+      "Siempre aumenta"
+    ],
+    "correcta": 0,
+    "breve": "Si fuerza neta es cero, ¿aceleración?",
+    "explicacion": "Por F=ma, si la fuerza neta es cero y hay masa positiva, la aceleración es cero."
+  },
+  {
+    "id": "q36",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Tangentes",
+    "enunciado": "Si f'(2)=0, ¿cómo es su tangente en x=2?",
+    "opciones": [
+      "Horizontal",
+      "Vertical",
+      "No tiene tangente"
+    ],
+    "correcta": 0,
+    "breve": "Si f'(2)=0, ¿cómo es su tangente en x=2?",
+    "explicacion": "Cuando existe la derivada y vale cero, la recta tangente es horizontal."
+  },
+  {
+    "id": "q52",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Ecuaciones",
+    "enunciado": "¿Soluciones de x²−9=0?",
+    "opciones": [
+      "Solo 3",
+      "−3 y 3",
+      "0 y 9"
+    ],
+    "correcta": 1,
+    "breve": "¿Soluciones de x²−9=0?",
+    "explicacion": "La igualdad x²=9 se cumple para x=3 y x=−3."
+  },
+  {
+    "id": "q68",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Aceleración",
+    "enunciado": "De 2 a 6 m/s en 4 s: ¿aceleración media?",
+    "opciones": [
+      "1 m/s²",
+      "2 m/s²",
+      "4 m/s²"
+    ],
+    "correcta": 0,
+    "breve": "De 2 a 6 m/s en 4 s: ¿aceleración media?",
+    "explicacion": "La aceleración media es (6−2)/4 = 1 m/s²."
+  },
+  {
+    "id": "q84",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Logaritmos",
+    "enunciado": "¿Integral de 1/x, x≠0?",
+    "opciones": [
+      "ln|x|+C",
+      "1/x²+C",
+      "x²/2+C"
+    ],
+    "correcta": 0,
+    "breve": "¿Integral de 1/x, x≠0?",
+    "explicacion": "La derivada de ln|x| es 1/x cuando x es distinto de cero."
+  },
+  {
+    "id": "q100",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Espacios vectoriales",
+    "enunciado": "¿Dimensión de ℝ³?",
+    "opciones": [
+      "2",
+      "3",
+      "4"
+    ],
+    "correcta": 1,
+    "breve": "¿Dimensión de ℝ³?",
+    "explicacion": "El espacio ℝ³ tiene una base de tres vectores linealmente independientes."
+  },
+  {
+    "id": "q116",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Tercera ley",
+    "enunciado": "Acción y reacción actúan…",
+    "opciones": [
+      "Sobre el mismo cuerpo",
+      "Sobre cuerpos diferentes",
+      "Solo si hay movimiento"
+    ],
+    "correcta": 1,
+    "breve": "Acción y reacción actúan…",
+    "explicacion": "Las fuerzas de acción y reacción tienen igual módulo y actúan en cuerpos distintos."
+  },
+  {
+    "id": "q37",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Pendiente de la tangente en x=a?",
+    "opciones": [
+      "f(a)",
+      "f'(a)",
+      "f''(a)"
+    ],
+    "correcta": 1,
+    "breve": "¿Pendiente de la tangente en x=a?",
+    "explicacion": "La derivada evaluada en a entrega la pendiente de la recta tangente."
+  },
+  {
+    "id": "q53",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Rectas",
+    "enunciado": "¿Pendiente entre (0,1) y (2,5)?",
+    "opciones": [
+      "2",
+      "3",
+      "4"
+    ],
+    "correcta": 0,
+    "breve": "¿Pendiente entre (0,1) y (2,5)?",
+    "explicacion": "La pendiente es (5−1)/(2−0), que vale 2."
+  },
+  {
+    "id": "q69",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Rapidez",
+    "enunciado": "¿Qué es la rapidez instantánea?",
+    "opciones": [
+      "El módulo de la velocidad",
+      "La aceleración",
+      "La posición"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué es la rapidez instantánea?",
+    "explicacion": "La rapidez es una magnitud escalar igual al módulo del vector velocidad."
+  },
+  {
+    "id": "q85",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Sustitución",
+    "enunciado": "¿Para qué sirve el cambio u=g(x)?",
+    "opciones": [
+      "Simplificar integrales compuestas",
+      "Cambiar su resultado",
+      "Eliminar los límites"
+    ],
+    "correcta": 0,
+    "breve": "¿Para qué sirve el cambio u=g(x)?",
+    "explicacion": "La sustitución transforma una integral compuesta en otra más simple."
+  },
+  {
+    "id": "q101",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Rango",
+    "enunciado": "¿Qué cuenta el rango de una matriz?",
+    "opciones": [
+      "Pivotes",
+      "Columnas necesariamente",
+      "Autovalores siempre"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué cuenta el rango de una matriz?",
+    "explicacion": "El rango es la cantidad de pivotes en una forma escalonada."
+  },
+  {
+    "id": "q117",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Ley de Hooke",
+    "enunciado": "¿Módulo de fuerza elástica ideal?",
+    "opciones": [
+      "k·|x|",
+      "m·v",
+      "m·g"
+    ],
+    "correcta": 0,
+    "breve": "¿Módulo de fuerza elástica ideal?",
+    "explicacion": "La ley de Hooke establece que la fuerza recuperadora tiene módulo k·|x|."
+  },
+  {
+    "id": "q38",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de 1/x, x≠0?",
+    "opciones": [
+      "1/x²",
+      "−1/x²",
+      "−x²"
+    ],
+    "correcta": 1,
+    "breve": "¿Derivada de 1/x, x≠0?",
+    "explicacion": "Como 1/x=x⁻¹, la regla de la potencia produce −x⁻²."
+  },
+  {
+    "id": "q54",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Rectas",
+    "enunciado": "En y=2x+3, ¿intercepto vertical?",
+    "opciones": [
+      "2",
+      "3",
+      "5"
+    ],
+    "correcta": 1,
+    "breve": "En y=2x+3, ¿intercepto vertical?",
+    "explicacion": "En la ecuación y=mx+b, el término b es la intersección con el eje vertical."
+  },
+  {
+    "id": "q70",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Unidades",
+    "enunciado": "¿Unidad SI de aceleración?",
+    "opciones": [
+      "m/s",
+      "m/s²",
+      "kg·m"
+    ],
+    "correcta": 1,
+    "breve": "¿Unidad SI de aceleración?",
+    "explicacion": "La aceleración cambia la velocidad por unidad de tiempo, y se mide en m/s²."
+  },
+  {
+    "id": "q86",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Integración por partes",
+    "enunciado": "¿Cuál es ∫u dv?",
+    "opciones": [
+      "uv+∫v du",
+      "uv−∫v du",
+      "u·v+C sin integral"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuál es ∫u dv?",
+    "explicacion": "La fórmula por partes se obtiene de integrar la regla del producto."
+  },
+  {
+    "id": "q102",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Transpuesta",
+    "enunciado": "¿Qué hace transponer una matriz?",
+    "opciones": [
+      "Cambiar filas por columnas",
+      "Cambiar todos los signos",
+      "Calcular la inversa"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué hace transponer una matriz?",
+    "explicacion": "La transpuesta intercambia la posición de filas y columnas."
+  },
+  {
+    "id": "q118",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Oscilaciones",
+    "enunciado": "En un resorte ideal, si aumenta la masa…",
+    "opciones": [
+      "Aumenta el período",
+      "Disminuye el período",
+      "No cambia el período"
+    ],
+    "correcta": 0,
+    "breve": "En un resorte ideal, si aumenta la masa…",
+    "explicacion": "El período es T=2π√(m/k); al crecer m y mantener k, crece T."
+  },
+  {
+    "id": "q39",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Teorema del valor medio",
+    "enunciado": "¿Qué exige el teorema del valor medio?",
+    "opciones": [
+      "Solo f(a)=f(b)",
+      "Continuidad y derivabilidad",
+      "Solo f'(a)=0"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué exige el teorema del valor medio?",
+    "explicacion": "Se necesita continuidad en el intervalo cerrado y derivabilidad en su interior."
+  },
+  {
+    "id": "q55",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Distancia",
+    "enunciado": "¿Distancia de (0,0) a (3,4)?",
+    "opciones": [
+      "4",
+      "5",
+      "7"
+    ],
+    "correcta": 1,
+    "breve": "¿Distancia de (0,0) a (3,4)?",
+    "explicacion": "La distancia euclidiana es √(3²+4²), igual a 5."
+  },
+  {
+    "id": "q71",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Gráficos",
+    "enunciado": "¿Qué indica la pendiente en posición-tiempo?",
+    "opciones": [
+      "Aceleración",
+      "Velocidad",
+      "Fuerza"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué indica la pendiente en posición-tiempo?",
+    "explicacion": "La pendiente de la gráfica de posición respecto del tiempo representa velocidad."
+  },
+  {
+    "id": "q87",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Primitivas",
+    "enunciado": "¿Derivada de x³/3?",
+    "opciones": [
+      "x²",
+      "x³",
+      "3x²"
+    ],
+    "correcta": 0,
+    "breve": "¿Derivada de x³/3?",
+    "explicacion": "La derivada de x³/3 es (3x²)/3, igual a x²."
+  },
+  {
+    "id": "q103",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Traza",
+    "enunciado": "¿Qué suma la traza de una matriz cuadrada?",
+    "opciones": [
+      "Columna uno",
+      "Diagonal principal",
+      "Todos los elementos"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué suma la traza de una matriz cuadrada?",
+    "explicacion": "La traza es la suma de las entradas de la diagonal principal."
+  },
+  {
+    "id": "q119",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Peso",
+    "enunciado": "¿Expresión del peso cerca de la Tierra?",
+    "opciones": [
+      "m/g",
+      "mg",
+      "mv"
+    ],
+    "correcta": 1,
+    "breve": "¿Expresión del peso cerca de la Tierra?",
+    "explicacion": "El módulo del peso es el producto de la masa por la gravedad local."
+  },
+  {
+    "id": "q40",
+    "curso": "MAT070",
+    "semestre": "Primer semestre",
+    "tema": "Derivadas",
+    "enunciado": "¿Derivada de cos(x)?",
+    "opciones": [
+      "sen(x)",
+      "−sen(x)",
+      "−cos(x)"
+    ],
+    "correcta": 1,
+    "breve": "¿Derivada de cos(x)?",
+    "explicacion": "La derivada de cos(x) es −sen(x)."
+  },
+  {
+    "id": "q56",
+    "curso": "MAT060",
+    "semestre": "Primer semestre",
+    "tema": "Funciones",
+    "enunciado": "¿Qué valor excluye 1/(x−2)?",
+    "opciones": [
+      "2",
+      "0",
+      "−2"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué valor excluye 1/(x−2)?",
+    "explicacion": "El denominador no puede ser cero, por lo que x=2 queda fuera del dominio."
+  },
+  {
+    "id": "q72",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Gráficos",
+    "enunciado": "¿Área con signo bajo velocidad-tiempo?",
+    "opciones": [
+      "Desplazamiento",
+      "Aceleración",
+      "Masa"
+    ],
+    "correcta": 0,
+    "breve": "¿Área con signo bajo velocidad-tiempo?",
+    "explicacion": "La integral de velocidad respecto del tiempo entrega el desplazamiento."
+  },
+  {
+    "id": "q88",
+    "curso": "MAT071",
+    "semestre": "Segundo semestre",
+    "tema": "Simetría",
+    "enunciado": "¿Cuánto vale ∫₋₁¹ x dx?",
+    "opciones": [
+      "−1",
+      "0",
+      "1"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuánto vale ∫₋₁¹ x dx?",
+    "explicacion": "La función x es impar; su integral en un intervalo simétrico vale cero."
+  },
+  {
+    "id": "q104",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Rango",
+    "enunciado": "¿Rango de una matriz completamente nula?",
+    "opciones": [
+      "0",
+      "1",
+      "Su número de filas"
+    ],
+    "correcta": 0,
+    "breve": "¿Rango de una matriz completamente nula?",
+    "explicacion": "Una matriz cuyos elementos son cero no tiene pivotes: su rango es cero."
+  },
+  {
+    "id": "q120",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Conservación de energía",
+    "enunciado": "Sin trabajo no conservativo, ¿qué se conserva?",
+    "opciones": [
+      "Energía mecánica",
+      "Rapidez siempre",
+      "Altura siempre"
+    ],
+    "correcta": 0,
+    "breve": "Sin trabajo no conservativo, ¿qué se conserva?",
+    "explicacion": "Si solo actúan fuerzas conservativas, la energía cinética más potencial se mantiene."
   }
 ]
