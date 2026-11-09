@@ -4,6 +4,8 @@
 .ciac-ranking{display:flex;flex-direction:column;gap:5px;font-size:12px;max-height:145px;overflow-y:auto;text-align:left}
 .ciac-ranking>strong{font-size:14px}
 .ciac-ranking>div{display:flex;justify-content:space-between;gap:12px}
+.ciac-ranking>div>span{min-width:0;overflow-wrap:anywhere}
+.ciac-ranking>div>b{flex-shrink:0}
 .ciac-dialog{position:absolute;z-index:12;left:50%;bottom:calc(10vh + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(650px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:16px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-align:center;pointer-events:auto}
 .ciac-question{display:block;font-size:clamp(17px,4.6vw,23px);margin-bottom:14px}
 .ciac-lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}

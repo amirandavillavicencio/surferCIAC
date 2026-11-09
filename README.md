@@ -15,14 +15,40 @@ Esta rama contiene la integración CIAC propia, no una versión jugable desplega
 - Respuesta correcta: suma 100 puntos académicos y desbloquea el siguiente tramo de 150 metros. Respuesta incorrecta: retrasa la carrera 3 segundos sin cerrar la partida ni sumar puntos; luego continúa con la siguiente pregunta.
 - Ranking de mejores puntajes, asociado al nombre público elegido por el jugador, con almacenamiento D1.
 - Comprobación de respuestas **en servidor** (las claves no se envían al navegador). El puntaje original de distancia/monedas se conserva en el juego, pero el ranking global solo usa los puntos académicos comprobados en servidor.
-- Moderación de nombres con `@2toad/profanity` en español e inglés y, opcionalmente, Llama Guard 3 en Cloudflare Workers AI. Los filtros no son infalibles.
+- Los nombres se guardan sin censura automática de palabras ni revisión con IA. El equipo revisa los resultados antes de publicarlos manualmente.
 - No se solicitan ni guardan RUT, correo o matrícula.
+
+
+## Publicación manual del ranking (una vez al día)
+
+Los puntajes se registran en `scores` al terminar cada partida, pero el ranking general y el semanal **solo muestran filas con `published_at` informado**. Ningún resultado nuevo se publica por sí mismo. Los nombres admiten cualquier texto visible, incluidos acentos, signos y emojis; los caracteres de control e invisibles se limpian al guardar. Se mantiene la comprobación de respuestas y el cálculo de puntaje en el servidor.
+
+Para activar este comportamiento en una base existente hay que ejecutar una sola vez `migrations/0002_manual_ranking.sql` en Cloudflare D1 **antes de desplegar el código modificado**. Esta migración conserva todos los puntajes existentes y los deja pendientes de publicación hasta la primera revisión.
+
+Cada día el equipo revisa los pendientes en la consola SQL de la base D1:
+
+```sql
+SELECT run_token, display_name, semestre, score, correct, created_at
+FROM scores
+WHERE published_at IS NULL
+ORDER BY created_at ASC;
+```
+
+Después de revisar la lista, puede publicarlos con esta instrucción **manual**, que no se programa ni se ejecuta automáticamente:
+
+```sql
+UPDATE scores
+SET published_at = unixepoch('now') * 1000
+WHERE published_at IS NULL;
+```
+
+Si un registro no debe hacerse público, se deja pendiente y se publica exclusivamente el conjunto aprobado mediante una condición `WHERE` que identifique sus `run_token`. Evitar ejecutar la actualización general cuando existan nombres o puntajes no revisados. La publicación diaria agrega los nuevos resultados autorizados sin modificar los puntajes, la clasificación semanal ni la clasificación histórica. Los datos de la semana anterior ya no aparecen en el ranking semanal al comenzar una nueva semana, aunque continúan en el general.
 
 ## Competencia semanal: kit de premio
 
 La pantalla de inicio anuncia: **«El ganador de la semana se lleva un kit de premio.»**
 
-El ranking semanal se calcula con los puntajes académicos guardados en Cloudflare D1 desde el **lunes a las 00:00 hasta el domingo a las 23:59 (hora de Santiago de Chile)**. El cálculo del límite semanal contempla los cambios de hora de Chile. La ruta `GET /api/leaderboard?periodo=semana` devuelve los 10 mejores puntajes de la semana; la pantalla muestra los primeros cinco. El ranking histórico sigue disponible en `GET /api/leaderboard`.
+El ranking semanal se calcula solo con los puntajes académicos publicados manualmente desde Cloudflare D1, obtenidos entre el **lunes a las 00:00 y el domingo a las 23:59 (hora de Santiago de Chile)**. El cálculo del límite semanal contempla los cambios de hora de Chile. La ruta `GET /api/leaderboard?periodo=semana` devuelve los 10 mejores puntajes de la semana; la pantalla muestra los primeros cinco. El ranking histórico sigue disponible en `GET /api/leaderboard`.
 
 Orden: mayor puntaje y, en caso de empate, el puntaje registrado primero. La cabecera del ranking muestra las fechas exactas de la semana. El líder **no es automáticamente declarado ganador**: los puntajes y la identidad de quien recibirá el premio deben revisarse manualmente al terminar la semana. No se ha conectado un sistema de entrega ni de notificación de ganadores. No se almacena identidad real ni datos de contacto.
 
@@ -57,9 +83,9 @@ El script inserta el módulo educativo en `upstream/src/main.ts` del árbol de t
 
 ## Cloudflare Pages + D1
 
-1. Crear una base D1 y aplicar `migrations/0001_init.sql`.
+1. Crear una base D1 y aplicar `migrations/0001_init.sql` y después `migrations/0002_manual_ranking.sql`. Las bases ya existentes aplican únicamente la segunda migración.
 2. Conectar la base al proyecto Pages con nombre de binding **DB**.
-3. Opcionalmente, agregar un binding Workers AI con nombre **AI** para el control adicional de nombres.
+3. Los nombres se guardan sin filtro de palabras ni IA y quedan pendientes de revisión hasta la publicación manual.
 4. Una vez aclarada la licencia, configurar la compilación con `npm run build`, salida `dist` y la variable `UPSTREAM_PERMISSION_GRANTED=1`. Verificar que el entorno de compilación haya descargado el submódulo `upstream/`.
 5. Las rutas `/api/start`, `/api/answer`, `/api/finish` y `/api/leaderboard` son Pages Functions. No funcionan si solo se abre el HTML como archivo local.
 

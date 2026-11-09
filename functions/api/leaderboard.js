@@ -12,8 +12,8 @@ export async function onRequestGet({ request, env }) {
   if (periodo === 'semana') {
     const semana = currentChileWeek();
     const sql = semestre === 'Todos'
-      ? 'SELECT display_name AS name, semestre, score FROM scores WHERE created_at >= ? AND created_at < ? ORDER BY score DESC, created_at ASC, run_token ASC LIMIT 10'
-      : 'SELECT display_name AS name, semestre, score FROM scores WHERE created_at >= ? AND created_at < ? AND semestre=? ORDER BY score DESC, created_at ASC, run_token ASC LIMIT 10';
+      ? 'SELECT display_name AS name, semestre, score FROM scores WHERE published_at IS NOT NULL AND created_at >= ? AND created_at < ? ORDER BY score DESC, created_at ASC, run_token ASC LIMIT 10'
+      : 'SELECT display_name AS name, semestre, score FROM scores WHERE published_at IS NOT NULL AND created_at >= ? AND created_at < ? AND semestre=? ORDER BY score DESC, created_at ASC, run_token ASC LIMIT 10';
     const query = env.DB.prepare(sql);
     const r = semestre === 'Todos'
       ? await query.bind(semana.inicio, semana.finExclusivo).all()
@@ -24,8 +24,8 @@ export async function onRequestGet({ request, env }) {
   }
 
   const sql = semestre === 'Todos'
-    ? 'SELECT display_name AS name, semestre, score FROM scores ORDER BY score DESC, created_at ASC LIMIT 10'
-    : 'SELECT display_name AS name, semestre, score FROM scores WHERE semestre=? ORDER BY score DESC, created_at ASC LIMIT 10';
+    ? 'SELECT display_name AS name, semestre, score FROM scores WHERE published_at IS NOT NULL ORDER BY score DESC, created_at ASC LIMIT 10'
+    : 'SELECT display_name AS name, semestre, score FROM scores WHERE published_at IS NOT NULL AND semestre=? ORDER BY score DESC, created_at ASC LIMIT 10';
   const r = semestre === 'Todos' ? await env.DB.prepare(sql).all() : await env.DB.prepare(sql).bind(semestre).all();
   return json({ranking:r.results||[]});
 }

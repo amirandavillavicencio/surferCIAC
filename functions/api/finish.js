@@ -8,7 +8,7 @@ export async function onRequestPost({request,env}) {
   if (typeof input?.token !== 'string' || input.token.length > 100) return json({error:'Partida inválida'},400);
   const run = await env.DB.prepare('SELECT * FROM runs WHERE token=?').bind(input.token).first();
   if (!run) return json({error:'No se encontró la partida'},404);
-  const nameCheck = await validateName(input.name,env);
+  const nameCheck = await validateName(input.name);
   if (!nameCheck.ok) return json({error:nameCheck.error},422);
   const existing = await env.DB.prepare('SELECT display_name, score FROM scores WHERE run_token=?').bind(run.token).first();
   if (existing) return json({name:existing.display_name,points:existing.score,alreadySaved:true});
