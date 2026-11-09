@@ -215,3 +215,5 @@ await import("./resource-integration.mjs");
 await import('./visual-finish.mjs');
 
 await import('./skater.mjs');
+
+await import('./certamen.mjs');

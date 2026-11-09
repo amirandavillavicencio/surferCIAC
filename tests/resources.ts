@@ -81,11 +81,13 @@ test('Kenney train meshes fit the collision envelope and have a walkable coach r
 });
 
 
-test('guard rendering stays small near the camera without changing pursuit state',()=>{
+test('guard rendering stays small near the camera without changing pursuit state',async()=>{
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(76,390/844,.3,260);
   camera.position.set(0,4.25,7.8);
-  const guard=new GuardView(scene);
+  const bytes = readFileSync('art/certamen/certamen.glb');
+  const asset = await new GLTFLoader().parseAsync(Uint8Array.from(bytes).buffer, '');
+  const guard = new GuardView(scene, asset.scene);
   const sim=new Sim();sim.noSpawn=true;sim.reset(1,false);sim.clearWorld();sim.start();
   const chase=new ChaseState();sim.update(1/120);chase.observe(sim,1/120,sim.drainEvents());
   const before={mode:chase.current.mode,gap:chase.current.gap,danger:chase.danger};
