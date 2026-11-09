@@ -29,10 +29,10 @@ export class CampusRunner {
   constructor(
     private readonly holder: THREE.Object3D,
     source: THREE.Object3D,
-    private readonly skater: THREE.Object3D,
+    private readonly runner: THREE.Object3D,
   ) {
-    skater.scale.setScalar(0.48);
-    holder.add(skater);
+    runner.scale.setScalar(0.48);
+    holder.add(runner);
     holder.updateWorldMatrix(true, true);
 
     const sourceBones = new Map<string, THREE.Bone>();
@@ -43,7 +43,7 @@ export class CampusRunner {
       if ((node as THREE.Mesh).isMesh) node.visible = false;
     });
     const inverseFrame = holder.getWorldQuaternion(this.inverseFrame).invert();
-    skater.traverse(target => {
+    runner.traverse(target => {
       if (!(target instanceof THREE.Bone)) return;
       const sourceName = jointNames[target.name] ?? target.name;
       const driver = sourceBones.get(sourceName);
@@ -57,14 +57,18 @@ export class CampusRunner {
     });
 
     const hips = this.joints.find(joint => joint.target.name === 'Hips');
-    if (!hips) throw new Error('El Skater requiere una articulación de cadera');
+    if (!hips) throw new Error('El protagonista requiere una articulación de cadera');
     this.sourceHip = hips.source;
     this.targetHip = hips.target;
     this.sourceHipRest = holder.worldToLocal(this.sourceHip.getWorldPosition(new THREE.Vector3()));
     this.targetHipRest = holder.worldToLocal(this.targetHip.getWorldPosition(new THREE.Vector3()));
 
-    const mesh = skater.getObjectByProperty('isSkinnedMesh', true) as THREE.SkinnedMesh;
+    const mesh = runner.getObjectByProperty('isSkinnedMesh', true) as THREE.SkinnedMesh;
     this.mesh = mesh;
+    if (mesh.material instanceof THREE.MeshLambertMaterial &&
+        !mesh.material.map && mesh.geometry.hasAttribute('color')) {
+      mesh.material.vertexColors = true;
+    }
     mesh.castShadow = true;
     mesh.frustumCulled = false;
     const positions = mesh.geometry.getAttribute('position');
@@ -75,8 +79,8 @@ export class CampusRunner {
   }
 
   update(supportY: number) {
-    const { holder, skater, point, mesh } = this;
-    skater.position.set(0, 0, 0);
+    const { holder, runner, point, mesh } = this;
+    runner.position.set(0, 0, 0);
     holder.updateWorldMatrix(true, true);
     holder.getWorldQuaternion(this.frame);
     this.inverseFrame.copy(this.frame).invert();
@@ -96,19 +100,19 @@ export class CampusRunner {
       target.updateWorldMatrix(false, false);
     }
 
-    skater.updateMatrixWorld(true);
+    runner.updateMatrixWorld(true);
     let lowest = Infinity;
     const positions = mesh.geometry.getAttribute('position');
     for (const index of this.soles) {
       point.fromBufferAttribute(positions, index);
-      mesh.boneTransform(index, point);
+      mesh.applyBoneTransform(index, point);
       lowest = Math.min(lowest, mesh.localToWorld(point).y);
     }
     if (lowest < supportY) {
       // Apply contact only to the rendered model, in world vertical.
-      point.setFromMatrixPosition(skater.matrixWorld);
+      point.setFromMatrixPosition(runner.matrixWorld);
       point.y += supportY - lowest;
-      skater.position.copy(holder.worldToLocal(point));
+      runner.position.copy(holder.worldToLocal(point));
     }
   }
 }
