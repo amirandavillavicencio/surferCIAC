@@ -51,3 +51,21 @@ test('when reading slots are disabled the generator fills them with playable dec
     assert.ok(verifyDecisionRun(seed, 4000, false, false, false).roofJumps >= 20);
   }
 });
+
+test('oncoming trains occupy 75% of eligible sections while tutorial stays clear', () => {
+  const variants = Array.from({ length: 36 }, (_, variant) => variant);
+  const moving = variants.filter(variant =>
+    decisionSection(300, 0, 1, variant).specs.some(spec => spec.kind === 'mtrain')
+  );
+  assert.equal(moving.length, 27);
+  assert.ok(variants.every(variant =>
+    decisionSection(150, 0, 1, variant).specs.every(spec => spec.kind !== 'mtrain')
+  ));
+  for (const variant of moving) {
+    const specs = decisionSection(300, 0, 1, variant).specs;
+    assert.equal(specs.filter(spec => spec.kind === 'mtrain').length, 1);
+    assert.ok(specs.some(spec => spec.kind === 'ramp'));
+    assert.ok(specs.some(spec => spec.kind === 'train' && spec.lane === 0));
+    assert.ok(specs.some(spec => spec.kind === 'train' && spec.lane === 1));
+  }
+});
