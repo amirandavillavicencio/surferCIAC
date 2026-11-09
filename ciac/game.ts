@@ -161,7 +161,7 @@ export class CIACQuiz {
     if(display===this.lastDanger)return;
     this.lastDanger=display;
     this.dangerHUD.hidden=level===0&&!shield;
-    this.dangerHUD.textContent=[level?'Guardia · '+level+'/4':'',shield?'Escudo activo':''].filter(Boolean).join(' · ');
+    this.dangerHUD.textContent=[level?'Certamen · '+level+'/4':'',shield?'Escudo activo':''].filter(Boolean).join(' · ');
     this.dangerHUD.setAttribute('data-danger',String(level));
   }
 
@@ -309,7 +309,7 @@ export class CIACQuiz {
         this.hooks.sound(shield ? 'shield' : 'bonus', .24);
       }
       if (!response.correct) this.hooks.penalize(Number(response.penaltySeconds) || 3);
-      const danger = change ? ` · Guardia ${change > 0 ? '+' : '−'}${Math.abs(change)}` : '';
+      const danger = change ? ` · Certamen ${change > 0 ? '+' : '−'}${Math.abs(change)}` : '';
       const reward = shield ? ' · Escudo por 150 m' : bonus ? ' · +100 de carrera' : '';
       const powerText = power ? ` · ${ACADEMIC_POWER_LABELS[power]} ${POWER_TIME[power]} s` : '';
       this.feedback.dataset.correct = String(response.correct);
@@ -329,7 +329,7 @@ export class CIACQuiz {
   }
 
   endRun(distance:number, score:number, caught:boolean) {
-    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el guardia':'Choque con un obstáculo'}`;
+    this.summary.textContent=`${Math.floor(distance)} m · ${score} puntos de carrera · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
     const progress = this.missions.progress;
     const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
     const missions = document.createElement('small');
