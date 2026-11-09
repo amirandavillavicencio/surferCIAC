@@ -29,6 +29,20 @@ async function api(path: string, body?: object): Promise<any> {
   return data;
 }
 
+// Ranking de muestra: se muestra en la portada, sin escribir en D1 ni consultar la API.
+export const STATIC_RANKING = [
+  { name: 'Emilia Rojas', score: 500 },
+  { name: 'Matías Araya', score: 500 },
+  { name: 'Antonia Mella', score: 400 },
+  { name: 'Diego Carrasco', score: 400 },
+  { name: 'Javiera Tapia', score: 300 },
+  { name: 'Benjamín Soto', score: 300 },
+  { name: 'Catalina Muñoz', score: 200 },
+  { name: 'Vicente Fuentes', score: 200 },
+  { name: 'Florencia Olivares', score: 100 },
+  { name: 'Tomás Pizarro', score: 100 },
+] as const;
+
 export class CIACQuiz {
   private missions = new RunMissions();
   private missionHUD: HTMLDivElement;
@@ -409,60 +423,34 @@ export class CIACQuiz {
     }
   }
 
-  private async refreshRanking() {
-    try {
-      const result = await api('leaderboard?periodo=semana');
-      const content = document.createDocumentFragment();
-      if (result.semana) {
-        const period = document.createElement('small');
-        const shortDate = (date: string) => date.split('-').reverse().slice(0, 2).join('/');
-        period.textContent = shortDate(result.semana.desde) + ' al ' + shortDate(result.semana.hasta);
-        content.append(period);
-      }
+  private refreshRanking() {
+    const content = document.createDocumentFragment();
+    const label = document.createElement('small');
+    label.textContent = 'Ranking de muestra · Puntajes ficticios';
+    content.append(label);
 
-      const rows = (result.ranking as Array<{name:string;score:number}>).slice(0,10);
-      if (rows.length === 0) {
-        const empty = document.createElement('p');
-        empty.textContent = 'Todavía no hay puntajes publicados.';
-        content.append(empty);
-      } else {
-        const list = document.createElement('ol');
-        list.className = 'ciac-ranking-list';
-        list.setAttribute('role', 'list');
-        for (const [index, row] of rows.entries()) {
-          const line = document.createElement('li');
-          const position = document.createElement('span');
-          position.className = 'ciac-ranking-position';
-          position.setAttribute('aria-label', 'Puesto ' + (index + 1));
-          position.textContent = String(index + 1);
-          const name = document.createElement('span');
-          name.className = 'ciac-ranking-name';
-          name.textContent = row.name;
-          const score = document.createElement('b');
-          score.textContent = row.score.toLocaleString('es-CL');
-          line.append(position, name, score);
-          list.append(line);
-        }
-        content.append(list);
-      }
-
-      const notice = document.createElement('small');
-      notice.textContent = 'El primer lugar es provisional. Premio: un kit.';
-      content.append(notice);
-      if (typeof result.ultimaPublicacion === 'number' && Number.isFinite(new Date(result.ultimaPublicacion).getTime())) {
-        const date = new Date(result.ultimaPublicacion);
-        const time = document.createElement('time');
-        time.dateTime = date.toISOString();
-        time.textContent = new Intl.DateTimeFormat('es-CL', {
-          dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Santiago'
-        }).format(date);
-        const updated = document.createElement('small');
-        updated.append('Última publicación: ', time);
-        content.append(updated);
-      }
-      this.rankingContent.replaceChildren(content);
-    } catch {
-      this.rankingContent.textContent = 'Ranking no disponible';
+    const list = document.createElement('ol');
+    list.className = 'ciac-ranking-list';
+    list.setAttribute('role', 'list');
+    for (const [index, row] of STATIC_RANKING.entries()) {
+      const line = document.createElement('li');
+      const position = document.createElement('span');
+      position.className = 'ciac-ranking-position';
+      position.setAttribute('aria-label', 'Puesto ' + (index + 1));
+      position.textContent = String(index + 1);
+      const name = document.createElement('span');
+      name.className = 'ciac-ranking-name';
+      name.textContent = row.name;
+      const score = document.createElement('b');
+      score.textContent = row.score.toLocaleString('es-CL');
+      line.append(position, name, score);
+      list.append(line);
     }
+    content.append(list);
+
+    const notice = document.createElement('small');
+    notice.textContent = 'Los puntajes reales se revisan y publican manualmente.';
+    content.append(notice);
+    this.rankingContent.replaceChildren(content);
   }
 }
