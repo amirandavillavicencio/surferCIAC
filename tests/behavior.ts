@@ -473,7 +473,7 @@ test('oncoming trains replace only the third parked roof and stay outside academ
     const thirdLane = 3 - rampLane - landingLane;
     const section = decisionSection(start, rampLane, landingLane, variant);
     const movers = section.specs.filter(spec => spec.kind === 'mtrain');
-    const enabled = start >= 190 && variant % 2 === 0;
+    const enabled = start >= 190 && variant % 6 !== 5;
     assert.equal(movers.length, Number(enabled));
     assert.ok(section.specs.every(spec => course.allowsObstacle(spec)), 'nothing enters a quiz reserve');
     assert.ok(section.specs.some(spec => spec.kind === 'ramp' && spec.lane === rampLane));
@@ -495,12 +495,12 @@ test('oncoming trains replace only the third parked roof and stay outside academ
   }
 });
 
-test('half of the 36 eligible encounter variants contain an oncoming train', () => {
+test('five sixths of the 36 eligible encounter variants contain an oncoming train', () => {
   for (const start of [190, 340, 490, 640]) {
     const count = Array.from({length:36}, (_, variant) =>
       decisionSection(start, 0, 1, variant).specs.some(spec => spec.kind === 'mtrain')
     ).filter(Boolean).length;
-    assert.equal(count, 18, '50% of eligible variants should carry a moving train');
+    assert.equal(count, 30, 'five of every six eligible variants should carry a moving train');
   }
 });
 
