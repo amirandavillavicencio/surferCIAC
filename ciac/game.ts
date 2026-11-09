@@ -381,7 +381,7 @@ export class CIACQuiz {
         content.append(period);
       }
 
-      const rows = (result.ranking as Array<{name:string;score:number}>).slice(0,5);
+      const rows = (result.ranking as Array<{name:string;score:number}>).slice(0,10);
       if (rows.length === 0) {
         const empty = document.createElement('p');
         empty.textContent = 'Todavía no hay puntajes publicados.';
