@@ -148,7 +148,28 @@ export class CIACQuiz {
     this.resultForm.addEventListener('pointerdown', (event) => event.stopPropagation());
     this.summary=document.createElement('p');
     this.summary.className='ciac-run-summary';
-    overPanel.append(this.summary,this.resultForm);
+
+    const invitation = document.createElement('section');
+    invitation.className = 'ciac-over-invite';
+    const invitationTitle = document.createElement('strong');
+    invitationTitle.textContent = '¿Quieres mejorar tus conocimientos?';
+    const invitationText = document.createElement('p');
+    invitationText.textContent = 'Ven al CIAC. Aquí puedes revisar los horarios de apoyo.';
+    const schedules = document.createElement('a');
+    schedules.className = 'ciac-schedules-link';
+    schedules.href = 'https://dispositivos-ciac.pages.dev/';
+    schedules.target = '_blank';
+    schedules.rel = 'noopener noreferrer';
+    schedules.textContent = 'Ver horarios del CIAC';
+    schedules.addEventListener('pointerdown', (event) => event.stopPropagation());
+    schedules.addEventListener('click', (event) => event.stopPropagation());
+    invitation.append(invitationTitle, invitationText, schedules);
+
+    const replayButton = overPanel.querySelector('#btn-again');
+    if (!replayButton) throw new Error('No se encontró el botón de nueva partida');
+    overPanel.insertBefore(this.summary, replayButton);
+    overPanel.insertBefore(invitation, replayButton);
+    overPanel.append(this.resultForm);
   }
 
   get activeGate() {
