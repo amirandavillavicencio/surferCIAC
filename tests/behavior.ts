@@ -6,7 +6,7 @@ import { Sim } from '../upstream/src/sim/sim';
 import { decisionSection } from '../upstream/src/ciac/rhythm';
 import { solve } from '../upstream/src/sim/track';
 import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_AHEAD, OB } from '../upstream/src/config';
-import { QuizCourse } from '../upstream/src/ciac/course';
+import { QuizCourse, QUESTION_VISIBLE_DISTANCE } from '../upstream/src/ciac/course';
 import { RacePace } from '../upstream/src/ciac/pace';
 import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
 import { CIACQuiz } from '../upstream/src/ciac/game';
@@ -145,12 +145,27 @@ test('Question transition and recovery are continuous and independent of frame r
     near(p.step(dt,139,180),1);
     let previous=1;
     for(let t=0;t<1;t+=dt) { const f=p.step(dt,145,180); assert.ok(f<=previous+1e-12); previous=f; }
-    near(p.factor,.88);
-    assert.ok(p.step(dt,180,180)>.88 && p.factor<1);
+    const readingFactor = Math.min(.88, 6 / speedAt(180));
+    near(p.factor,readingFactor);
+    assert.ok(p.step(dt,180,180)>readingFactor && p.factor<1);
     for(let t=0;t<1;t+=dt) p.step(dt,181,180);
     samples.push(p.factor);
   }
   for(const value of samples) near(value,1);
+});
+
+test('question approach gives about six seconds to read and choose a lane', () => {
+  for (const gate of [180, 780, 2580, 5000]) {
+    const pace = new RacePace();
+    let distance = gate - QUESTION_VISIBLE_DISTANCE;
+    let seconds = 0;
+    while (distance < gate && seconds < 10) {
+      const dt = 1 / 120;
+      distance += speedAt(distance) * pace.step(dt, distance, gate) * dt;
+      seconds += dt;
+    }
+    assert.ok(seconds >= 5.5 && seconds <= 7, `Puerta ${gate}: ${seconds.toFixed(2)} s`);
+  }
 });
 
 test('wrong answers retain 3 seconds at 55%, including a strip and pause, then recover', () => {
