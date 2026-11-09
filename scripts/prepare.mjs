@@ -11,6 +11,8 @@ for (const path of original) {
 }
 
 await access('upstream/src/main.ts');
+await mkdir('upstream/public/assets', {recursive:true});
+await copyFile('ciac/ciac-logo.png', 'upstream/public/assets/ciac-logo.png');
 await mkdir('upstream/src/ciac', {recursive:true});
 await copyFile('ciac/course.ts','upstream/src/ciac/course.ts');
 await copyFile('ciac/pace.ts','upstream/src/ciac/pace.ts');
@@ -29,10 +31,19 @@ await copyFile('ciac/i18n.ts','upstream/src/i18n.ts');
 const indexFile = 'upstream/index.html';
 let html = await readFile(indexFile, 'utf8');
 html = html.replace('<html lang="en">', '<html lang="es">');
-html = html.replace('<title>Subway Run</title>', '<title>Surfer CIAC</title>');
-html = html.replace('<h1 id="ld-title">Subway Run</h1>', '<h1 id="ld-title">Surfer CIAC</h1>');
-html = html.replace(/var T = \{ 'zh-TW': [^\n]+\}\[lang\];/, "var T = ['Surfer CIAC', 'Descargando', 'Preparando…'];");
+html = html.replace('<link rel="icon" href="./favicon.ico" />',
+  '<link rel="icon" type="image/png" href="/assets/ciac-logo.png" />\n<link rel="apple-touch-icon" href="/assets/ciac-logo.png" />');
+html = html.replace('<meta name="description" content="A three-lane endless runner made with three.js" />',
+  '<meta name="description" content="Carrera CIAC, juego académico de carreras del CIAC." />');
+html = html.replace('<title>Subway Run</title>', '<title>Carrera CIAC</title>');
+html = html.replace('<h1 id="ld-title">Subway Run</h1>', '<img class="ciac-brand-logo" src="/assets/ciac-logo.png" alt="CIAC" />\n  <h1 id="ld-title">Carrera CIAC</h1>');
+html = html.replace(/var T = \{ 'zh-TW': [^\n]+\}\[lang\];/, "var T = ['Carrera CIAC', 'Descargando', 'Preparando…'];");
 html = html.replace('#ui{position:fixed;inset:0;touch-action:none}', '#ui{position:fixed;inset:0;touch-action:none;overscroll-behavior:none}');
+html = html.replace('</style>', `
+.ciac-brand-logo{display:block;width:min(176px,58vw);height:auto;margin:0 auto;border-radius:10px;background:#f3f3f3}
+.screen.start .ciac-brand-logo{align-self:center}
+@media (orientation:landscape) and (max-height:500px){.screen.start .ciac-brand-logo{width:112px}}
+</style>`);
 await writeFile(indexFile, html);
 const file = 'upstream/src/main.ts';
 let source = await readFile(file,'utf8');
@@ -128,7 +139,11 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
   await writeFile(inputPath, "import { bindSwipe } from './ciac/swipe';\n" + input.slice(0, swipe) + '  bindSwipe(target, on, canSwipe);\n}\n');
 
   const uiPath = 'upstream/src/ui.ts';
-  const ui = await readFile(uiPath, 'utf8');
+  let ui = await readFile(uiPath, 'utf8');
+const menuTitle = '          <h1 data-k="title"></h1>';
+if (ui.split(menuTitle).length !== 2) throw new Error('No se encontró el título único del menú');
+ui = ui.replace(menuTitle,
+  '          <img class="ciac-brand-logo" src="/assets/ciac-logo.png" alt="CIAC" />\\n' + menuTitle);
   const focusPause = "    if (s === 'pause') this.el['btn-resume'].focus({ preventScroll: true });";
   if (ui.split(focusPause).length !== 2) throw new Error('Foco original de pausa cambió');
   await writeFile(uiPath, ui.replace(focusPause, focusPause + `

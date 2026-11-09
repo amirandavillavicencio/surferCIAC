@@ -3,7 +3,7 @@ export type Lang = 'es';
 export type Key = keyof typeof S;
 
 const S = {
-  title: 'Surfer CIAC',
+  title: 'Carrera CIAC',
   tagline: 'Esquiva los trenes y sigue avanzando.',
   play: 'Jugar',
   best: 'Mejor puntaje',
