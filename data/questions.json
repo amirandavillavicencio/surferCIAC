@@ -1558,5 +1558,245 @@
     "correcta": 0,
     "breve": "¿Rango de una matriz completamente nula?",
     "explicacion": "Una matriz cuyos elementos son cero no tiene pivotes: su rango es cero."
+  },
+  {
+    "id": "q105",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Segunda ley de Newton",
+    "enunciado": "Con m=2 kg y a=3 m/s², ¿fuerza neta?",
+    "opciones": [
+      "3 N",
+      "5 N",
+      "6 N"
+    ],
+    "correcta": 2,
+    "breve": "Con m=2 kg y a=3 m/s², ¿fuerza neta?",
+    "explicacion": "La segunda ley de Newton es F=ma, por lo que 2·3=6 N."
+  },
+  {
+    "id": "q106",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Unidades",
+    "enunciado": "¿Qué equivale a un newton?",
+    "opciones": [
+      "kg·m/s²",
+      "kg/s",
+      "J/s"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué equivale a un newton?",
+    "explicacion": "Un newton es la fuerza que acelera 1 kg a 1 m/s²."
+  },
+  {
+    "id": "q107",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Trabajo",
+    "enunciado": "Fuerza paralela de 10 N por 2 m: ¿trabajo?",
+    "opciones": [
+      "5 J",
+      "20 J",
+      "12 J"
+    ],
+    "correcta": 1,
+    "breve": "Fuerza paralela de 10 N por 2 m: ¿trabajo?",
+    "explicacion": "El trabajo de una fuerza constante paralela al movimiento es F·d."
+  },
+  {
+    "id": "q108",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Energía cinética",
+    "enunciado": "m=2 kg, v=3 m/s: ¿energía cinética?",
+    "opciones": [
+      "9 J",
+      "6 J",
+      "18 J"
+    ],
+    "correcta": 0,
+    "breve": "m=2 kg, v=3 m/s: ¿energía cinética?",
+    "explicacion": "La energía cinética vale ½mv² = ½·2·3² = 9 J."
+  },
+  {
+    "id": "q109",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Energía potencial",
+    "enunciado": "Cerca de la Tierra, energía potencial gravitatoria",
+    "opciones": [
+      "mgh",
+      "½mv²",
+      "ma"
+    ],
+    "correcta": 0,
+    "breve": "Cerca de la Tierra, energía potencial gravitatoria",
+    "explicacion": "La energía potencial gravitatoria respecto de una referencia es U=mgh."
+  },
+  {
+    "id": "q110",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Potencia",
+    "enunciado": "¿Cómo se define potencia media?",
+    "opciones": [
+      "Trabajo/tiempo",
+      "Fuerza/masa",
+      "Distancia/tiempo"
+    ],
+    "correcta": 0,
+    "breve": "¿Cómo se define potencia media?",
+    "explicacion": "La potencia media es el trabajo realizado dividido por el tiempo empleado."
+  },
+  {
+    "id": "q111",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Momento lineal",
+    "enunciado": "¿Expresión del momento lineal?",
+    "opciones": [
+      "mv",
+      "ma",
+      "½mv²"
+    ],
+    "correcta": 0,
+    "breve": "¿Expresión del momento lineal?",
+    "explicacion": "El momento lineal de una partícula es el producto de su masa y velocidad."
+  },
+  {
+    "id": "q112",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Colisiones",
+    "enunciado": "En un sistema aislado, ¿qué se conserva?",
+    "opciones": [
+      "Velocidad de cada cuerpo",
+      "Momento total",
+      "Energía cinética siempre"
+    ],
+    "correcta": 1,
+    "breve": "En un sistema aislado, ¿qué se conserva?",
+    "explicacion": "Sin fuerza externa neta, el momento lineal total se conserva."
+  },
+  {
+    "id": "q113",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Impulso",
+    "enunciado": "Con fuerza constante, ¿impulso?",
+    "opciones": [
+      "F·Δt",
+      "F/Δt",
+      "F·m"
+    ],
+    "correcta": 0,
+    "breve": "Con fuerza constante, ¿impulso?",
+    "explicacion": "El impulso de una fuerza constante es su producto por la duración de aplicación."
+  },
+  {
+    "id": "q114",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Rozamiento",
+    "enunciado": "¿Hacia dónde apunta el roce cinético?",
+    "opciones": [
+      "En el deslizamiento",
+      "Opuesto al deslizamiento",
+      "Siempre hacia arriba"
+    ],
+    "correcta": 1,
+    "breve": "¿Hacia dónde apunta el roce cinético?",
+    "explicacion": "La fuerza de roce cinético se opone al movimiento relativo de las superficies."
+  },
+  {
+    "id": "q115",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Equilibrio",
+    "enunciado": "Si fuerza neta es cero, ¿aceleración?",
+    "opciones": [
+      "Cero",
+      "Constante distinta de cero",
+      "Siempre aumenta"
+    ],
+    "correcta": 0,
+    "breve": "Si fuerza neta es cero, ¿aceleración?",
+    "explicacion": "Por F=ma, si la fuerza neta es cero y hay masa positiva, la aceleración es cero."
+  },
+  {
+    "id": "q116",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Tercera ley",
+    "enunciado": "Acción y reacción actúan…",
+    "opciones": [
+      "Sobre el mismo cuerpo",
+      "Sobre cuerpos diferentes",
+      "Solo si hay movimiento"
+    ],
+    "correcta": 1,
+    "breve": "Acción y reacción actúan…",
+    "explicacion": "Las fuerzas de acción y reacción tienen igual módulo y actúan en cuerpos distintos."
+  },
+  {
+    "id": "q117",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Ley de Hooke",
+    "enunciado": "¿Módulo de fuerza elástica ideal?",
+    "opciones": [
+      "k·|x|",
+      "m·v",
+      "m·g"
+    ],
+    "correcta": 0,
+    "breve": "¿Módulo de fuerza elástica ideal?",
+    "explicacion": "La ley de Hooke establece que la fuerza recuperadora tiene módulo k·|x|."
+  },
+  {
+    "id": "q118",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Oscilaciones",
+    "enunciado": "En un resorte ideal, si aumenta la masa…",
+    "opciones": [
+      "Aumenta el período",
+      "Disminuye el período",
+      "No cambia el período"
+    ],
+    "correcta": 0,
+    "breve": "En un resorte ideal, si aumenta la masa…",
+    "explicacion": "El período es T=2π√(m/k); al crecer m y mantener k, crece T."
+  },
+  {
+    "id": "q119",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Peso",
+    "enunciado": "¿Expresión del peso cerca de la Tierra?",
+    "opciones": [
+      "m/g",
+      "mg",
+      "mv"
+    ],
+    "correcta": 1,
+    "breve": "¿Expresión del peso cerca de la Tierra?",
+    "explicacion": "El módulo del peso es el producto de la masa por la gravedad local."
+  },
+  {
+    "id": "q120",
+    "curso": "FIS110",
+    "semestre": "Segundo semestre",
+    "tema": "Conservación de energía",
+    "enunciado": "Sin trabajo no conservativo, ¿qué se conserva?",
+    "opciones": [
+      "Energía mecánica",
+      "Rapidez siempre",
+      "Altura siempre"
+    ],
+    "correcta": 0,
+    "breve": "Sin trabajo no conservativo, ¿qué se conserva?",
+    "explicacion": "Si solo actúan fuerzas conservativas, la energía cinética más potencial se mantiene."
   }
 ]
