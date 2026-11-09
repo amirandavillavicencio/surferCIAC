@@ -328,7 +328,8 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
   assert.deepEqual(rewards,[[true,0],[false,100],[true,0]]);
   quiz.endRun(1700.5,1200,true);
   const summary=(quiz as any).summary;
-  assert.match(summary.textContent,/1700 m.*1200 puntos.*9 aciertos.*Mejor racha: 6.*Certamen/);
+  assert.match(summary.textContent,/9 aciertos.*Mejor racha: 6.*Certamen/);
+  assert.doesNotMatch(summary.textContent,/1700 m|1200 puntos/);
   quiz.reset();
   assert.equal(summary.textContent,'');
 });
