@@ -270,7 +270,9 @@ test('short iPhone-width swipes: four directions, one action per gesture, diagon
 test('real quiz: 24 questions, one request at each crossing, delayed answers, failures and stale responses', async () => {
   dom();
   const bank=JSON.parse(readFileSync('data/questions.json','utf8'));
-  const questions=Array.isArray(bank)?bank:bank.questions;
+  const allQuestions=Array.isArray(bank)?bank:bank.questions;
+  assert.equal(allQuestions.length,120);
+  const questions=allQuestions.slice(0,24);
   assert.equal(questions.length,24);
   const course=new QuizCourse(), scene=new THREE.Scene(); let index=0, answers=0, penalty=0;
   const awarded: string[] = [];
