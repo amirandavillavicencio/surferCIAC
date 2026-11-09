@@ -1318,5 +1318,245 @@
     "correcta": 1,
     "breve": "¿Cuánto vale ∫₋₁¹ x dx?",
     "explicacion": "La función x es impar; su integral en un intervalo simétrico vale cero."
+  },
+  {
+    "id": "q89",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matrices",
+    "enunciado": "Una matriz 2×3 tiene…",
+    "opciones": [
+      "2 filas y 3 columnas",
+      "3 filas y 2 columnas",
+      "6 filas"
+    ],
+    "correcta": 0,
+    "breve": "Una matriz 2×3 tiene…",
+    "explicacion": "En una matriz m×n, m indica filas y n indica columnas."
+  },
+  {
+    "id": "q90",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matrices",
+    "enunciado": "¿Cuándo se pueden sumar dos matrices?",
+    "opciones": [
+      "Si tienen igual tamaño",
+      "Si ambas son cuadradas",
+      "Si tienen igual determinante"
+    ],
+    "correcta": 0,
+    "breve": "¿Cuándo se pueden sumar dos matrices?",
+    "explicacion": "La suma de matrices requiere el mismo número de filas y columnas."
+  },
+  {
+    "id": "q91",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Producto matricial",
+    "enunciado": "(2×3) · (3×4) tiene tamaño…",
+    "opciones": [
+      "2×4",
+      "3×3",
+      "4×2"
+    ],
+    "correcta": 0,
+    "breve": "(2×3) · (3×4) tiene tamaño…",
+    "explicacion": "Se igualan las dimensiones interiores y el resultado conserva las exteriores."
+  },
+  {
+    "id": "q92",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Matriz identidad",
+    "enunciado": "¿Qué vale A·I, con dimensiones compatibles?",
+    "opciones": [
+      "0",
+      "A",
+      "I"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué vale A·I, con dimensiones compatibles?",
+    "explicacion": "La matriz identidad actúa como el uno en la multiplicación matricial."
+  },
+  {
+    "id": "q93",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "Determinante de [a b; c d]",
+    "opciones": [
+      "ad−bc",
+      "ab−cd",
+      "ac+bd"
+    ],
+    "correcta": 0,
+    "breve": "Determinante de [a b; c d]",
+    "explicacion": "Para una matriz 2×2 se multiplica la diagonal principal y se resta la secundaria."
+  },
+  {
+    "id": "q94",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "Determinante de [1 2; 3 4]",
+    "opciones": [
+      "2",
+      "−2",
+      "10"
+    ],
+    "correcta": 1,
+    "breve": "Determinante de [1 2; 3 4]",
+    "explicacion": "El determinante es 1·4−2·3=−2."
+  },
+  {
+    "id": "q95",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Inversa",
+    "enunciado": "¿Cuándo es invertible una matriz cuadrada?",
+    "opciones": [
+      "Si det=0",
+      "Si det≠0",
+      "Si tiene ceros"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo es invertible una matriz cuadrada?",
+    "explicacion": "Una matriz cuadrada tiene inversa exactamente cuando su determinante no es cero."
+  },
+  {
+    "id": "q96",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Determinantes",
+    "enunciado": "Determinante de matriz triangular",
+    "opciones": [
+      "Suma de sus filas",
+      "Producto de diagonal",
+      "Número de columnas"
+    ],
+    "correcta": 1,
+    "breve": "Determinante de matriz triangular",
+    "explicacion": "En una matriz triangular, el determinante es el producto de sus entradas diagonales."
+  },
+  {
+    "id": "q97",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Autovectores",
+    "enunciado": "¿Puede ser cero un autovector?",
+    "opciones": [
+      "Sí, siempre",
+      "No",
+      "Solo si λ=0"
+    ],
+    "correcta": 1,
+    "breve": "¿Puede ser cero un autovector?",
+    "explicacion": "Por definición, un autovector debe ser distinto del vector cero."
+  },
+  {
+    "id": "q98",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Sistemas lineales",
+    "enunciado": "¿Qué solución siempre tiene Ax=0?",
+    "opciones": [
+      "x=0",
+      "x=1 en cada entrada",
+      "Ninguna"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué solución siempre tiene Ax=0?",
+    "explicacion": "Todo sistema homogéneo tiene como solución al vector cero."
+  },
+  {
+    "id": "q99",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Independencia lineal",
+    "enunciado": "¿Cuándo son independientes varios vectores?",
+    "opciones": [
+      "Cuando suman cero",
+      "Solo con combinación trivial nula",
+      "Cuando todos son iguales"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuándo son independientes varios vectores?",
+    "explicacion": "La independencia exige que la combinación lineal cero tenga solo coeficientes cero."
+  },
+  {
+    "id": "q100",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Espacios vectoriales",
+    "enunciado": "¿Dimensión de ℝ³?",
+    "opciones": [
+      "2",
+      "3",
+      "4"
+    ],
+    "correcta": 1,
+    "breve": "¿Dimensión de ℝ³?",
+    "explicacion": "El espacio ℝ³ tiene una base de tres vectores linealmente independientes."
+  },
+  {
+    "id": "q101",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Rango",
+    "enunciado": "¿Qué cuenta el rango de una matriz?",
+    "opciones": [
+      "Pivotes",
+      "Columnas necesariamente",
+      "Autovalores siempre"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué cuenta el rango de una matriz?",
+    "explicacion": "El rango es la cantidad de pivotes en una forma escalonada."
+  },
+  {
+    "id": "q102",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Transpuesta",
+    "enunciado": "¿Qué hace transponer una matriz?",
+    "opciones": [
+      "Cambiar filas por columnas",
+      "Cambiar todos los signos",
+      "Calcular la inversa"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué hace transponer una matriz?",
+    "explicacion": "La transpuesta intercambia la posición de filas y columnas."
+  },
+  {
+    "id": "q103",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Traza",
+    "enunciado": "¿Qué suma la traza de una matriz cuadrada?",
+    "opciones": [
+      "Columna uno",
+      "Diagonal principal",
+      "Todos los elementos"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué suma la traza de una matriz cuadrada?",
+    "explicacion": "La traza es la suma de las entradas de la diagonal principal."
+  },
+  {
+    "id": "q104",
+    "curso": "MAT061",
+    "semestre": "Segundo semestre",
+    "tema": "Rango",
+    "enunciado": "¿Rango de una matriz completamente nula?",
+    "opciones": [
+      "0",
+      "1",
+      "Su número de filas"
+    ],
+    "correcta": 0,
+    "breve": "¿Rango de una matriz completamente nula?",
+    "explicacion": "Una matriz cuyos elementos son cero no tiene pivotes: su rango es cero."
   }
 ]
