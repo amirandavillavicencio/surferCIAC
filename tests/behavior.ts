@@ -378,11 +378,11 @@ async function parseUntexturedGLB(path: string) {
   return new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
 }
 
-test('complete train instances and retargeted Skater animation clips', async () => {
+test('complete train instances and retargeted protagonist animation clips', async () => {
   const gltf=await parseUntexturedGLB('upstream/public/assets/core.glb');
-  const skater=await parseUntexturedGLB('third_party/kenney-skater/skater-ciac.glb');
-  skater.scene.name='kenney-skater';
-  gltf.scene.add(skater.scene);
+  const protagonist = await parseUntexturedGLB('upstream/public/assets/protagonista-ciac.glb');
+  protagonist.scene.name = 'ciac-protagonist';
+  gltf.scene.add(protagonist.scene);
   const train=gltf.scene.getObjectByName('train')!;
   const scene=new THREE.Scene();
   const cabPool=new Instanced(train,60,scene,{colors:true});
@@ -429,9 +429,9 @@ test('complete train instances and retargeted Skater animation clips', async () 
   assert.ok(shadow,'ground contact shadow remains attached to the player renderer');
   const oldCostume=player.model.getObjectByName('Boy01_Body_Geo') as THREE.Mesh;
   assert.ok(oldCostume && !oldCostume.visible,'original character geometry is hidden');
-  const replacement=skater.scene.getObjectByProperty('isSkinnedMesh',true) as THREE.SkinnedMesh;
-  assert.ok(replacement?.visible && replacement.skeleton.bones.length >= 32);
-  const knee=skater.scene.getObjectByName('LeftLeg')!;
+  const replacement=protagonist.scene.getObjectByProperty('isSkinnedMesh',true) as THREE.SkinnedMesh;
+  assert.ok(replacement?.visible && replacement.skeleton.bones.length >= 22);
+  const knee=protagonist.scene.getObjectByName('LeftLeg')!;
   const rest=knee.quaternion.clone();
   const oldMeshCount=player.model.children.length;
   const nodes=actorScene.children.length;
@@ -441,7 +441,7 @@ test('complete train instances and retargeted Skater animation clips', async () 
     assert.equal(actorScene.children.length,nodes,'no new scene nodes per frame');
     assert.equal(player.model.children.length,oldMeshCount,'rig keeps its character structure');
   }
-  assert.ok(knee.quaternion.angleTo(rest) > 0.01, 'the Mixamo pose drives the Skater knee');
+  assert.ok(knee.quaternion.angleTo(rest) > 0.01, 'the Mixamo pose drives the protagonist knee');
   player.play('jump',0,1,true);player.mixer.update(10);
   const time=player.actions.jump.time;player.play('jump',0,1);near(player.actions.jump.time,time);
   player.play('jump',0,1,true);near(player.actions.jump.time,0);
