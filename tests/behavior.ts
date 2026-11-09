@@ -318,7 +318,7 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
     quiz.tick(gate+1,1);
     await new Promise(resolve=>setImmediate(resolve));
     const feedback=(quiz as any).feedback;
-    assert.match(feedback.textContent, _ ? /\+100 académicos · Guardia −1/ : /Incorrecto · Guardia \+1/);
+    assert.match(feedback.textContent, _ ? /\+100 académicos · Certamen −1/ : /Incorrecto · Certamen \+1/);
   }
   assert.equal(sounds.filter(cue=>cue==='correct').length,9);
   assert.equal(sounds.filter(cue=>cue==='wrong').length,1);
@@ -328,7 +328,7 @@ test('quiz awards a shield and career bonus once per streak and reports the run'
   assert.deepEqual(rewards,[[true,0],[false,100],[true,0]]);
   quiz.endRun(1700.5,1200,true);
   const summary=(quiz as any).summary;
-  assert.match(summary.textContent,/1700 m.*1200 puntos.*9 aciertos.*Mejor racha: 6.*guardia/);
+  assert.match(summary.textContent,/1700 m.*1200 puntos.*9 aciertos.*Mejor racha: 6.*Certamen/);
   quiz.reset();
   assert.equal(summary.textContent,'');
 });
