@@ -838,5 +838,245 @@
     "correcta": 0,
     "breve": "¿Qué valor excluye 1/(x−2)?",
     "explicacion": "El denominador no puede ser cero, por lo que x=2 queda fuera del dominio."
+  },
+  {
+    "id": "q57",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Magnitudes",
+    "enunciado": "¿Cuál es una magnitud escalar?",
+    "opciones": [
+      "Velocidad",
+      "Masa",
+      "Desplazamiento"
+    ],
+    "correcta": 1,
+    "breve": "¿Cuál es una magnitud escalar?",
+    "explicacion": "La masa tiene magnitud sin dirección; velocidad y desplazamiento son vectores."
+  },
+  {
+    "id": "q58",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "¿Módulo del vector (3,4)?",
+    "opciones": [
+      "5",
+      "7",
+      "12"
+    ],
+    "correcta": 0,
+    "breve": "¿Módulo del vector (3,4)?",
+    "explicacion": "En el plano, el módulo se calcula con √(3²+4²), que vale 5."
+  },
+  {
+    "id": "q59",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Desplazamiento",
+    "enunciado": "¿Cómo se calcula el desplazamiento?",
+    "opciones": [
+      "Posición final menos inicial",
+      "Distancia total",
+      "Rapidez por masa"
+    ],
+    "correcta": 0,
+    "breve": "¿Cómo se calcula el desplazamiento?",
+    "explicacion": "El desplazamiento es el cambio de posición entre el inicio y el final."
+  },
+  {
+    "id": "q60",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Cinemática",
+    "enunciado": "¿Velocidad media en una dimensión?",
+    "opciones": [
+      "Tiempo/posición",
+      "Desplazamiento/tiempo",
+      "Rapidez/masa"
+    ],
+    "correcta": 1,
+    "breve": "¿Velocidad media en una dimensión?",
+    "explicacion": "La velocidad media es el desplazamiento dividido por el intervalo de tiempo."
+  },
+  {
+    "id": "q61",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Aceleración",
+    "enunciado": "De 5 a 15 m/s en 2 s: ¿aceleración media?",
+    "opciones": [
+      "5 m/s²",
+      "10 m/s²",
+      "20 m/s²"
+    ],
+    "correcta": 0,
+    "breve": "De 5 a 15 m/s en 2 s: ¿aceleración media?",
+    "explicacion": "La aceleración media es (15−5)/2 = 5 m/s²."
+  },
+  {
+    "id": "q62",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "MRU",
+    "enunciado": "A 4 m/s durante 3 s, ¿cuánto avanza?",
+    "opciones": [
+      "7 m",
+      "12 m",
+      "16 m"
+    ],
+    "correcta": 1,
+    "breve": "A 4 m/s durante 3 s, ¿cuánto avanza?",
+    "explicacion": "En MRU, el desplazamiento es velocidad por tiempo: 4·3=12 m."
+  },
+  {
+    "id": "q63",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Caída libre",
+    "enunciado": "Sin roce del aire, ¿hacia dónde apunta g?",
+    "opciones": [
+      "Hacia arriba",
+      "Horizontal",
+      "Hacia abajo"
+    ],
+    "correcta": 2,
+    "breve": "Sin roce del aire, ¿hacia dónde apunta g?",
+    "explicacion": "Cerca de la superficie terrestre, la aceleración gravitatoria apunta hacia abajo."
+  },
+  {
+    "id": "q64",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Lanzamiento vertical",
+    "enunciado": "En el punto más alto, ¿velocidad vertical?",
+    "opciones": [
+      "Cero",
+      "Máxima hacia arriba",
+      "Máxima hacia abajo"
+    ],
+    "correcta": 0,
+    "breve": "En el punto más alto, ¿velocidad vertical?",
+    "explicacion": "En el punto máximo de un lanzamiento vertical, la velocidad instantánea es cero."
+  },
+  {
+    "id": "q65",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Producto punto",
+    "enunciado": "¿Producto punto de vectores perpendiculares?",
+    "opciones": [
+      "1",
+      "0",
+      "−1"
+    ],
+    "correcta": 1,
+    "breve": "¿Producto punto de vectores perpendiculares?",
+    "explicacion": "El producto punto incluye el coseno del ángulo, y cos(90°)=0."
+  },
+  {
+    "id": "q66",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "¿Ángulo entre vectores paralelos del mismo sentido?",
+    "opciones": [
+      "0°",
+      "90°",
+      "180°"
+    ],
+    "correcta": 0,
+    "breve": "¿Ángulo entre vectores paralelos del mismo sentido?",
+    "explicacion": "Dos vectores paralelos que apuntan en el mismo sentido forman un ángulo de 0°."
+  },
+  {
+    "id": "q67",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Vectores",
+    "enunciado": "¿Suma de dos vectores iguales y opuestos?",
+    "opciones": [
+      "Cero",
+      "El doble de uno",
+      "Siempre positiva"
+    ],
+    "correcta": 0,
+    "breve": "¿Suma de dos vectores iguales y opuestos?",
+    "explicacion": "Los vectores de igual módulo y direcciones opuestas se cancelan."
+  },
+  {
+    "id": "q68",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Aceleración",
+    "enunciado": "De 2 a 6 m/s en 4 s: ¿aceleración media?",
+    "opciones": [
+      "1 m/s²",
+      "2 m/s²",
+      "4 m/s²"
+    ],
+    "correcta": 0,
+    "breve": "De 2 a 6 m/s en 4 s: ¿aceleración media?",
+    "explicacion": "La aceleración media es (6−2)/4 = 1 m/s²."
+  },
+  {
+    "id": "q69",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Rapidez",
+    "enunciado": "¿Qué es la rapidez instantánea?",
+    "opciones": [
+      "El módulo de la velocidad",
+      "La aceleración",
+      "La posición"
+    ],
+    "correcta": 0,
+    "breve": "¿Qué es la rapidez instantánea?",
+    "explicacion": "La rapidez es una magnitud escalar igual al módulo del vector velocidad."
+  },
+  {
+    "id": "q70",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Unidades",
+    "enunciado": "¿Unidad SI de aceleración?",
+    "opciones": [
+      "m/s",
+      "m/s²",
+      "kg·m"
+    ],
+    "correcta": 1,
+    "breve": "¿Unidad SI de aceleración?",
+    "explicacion": "La aceleración cambia la velocidad por unidad de tiempo, y se mide en m/s²."
+  },
+  {
+    "id": "q71",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Gráficos",
+    "enunciado": "¿Qué indica la pendiente en posición-tiempo?",
+    "opciones": [
+      "Aceleración",
+      "Velocidad",
+      "Fuerza"
+    ],
+    "correcta": 1,
+    "breve": "¿Qué indica la pendiente en posición-tiempo?",
+    "explicacion": "La pendiente de la gráfica de posición respecto del tiempo representa velocidad."
+  },
+  {
+    "id": "q72",
+    "curso": "FIS100",
+    "semestre": "Primer semestre",
+    "tema": "Gráficos",
+    "enunciado": "¿Área con signo bajo velocidad-tiempo?",
+    "opciones": [
+      "Desplazamiento",
+      "Aceleración",
+      "Masa"
+    ],
+    "correcta": 0,
+    "breve": "¿Área con signo bajo velocidad-tiempo?",
+    "explicacion": "La integral de velocidad respecto del tiempo entrega el desplazamiento."
   }
 ]
