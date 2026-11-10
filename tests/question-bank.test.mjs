@@ -15,9 +15,9 @@ const { bank, questionFor, questionLimit } = await import(
 
 const courses = ['MAT060', 'MAT061', 'MAT070', 'MAT071', 'FIS100', 'FIS110'];
 const modes = [
-  ['Primer semestre', 60, 12],
-  ['Segundo semestre', 60, 12],
-  ['Todos', 120, 24],
+  ['Primer semestre', 60, 60],
+  ['Segundo semestre', 60, 60],
+  ['Todos', 120, 120],
 ];
 
 test('120 preguntas: 20 por asignatura, tres alternativas y respuestas explicadas', () => {
@@ -37,7 +37,7 @@ test('120 preguntas: 20 por asignatura, tres alternativas y respuestas explicada
   }
 });
 
-test('cada carrera mantiene 12 o 24 preguntas, sin repeticiones ni cambios de semestre', () => {
+test('cada carrera recorre las 60 o 120 preguntas, sin repeticiones ni cambios de semestre', () => {
   for (const [semester, pool, limit] of modes) {
     assert.equal(bank(semester).length, pool);
     assert.equal(questionLimit(semester), limit);
