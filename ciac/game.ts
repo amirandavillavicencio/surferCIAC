@@ -49,7 +49,12 @@ export class CIACQuiz {
   private feedback: HTMLDivElement;
   private feedbackUntil = 0;
   private summary: HTMLElement;
+  private endTitle: HTMLElement | null = null;
+  private normalEndTitle = '';
   private phase: Phase = 'idle';
+  private questionsAnswered = 0;
+  private questionCap = 120;
+  private completedAllQuestions = false;
   private runSerial = 0;
   private hooks: Hooks;
   private token = '';
@@ -77,6 +82,8 @@ export class CIACQuiz {
     const actions = startPanel?.querySelector('.ciac-start-actions');
     const overPanel = document.querySelector<HTMLElement>('#s-over .panel');
     if (!startPanel || !actions || !overPanel) throw new Error('No se encontró la interfaz del motor SUBWAY-SURFERS');
+    this.endTitle = overPanel.querySelector<HTMLElement>('h2');
+    this.normalEndTitle = this.endTitle?.textContent ?? '';
 
     const label = document.createElement('label');
     label.className = 'ciac-course';
@@ -193,7 +200,11 @@ export class CIACQuiz {
   get activeGate() {
     return this.phase === 'ready' || this.phase === 'question' ? this.nextDistance : Infinity;
   }
-  render(distance: number) { this.answerTrack.update(distance, this.hooks.course); }
+  get completedAll() { return this.phase === 'complete' && this.completedAllQuestions; }
+  render(distance: number) {
+    if (this.phase === 'ended') { this.answerTrack.hide(); return; }
+    this.answerTrack.update(distance, this.hooks.course);
+  }
   get questionSlow() {
     return this.phase === 'question' &&
       this.nextDistance - this.currentDistance <= STRIP_LENGTH &&
@@ -224,18 +235,22 @@ export class CIACQuiz {
     const text = mission
       ? `Misiones · ${next + 1}/${MISSIONS.length} · ${mission.label} ${progress[next]}/${mission.goal}`
       : 'Misiones · 4/4 completadas';
-    if (this.missionHUD.textContent !== text) this.missionHUD.textContent = text;
+    const progressText = `Preguntas ${this.questionsAnswered}/${this.questionCap} · ${text}`;
+    if (this.missionHUD.textContent !== progressText) this.missionHUD.textContent = progressText;
   }
 
   reset() {
     this.runSerial++;
     this.phase = 'idle';
+    this.questionsAnswered = 0;
+    this.completedAllQuestions = false;
     this.question = null;
     this.token = '';
     this.missions = new RunMissions();
     this.feedbackUntil = 0;
     this.feedback.hidden = this.missionHUD.hidden = true;
     this.summary.textContent='';
+    if (this.endTitle) this.endTitle.textContent = this.normalEndTitle;
     this.dialog.hidden = true;
     this.setDanger(0);
     this.resultForm.hidden = true;
@@ -256,6 +271,7 @@ export class CIACQuiz {
   async start() {
     const serial = this.runSerial;
     this.phase = 'idle';
+    this.questionCap = this.select.value === 'Todos' ? 120 : 60;
     try {
       const response = await api('start', { semestre: this.select.value });
       if (serial !== this.runSerial) return;
@@ -338,6 +354,7 @@ export class CIACQuiz {
       if (typeof response.correct !== 'boolean' || !Number.isSafeInteger(response.points) || response.points < 0) {
         throw new Error('Respuesta del servidor incompleta');
       }
+      this.questionsAnswered++;
       this.question = response.question;
       this.nextDistance = this.hooks.course.gateAtOrAfter(Math.max(
         gateDistance + GATE_SPACING, this.currentDistance + QUESTION_VISIBLE_DISTANCE
@@ -376,7 +393,10 @@ export class CIACQuiz {
         }
       }
       this.feedbackUntil = performance.now() + (response.correct ? 2300 : 6000);
-      if (!this.question) this.hooks.course.stop(this.hooks.frontier());
+      if (!this.question) {
+        this.completedAllQuestions = this.questionsAnswered === this.questionCap;
+        this.hooks.course.stop(this.hooks.frontier());
+      }
     } catch (error) {
       if (serial !== this.runSerial) return;
       // Si no hay respuesta del servidor, no se inventan puntos.
@@ -387,8 +407,11 @@ export class CIACQuiz {
     }
   }
 
-  endRun(_distance:number, _score:number, caught:boolean) {
-    this.summary.textContent=`${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
+  endRun(_distance:number, _score:number, caught:boolean, victory=false) {
+    if (this.endTitle) this.endTitle.textContent = victory ? '¡Llegaste hasta el final!' : this.normalEndTitle;
+    this.summary.textContent = victory
+      ? `${this.questionsAnswered}/${this.questionCap} preguntas completadas · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak}`
+      : `${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
     const progress = this.missions.progress;
     const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
     const missions = document.createElement('small');
