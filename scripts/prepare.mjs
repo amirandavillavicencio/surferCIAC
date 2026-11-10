@@ -65,6 +65,22 @@ if (!source.includes("import { CIACQuiz } from './ciac/game';")) {
      "    audio.unlock();\n    if (!TEST && quiz.handleAction(a)) return;\n    if (a === 'pause') pause();"],
     ["        overTimer = 0;\n        break;",
      "        overTimer = 0;\n        if (!TEST) quiz.endRun();\n        break;"],
+    ["    } else if (state === 'over') overTimer += dt;",
+     `    } else if (state === 'over') overTimer += dt;
+    // Completing the academic bank is a victory, even if no obstacle was hit.
+    if (state === 'play' && !TEST && quiz.completedAll && sim.alive) {
+      const score = Math.floor(sim.score);
+      const newBest = score > best;
+      if (newBest) { best = score; save('best', best); }
+      bank += sim.coins;
+      save('bank', bank);
+      ui.result({ score, coins: sim.coins, distance: Math.floor(sim.d), best, newBest });
+      audio.stopMusic();
+      state = 'over';
+      overTimer = 0;
+      ui.show('over');
+      quiz.endRun(sim.d, score, false, true);
+    }`],
     ["  let seed = (Date.now() % 100000) + 1;\n",
      "  let tutorialDone = load('tutorialDone', false);\n  let seed = (Date.now() % 100000) + 1;\n"],
     ["sim.reset(seed, !load('tutorialDone', false));", "sim.track.course.reset(!TEST); sim.reset(seed, !tutorialDone);"],
