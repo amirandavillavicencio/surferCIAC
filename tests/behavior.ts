@@ -267,13 +267,13 @@ test('short iPhone-width swipes: four directions, one action per gesture, diagon
   assert.equal(actions.length,6);
 });
 
-test('real quiz: 24 questions, one request at each crossing, delayed answers, failures and stale responses', async () => {
+test('real quiz: full 120 question marathon, one request per crossing and victory after the last one', async () => {
   dom();
   const bank=JSON.parse(readFileSync('data/questions.json','utf8'));
   const allQuestions=Array.isArray(bank)?bank:bank.questions;
   assert.equal(allQuestions.length,120);
-  const questions=allQuestions.slice(0,24);
-  assert.equal(questions.length,24);
+  const questions=allQuestions.slice(0,120);
+  assert.equal(questions.length,120);
   const course=new QuizCourse(), scene=new THREE.Scene(); let index=0, answers=0, penalty=0;
   const awarded: string[] = [];
   let resolveAnswer:any; let delay=false;
@@ -290,8 +290,9 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
   const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;},threat(){return 0;},sound(){},
     grantPower(kind){awarded.push(kind);}
   });
+  (quiz as any).select.value = 'Todos';
   await quiz.start();
-  for(let n=0;n<24;n++) {
+  for(let n=0;n<120;n++) {
     const gate=quiz.activeGate; assert.ok(Number.isFinite(gate));
     quiz.tick(gate-40.1,1); assert.equal((quiz as any).dialog.hidden,true);
     quiz.tick(gate-40,1); assert.equal((quiz as any).dialog.hidden,false);
@@ -302,10 +303,13 @@ test('real quiz: 24 questions, one request at each crossing, delayed answers, fa
     if(delay) {quiz.tick(gate+220,1);resolveAnswer();}
     await new Promise(resolve=>setImmediate(resolve));
     assert.equal(awarded.length, Math.floor((n+1)/2), 'solo los aciertos verificados conceden poderes');
-    if(n<23) assert.ok(quiz.activeGate>=gate+150);
+    if(n<119) assert.ok(quiz.activeGate>=gate+150);
   }
-  assert.equal(answers,24);assert.equal(penalty,36);assert.equal(quiz.activeGate,Infinity);
-  assert.deepEqual(awarded, Array.from({length:12},(_,i)=>['magnet','double','shoes'][i%3]));
+  assert.equal(answers,120);assert.equal(penalty,180);assert.equal(quiz.activeGate,Infinity);
+  assert.equal(quiz.completedAll,true);
+  quiz.endRun(18030,12000,false,true);
+  assert.match((quiz as any).summary.textContent,/Carrera CIAC completada.*120\/120 preguntas.*60 aciertos/);
+  assert.deepEqual(awarded, Array.from({length:60},(_,i)=>['magnet','double','shoes'][i%3]));
   assert.equal(course.intersects(5500,5600),false);
   const existing = new Sim(); existing.reset(4,false);
   const ids = existing.obs.map(o=>o.id);
