@@ -49,6 +49,8 @@ export class CIACQuiz {
   private feedback: HTMLDivElement;
   private feedbackUntil = 0;
   private summary: HTMLElement;
+  private endTitle: HTMLElement | null = null;
+  private normalEndTitle = '';
   private phase: Phase = 'idle';
   private questionsAnswered = 0;
   private questionCap = 120;
@@ -80,6 +82,8 @@ export class CIACQuiz {
     const actions = startPanel?.querySelector('.ciac-start-actions');
     const overPanel = document.querySelector<HTMLElement>('#s-over .panel');
     if (!startPanel || !actions || !overPanel) throw new Error('No se encontró la interfaz del motor SUBWAY-SURFERS');
+    this.endTitle = overPanel.querySelector<HTMLElement>('h2');
+    this.normalEndTitle = this.endTitle?.textContent ?? '';
 
     const label = document.createElement('label');
     label.className = 'ciac-course';
@@ -246,6 +250,7 @@ export class CIACQuiz {
     this.feedbackUntil = 0;
     this.feedback.hidden = this.missionHUD.hidden = true;
     this.summary.textContent='';
+    if (this.endTitle) this.endTitle.textContent = this.normalEndTitle;
     this.dialog.hidden = true;
     this.setDanger(0);
     this.resultForm.hidden = true;
@@ -403,8 +408,9 @@ export class CIACQuiz {
   }
 
   endRun(_distance:number, _score:number, caught:boolean, victory=false) {
+    if (this.endTitle) this.endTitle.textContent = victory ? '¡Llegaste hasta el final!' : this.normalEndTitle;
     this.summary.textContent = victory
-      ? `¡Carrera CIAC completada! · ${this.questionsAnswered}/${this.questionCap} preguntas · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak}`
+      ? `${this.questionsAnswered}/${this.questionCap} preguntas completadas · ${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak}`
       : `${this.missions.correct} aciertos · Mejor racha: ${this.missions.bestStreak} · ${caught?'Te alcanzó el Certamen':'Choque con un obstáculo'}`;
     const progress = this.missions.progress;
     const completed = MISSIONS.filter((mission, index) => progress[index] >= mission.goal);
