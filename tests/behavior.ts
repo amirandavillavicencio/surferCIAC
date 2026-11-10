@@ -308,7 +308,8 @@ test('real quiz: full 120 question marathon, one request per crossing and victor
   assert.equal(answers,120);assert.equal(penalty,180);assert.equal(quiz.activeGate,Infinity);
   assert.equal(quiz.completedAll,true);
   quiz.endRun(18030,12000,false,true);
-  assert.match((quiz as any).summary.textContent,/Carrera CIAC completada.*120\/120 preguntas.*60 aciertos/);
+  assert.match((quiz as any).summary.textContent,/120\/120 preguntas completadas.*60 aciertos/);
+  assert.equal((quiz as any).endTitle.textContent,'¡Llegaste hasta el final!');
   assert.deepEqual(awarded, Array.from({length:60},(_,i)=>['magnet','double','shoes'][i%3]));
   assert.equal(course.intersects(5500,5600),false);
   const existing = new Sim(); existing.reset(4,false);
