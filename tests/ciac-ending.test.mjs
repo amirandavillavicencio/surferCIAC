@@ -24,7 +24,9 @@ test('el enlace de horarios es accesible y no pierde la partida', () => {
 });
 
 test('los datos no se repiten y el formulario queda antes de la revancha', () => {
-  assert.match(game, /this\.summary\.textContent=\x60\$\{this\.missions\.correct\} aciertos/);
+  assert.match(game, /this\.summary\.textContent = victory/);
+  assert.match(game, /: `\$\{this\.missions\.correct\} aciertos/);
+  assert.match(game, /preguntas completadas/);
   assert.doesNotMatch(game, /this\.summary\.textContent=\x60\$\{Math\.floor\(distance\)\}/);
   assert.match(game, /overPanel\.insertBefore\(this\.summary, replayButton\);/);
   assert.match(game, /overPanel\.insertBefore\(this\.resultForm, replayButton\);/);
