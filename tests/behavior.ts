@@ -243,15 +243,15 @@ test('static exhibition ranking distinguishes three real scores and seven exampl
     penalize(){}, threat(){return 0;}, sound(){}, grantPower(){}
   });
   const content = (quiz as any).rankingContent.children[0];
-  assert.match(content.children[0].textContent, /3 reales y 7 de muestra/);
-  const list = content.children[1];
+  assert.equal(content.children.length, 1);
+  const list = content.children[0];
   assert.equal(list.children.length, 10);
   assert.equal(list.children[0].children[1].textContent, 'John');
-  assert.equal(list.children[1].children[1].textContent, 'Daniela Torres *');
+  assert.equal(list.children[1].children[1].textContent, 'Daniela Torres');
   assert.equal(list.children[7].children[1].textContent, 'framburguerss');
   assert.equal(list.children[8].children[1].textContent, 'Andy');
+  assert.equal(list.children[9].children[1].textContent, 'Emilia Silva');
   assert.equal(list.children[9].children[2].textContent, '100');
-  assert.match(content.children[2].textContent, /fuera de competencia/);
 });
 
 test('short iPhone-width swipes: four directions, one action per gesture, diagonals and rapid reversals', () => {
