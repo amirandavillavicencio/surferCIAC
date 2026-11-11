@@ -1,6 +1,5 @@
 .ciac-course{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;text-align:left}
-.ciac-course select,.ciac-result input{font:inherit;color:#fff;border-radius:12px;border:1px solid var(--line);background:var(--panel);padding:10px 12px;width:100%}
-.ciac-course option{color:#1d2433;background:#fff}
+.ciac-result input{font:inherit;color:#fff;border-radius:12px;border:1px solid var(--line);background:var(--panel);padding:10px 12px;width:100%}
 .ciac-dialog{position:absolute;z-index:12;left:50%;bottom:calc(10vh + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(650px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:16px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-align:center;pointer-events:auto}
 .ciac-question{display:block;font-size:clamp(17px,4.6vw,23px);margin-bottom:14px}
 .ciac-lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -96,7 +95,7 @@
   #ui > .ciac-dialog .ciac-message{font-size:10px;margin-top:4px}
 }
 
-/* Contain the game viewport without disabling native semester/name controls. */
+/* Contain the game viewport without disabling the native name control. */
 html, body { overscroll-behavior: none; }
 body { overflow: hidden; }
 #game, #ui { touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -307,12 +306,6 @@ body { overflow: hidden; }
 #s-start .tag { margin: 0; font-size: 13px; }
 #s-start .ctrl { font-size: 12px; line-height: 1.3; }
 #s-start .ciac-course { gap: 4px; }
-#s-start .ciac-course select {
-  min-height: 44px;
-  padding: 4px 10px;
-  font-size: 16px;
-}
-
 #s-start .stats {
   display: flex;
   justify-content: center;
