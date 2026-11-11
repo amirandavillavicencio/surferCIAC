@@ -449,10 +449,6 @@ export class CIACQuiz {
 
   private refreshRanking() {
     const content = document.createDocumentFragment();
-    const label = document.createElement('small');
-    label.textContent = 'Ranking de exhibición · 3 reales y 7 de muestra';
-    content.append(label);
-
     const list = document.createElement('ol');
     list.className = 'ciac-ranking-list';
     list.setAttribute('role', 'list');
@@ -464,7 +460,7 @@ export class CIACQuiz {
       position.textContent = String(index + 1);
       const name = document.createElement('span');
       name.className = 'ciac-ranking-name';
-      name.textContent = row.name + (row.source === 'muestra' ? ' *' : '');
+      name.textContent = row.name;
       const score = document.createElement('b');
       score.textContent = row.score.toLocaleString('es-CL');
       line.append(position, name, score);
@@ -472,9 +468,6 @@ export class CIACQuiz {
     }
     content.append(list);
 
-    const notice = document.createElement('small');
-    notice.textContent = '* Puntajes de muestra, fuera de competencia. Los puntajes reales se publican manualmente.';
-    content.append(notice);
     this.rankingContent.replaceChildren(content);
   }
 }
