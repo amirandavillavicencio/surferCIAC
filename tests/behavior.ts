@@ -285,7 +285,10 @@ test('real quiz: full 120 question marathon, one request per crossing and victor
   const response=(data:any)=>({ok:true,json:async()=>data});
   (globalThis as any).fetch=async(path:string,options:any)=>{
     if(path.includes('leaderboard'))return response({ranking:[]});
-    if(path.endsWith('start'))return response({token:'',question:questions[0]});
+    if(path.endsWith('start')) {
+      assert.deepEqual(JSON.parse(options.body), {semestre:'Todos'});
+      return response({token:'',question:questions[0]});
+    }
     assert.equal(path,'/api/answer'); assert.ok([0,1,2].includes(JSON.parse(options.body).lane));
     answers++; index++;
     const data={correct:index%2===0,points:100*Math.floor(index/2),penaltySeconds:index%2?3:0,question:questions[index]||null};
@@ -295,8 +298,8 @@ test('real quiz: full 120 question marathon, one request per crossing and victor
   const quiz=new CIACQuiz({scene,course,frontier:()=>5000,notice(){},penalize(n){penalty+=n;},threat(){return 0;},sound(){},
     grantPower(kind){awarded.push(kind);}
   });
-  (quiz as any).select.value = 'Todos';
   await quiz.start();
+  assert.equal((quiz as any).questionCap, 120);
   for(let n=0;n<120;n++) {
     const gate=quiz.activeGate; assert.ok(Number.isFinite(gate));
     quiz.tick(gate-40.1,1); assert.equal((quiz as any).dialog.hidden,true);
