@@ -220,20 +220,22 @@ function dom() {
   (globalThis as any).window={addEventListener(){}};
 }
 
-test('static ranking displays the same ten fictional records without touching D1', () => {
-  assert.deepEqual(STATIC_RANKING.map(row => [row.name, row.score]), [
-    ['Emilia Rojas', 500],
-    ['Matías Araya', 500],
-    ['Antonia Mella', 400],
-    ['Diego Carrasco', 400],
-    ['Javiera Tapia', 300],
-    ['Benjamín Soto', 300],
-    ['Catalina Muñoz', 200],
-    ['Vicente Fuentes', 200],
-    ['Florencia Olivares', 100],
-    ['Tomás Pizarro', 100],
+test('static exhibition ranking distinguishes three real scores and seven examples without touching D1', () => {
+  assert.deepEqual(STATIC_RANKING.map(row => [row.name, row.score, row.source]), [
+    ['John', 900, 'real'],
+    ['Daniela Torres', 700, 'muestra'],
+    ['Matías Fuentes', 600, 'muestra'],
+    ['Sofía Muñoz', 500, 'muestra'],
+    ['Vicente Araya', 400, 'muestra'],
+    ['Catalina Soto', 300, 'muestra'],
+    ['Benjamín Rojas', 200, 'muestra'],
+    ['framburguerss', 100, 'real'],
+    ['Andy', 100, 'real'],
+    ['Emilia Silva', 100, 'muestra'],
   ]);
   assert.equal(new Set(STATIC_RANKING.map(row => row.name)).size, 10);
+  assert.equal(STATIC_RANKING.filter(row => row.source === 'real').length, 3);
+  assert.equal(STATIC_RANKING.filter(row => row.source === 'muestra').length, 7);
   dom();
   (globalThis as any).fetch=async()=>{throw new Error('No ranking API should be requested');};
   const quiz = new CIACQuiz({
@@ -241,12 +243,15 @@ test('static ranking displays the same ten fictional records without touching D1
     penalize(){}, threat(){return 0;}, sound(){}, grantPower(){}
   });
   const content = (quiz as any).rankingContent.children[0];
-  assert.match(content.children[0].textContent, /Puntajes ficticios/);
+  assert.match(content.children[0].textContent, /3 reales y 7 de muestra/);
   const list = content.children[1];
   assert.equal(list.children.length, 10);
-  assert.equal(list.children[0].children[1].textContent, 'Emilia Rojas');
+  assert.equal(list.children[0].children[1].textContent, 'John');
+  assert.equal(list.children[1].children[1].textContent, 'Daniela Torres *');
+  assert.equal(list.children[7].children[1].textContent, 'framburguerss');
+  assert.equal(list.children[8].children[1].textContent, 'Andy');
   assert.equal(list.children[9].children[2].textContent, '100');
-  assert.match(content.children[2].textContent, /manualmente/);
+  assert.match(content.children[2].textContent, /fuera de competencia/);
 });
 
 test('short iPhone-width swipes: four directions, one action per gesture, diagonals and rapid reversals', () => {
