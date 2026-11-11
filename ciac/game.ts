@@ -70,7 +70,6 @@ export class CIACQuiz {
   private title: HTMLElement;
   private choices: HTMLButtonElement[] = [];
   private message: HTMLElement;
-  private select: HTMLSelectElement;
   private resultForm: HTMLFormElement;
   private playerName: HTMLInputElement;
   private formStatus: HTMLElement;
@@ -86,18 +85,9 @@ export class CIACQuiz {
     this.endTitle = overPanel.querySelector<HTMLElement>('h2');
     this.normalEndTitle = this.endTitle?.textContent ?? '';
 
-    const label = document.createElement('label');
+    const label = document.createElement('div');
     label.className = 'ciac-course';
     label.textContent = 'Preguntas de primer año · USM';
-    this.select = document.createElement('select');
-    this.select.setAttribute('aria-label', 'Seleccionar semestre');
-    for (const semester of ['Primer semestre', 'Segundo semestre', 'Todos']) {
-      const option = document.createElement('option');
-      option.value = semester;
-      option.textContent = semester;
-      this.select.append(option);
-    }
-    label.append(this.select);
     actions.insertBefore(label, document.getElementById('btn-play'));
 
     const ranking = document.createElement('section');
@@ -272,9 +262,9 @@ export class CIACQuiz {
   async start() {
     const serial = this.runSerial;
     this.phase = 'idle';
-    this.questionCap = this.select.value === 'Todos' ? 120 : 60;
+    this.questionCap = 120;
     try {
-      const response = await api('start', { semestre: this.select.value });
+      const response = await api('start', { semestre: 'Todos' });
       if (serial !== this.runSerial) return;
       this.token = response.token;
       if ((this.phase as Phase) === 'ended') { this.resultForm.hidden = false; return; }
