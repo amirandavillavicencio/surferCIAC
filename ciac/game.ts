@@ -29,18 +29,19 @@ async function api(path: string, body?: object): Promise<any> {
   return data;
 }
 
-// Ranking de muestra: se muestra en la portada, sin escribir en D1 ni consultar la API.
+// Ranking visible de exhibición: puntajes reales revisados y ejemplos ficticios.
+// Los ejemplos no se guardan en D1 ni participan por el premio.
 export const STATIC_RANKING = [
-  { name: 'Emilia Rojas', score: 500 },
-  { name: 'Matías Araya', score: 500 },
-  { name: 'Antonia Mella', score: 400 },
-  { name: 'Diego Carrasco', score: 400 },
-  { name: 'Javiera Tapia', score: 300 },
-  { name: 'Benjamín Soto', score: 300 },
-  { name: 'Catalina Muñoz', score: 200 },
-  { name: 'Vicente Fuentes', score: 200 },
-  { name: 'Florencia Olivares', score: 100 },
-  { name: 'Tomás Pizarro', score: 100 },
+  { name: 'John', score: 900, source: 'real' },
+  { name: 'Daniela Torres', score: 700, source: 'muestra' },
+  { name: 'Matías Fuentes', score: 600, source: 'muestra' },
+  { name: 'Sofía Muñoz', score: 500, source: 'muestra' },
+  { name: 'Vicente Araya', score: 400, source: 'muestra' },
+  { name: 'Catalina Soto', score: 300, source: 'muestra' },
+  { name: 'Benjamín Rojas', score: 200, source: 'muestra' },
+  { name: 'framburguerss', score: 100, source: 'real' },
+  { name: 'Andy', score: 100, source: 'real' },
+  { name: 'Emilia Silva', score: 100, source: 'muestra' },
 ] as const;
 
 export class CIACQuiz {
@@ -449,7 +450,7 @@ export class CIACQuiz {
   private refreshRanking() {
     const content = document.createDocumentFragment();
     const label = document.createElement('small');
-    label.textContent = 'Ranking de muestra · Puntajes ficticios';
+    label.textContent = 'Ranking de exhibición · 3 reales y 7 de muestra';
     content.append(label);
 
     const list = document.createElement('ol');
@@ -463,7 +464,7 @@ export class CIACQuiz {
       position.textContent = String(index + 1);
       const name = document.createElement('span');
       name.className = 'ciac-ranking-name';
-      name.textContent = row.name;
+      name.textContent = row.name + (row.source === 'muestra' ? ' *' : '');
       const score = document.createElement('b');
       score.textContent = row.score.toLocaleString('es-CL');
       line.append(position, name, score);
@@ -472,7 +473,7 @@ export class CIACQuiz {
     content.append(list);
 
     const notice = document.createElement('small');
-    notice.textContent = 'Los puntajes reales se revisan y publican manualmente.';
+    notice.textContent = '* Puntajes de muestra, fuera de competencia. Los puntajes reales se publican manualmente.';
     content.append(notice);
     this.rankingContent.replaceChildren(content);
   }
