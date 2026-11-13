@@ -174,7 +174,16 @@ export class CIACQuiz {
     schedules.rel = 'noopener noreferrer';
     schedules.textContent = 'Ver horarios del CIAC';
     schedules.addEventListener('pointerdown', (event) => event.stopPropagation());
-    schedules.addEventListener('click', (event) => event.stopPropagation());
+    schedules.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const endpoint = '/api/schedules-click';
+      const fallback = () => { void fetch(endpoint, { method: 'POST', keepalive: true }).catch(() => {}); };
+      try {
+        if (!navigator.sendBeacon?.(endpoint)) fallback();
+      } catch {
+        fallback();
+      }
+    });
     const secondaryActions = document.createElement('div');
     secondaryActions.className = 'ciac-over-secondary';
     const homeButton = overPanel.querySelector('#btn-home2');

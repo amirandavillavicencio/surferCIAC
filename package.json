@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node scripts/test-game.mjs && node --test tests/week.test.mjs tests/ranking-publication.test.mjs tests/ciac-ending.test.mjs tests/corrections.test.mjs tests/question-bank.test.mjs && node scripts/check-questions.mjs",
+    "test": "node scripts/test-game.mjs && node --test tests/week.test.mjs tests/ranking-publication.test.mjs tests/schedules-click.test.mjs tests/ciac-ending.test.mjs tests/corrections.test.mjs tests/question-bank.test.mjs && node scripts/check-questions.mjs",
     "check:questions": "node scripts/check-questions.mjs",
     "prepare:game": "node scripts/prepare.mjs",
     "dev:game": "npm run prepare:game && npm --prefix upstream install && npm --prefix upstream run dev",
