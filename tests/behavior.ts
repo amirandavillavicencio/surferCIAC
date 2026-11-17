@@ -9,7 +9,7 @@ import { speedAt, moverFront, trainLength, CAR_LEN, CAR_GAP, laneX, MOVER, VIEW_
 import { QuizCourse, QUESTION_VISIBLE_DISTANCE } from '../upstream/src/ciac/course';
 import { RacePace } from '../upstream/src/ciac/pace';
 import { QuizAnswerTrack } from '../upstream/src/ciac/answer-track';
-import { CIACQuiz, STATIC_RANKING } from '../upstream/src/ciac/game';
+import { CIACQuiz } from '../upstream/src/ciac/game';
 import { decisionPilot } from './decision-pilot';
 import { bindSwipe } from '../upstream/src/ciac/swipe';
 import { PlayerView } from '../upstream/src/view/player';
@@ -220,38 +220,27 @@ function dom() {
   (globalThis as any).window={addEventListener(){}};
 }
 
-test('static exhibition ranking distinguishes three real scores and seven examples without touching D1', () => {
-  assert.deepEqual(STATIC_RANKING.map(row => [row.name, row.score, row.source]), [
-    ['John', 900, 'real'],
-    ['Daniela Torres', 700, 'muestra'],
-    ['Matías Fuentes', 600, 'muestra'],
-    ['Sofía Muñoz', 500, 'muestra'],
-    ['Vicente Araya', 400, 'muestra'],
-    ['Catalina Soto', 300, 'muestra'],
-    ['Benjamín Rojas', 200, 'muestra'],
-    ['framburguerss', 100, 'real'],
-    ['Andy', 100, 'real'],
-    ['Emilia Silva', 100, 'muestra'],
-  ]);
-  assert.equal(new Set(STATIC_RANKING.map(row => row.name)).size, 10);
-  assert.equal(STATIC_RANKING.filter(row => row.source === 'real').length, 3);
-  assert.equal(STATIC_RANKING.filter(row => row.source === 'muestra').length, 7);
+test('the public ranking loads published real scores instead of fixed sample names', async () => {
   dom();
-  (globalThis as any).fetch=async()=>{throw new Error('No ranking API should be requested');};
+  const requested: string[] = [];
+  (globalThis as any).fetch = async (url: string) => {
+    requested.push(url);
+    return {ok:true,json:async()=>({ranking:[
+      {name:'Xavi',score:2600},{name:'Jesus',score:1900},{name:'Mati A',score:1000}
+    ]})};
+  };
   const quiz = new CIACQuiz({
     scene:new THREE.Scene(), course:new QuizCourse(), frontier:()=>0, notice(){},
     penalize(){}, threat(){return 0;}, sound(){}, grantPower(){}
   });
-  const content = (quiz as any).rankingContent.children[0];
-  assert.equal(content.children.length, 1);
-  const list = content.children[0];
-  assert.equal(list.children.length, 10);
-  assert.equal(list.children[0].children[1].textContent, 'John');
-  assert.equal(list.children[1].children[1].textContent, 'Daniela Torres');
-  assert.equal(list.children[7].children[1].textContent, 'framburguerss');
-  assert.equal(list.children[8].children[1].textContent, 'Andy');
-  assert.equal(list.children[9].children[1].textContent, 'Emilia Silva');
-  assert.equal(list.children[9].children[2].textContent, '100');
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.ok(requested.includes('/api/leaderboard?semestre=Todos&periodo=general'));
+  const list = (quiz as any).rankingContent.children[0];
+  assert.equal(list.children.length, 3);
+  assert.equal(list.children[0].children[1].textContent, 'Xavi');
+  assert.equal(list.children[0].children[2].textContent, '2.600');
+  assert.equal(list.children[1].children[1].textContent, 'Jesus');
+  assert.equal(list.children[2].children[1].textContent, 'Mati A');
 });
 
 test('short iPhone-width swipes: four directions, one action per gesture, diagonals and rapid reversals', () => {
