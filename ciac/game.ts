@@ -29,21 +29,6 @@ async function api(path: string, body?: object): Promise<any> {
   return data;
 }
 
-// Ranking visible de exhibición: puntajes reales revisados y ejemplos ficticios.
-// Los ejemplos no se guardan en D1 ni participan por el premio.
-export const STATIC_RANKING = [
-  { name: 'John', score: 900, source: 'real' },
-  { name: 'Daniela Torres', score: 700, source: 'muestra' },
-  { name: 'Matías Fuentes', score: 600, source: 'muestra' },
-  { name: 'Sofía Muñoz', score: 500, source: 'muestra' },
-  { name: 'Vicente Araya', score: 400, source: 'muestra' },
-  { name: 'Catalina Soto', score: 300, source: 'muestra' },
-  { name: 'Benjamín Rojas', score: 200, source: 'muestra' },
-  { name: 'framburguerss', score: 100, source: 'real' },
-  { name: 'Andy', score: 100, source: 'real' },
-  { name: 'Emilia Silva', score: 100, source: 'muestra' },
-] as const;
-
 export class CIACQuiz {
   private missions = new RunMissions();
   private missionHUD: HTMLDivElement;
@@ -87,7 +72,7 @@ export class CIACQuiz {
 
     const label = document.createElement('div');
     label.className = 'ciac-course';
-    label.textContent = 'Preguntas de primer año · USM';
+    label.textContent = 'Preguntas de todos los semestres · USM';
     actions.insertBefore(label, document.getElementById('btn-play'));
 
     const ranking = document.createElement('section');
@@ -95,7 +80,7 @@ export class CIACQuiz {
     ranking.setAttribute('aria-labelledby', 'ciac-ranking-title');
     const heading = document.createElement('h2');
     heading.id = 'ciac-ranking-title';
-    heading.textContent = 'Ranking semanal';
+    heading.textContent = 'Ranking general';
     const rankingContent = document.createElement('div');
     rankingContent.className = 'ciac-ranking-content';
     rankingContent.setAttribute('aria-live', 'polite');
@@ -446,27 +431,44 @@ export class CIACQuiz {
     }
   }
 
-  private refreshRanking() {
-    const content = document.createDocumentFragment();
-    const list = document.createElement('ol');
-    list.className = 'ciac-ranking-list';
-    list.setAttribute('role', 'list');
-    for (const [index, row] of STATIC_RANKING.entries()) {
-      const line = document.createElement('li');
-      const position = document.createElement('span');
-      position.className = 'ciac-ranking-position';
-      position.setAttribute('aria-label', 'Puesto ' + (index + 1));
-      position.textContent = String(index + 1);
-      const name = document.createElement('span');
-      name.className = 'ciac-ranking-name';
-      name.textContent = row.name;
-      const score = document.createElement('b');
-      score.textContent = row.score.toLocaleString('es-CL');
-      line.append(position, name, score);
-      list.append(line);
+  private async refreshRanking() {
+    this.rankingContent.textContent = 'Cargando puntajes…';
+    try {
+      const data = await api('leaderboard?semestre=Todos&periodo=general');
+      if (!Array.isArray(data.ranking)) throw new Error('Respuesta inválida del ranking');
+      const rows = data.ranking.filter((row: any) =>
+        typeof row?.name === 'string' && Number.isFinite(row.score) && row.score >= 0
+      ) as { name: string; score: number }[];
+      if (!rows.length) {
+        this.rankingContent.textContent = 'Aún no hay puntajes publicados.';
+        return;
+      }
+      const list = document.createElement('ol');
+      list.className = 'ciac-ranking-list';
+      list.setAttribute('role', 'list');
+      for (const [index, row] of rows.entries()) {
+        const line = document.createElement('li');
+        const position = document.createElement('span');
+        position.className = 'ciac-ranking-position';
+        position.setAttribute('aria-label', 'Puesto ' + (index + 1));
+        position.textContent = String(index + 1);
+        const name = document.createElement('span');
+        name.className = 'ciac-ranking-name';
+        name.textContent = row.name;
+        const score = document.createElement('b');
+        score.textContent = row.score.toLocaleString('es-CL');
+        line.append(position, name, score);
+        list.append(line);
+      }
+      this.rankingContent.replaceChildren(list);
+    } catch {
+      const message = document.createElement('p');
+      message.textContent = 'No se pudo cargar el ranking.';
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.textContent = 'Reintentar';
+      retry.addEventListener('click', () => void this.refreshRanking());
+      this.rankingContent.replaceChildren(message, retry);
     }
-    content.append(list);
-
-    this.rankingContent.replaceChildren(content);
   }
 }
